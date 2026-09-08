@@ -1,0 +1,31 @@
+# Render Blueprint — Krypton web + free Postgres.
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: krypton
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: RENDER
+        value: 'true'
+      - key: HOST
+        value: 0.0.0.0
+      # Secrets — set these in the Render dashboard (or use render.yaml envVar groups).
+      # - key: ADMIN_PASSWORD
+      #   sync: false
+      # - key: OPENAI_API_KEY
+      #   sync: false
+      # - key: SMTP_PASS
+      #   sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: krypton-postgres
+          property: connectionString
+
+databases:
+  - name: krypton-postgres
+    plan: free

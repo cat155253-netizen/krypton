@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KRYPTON — Premium Interactive Architecture</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23124a5e'/%3E%3Cstop offset='1' stop-color='%233fa7c9'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3Ctext x='32' y='46' font-family='Georgia,serif' font-style='italic' font-weight='600' font-size='38' text-anchor='middle' fill='%237fd0b5'%3EK%3C/text%3E%3C/svg%3E">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@500;600&family=Inter:wght@300;400;500;600;700&family=Permanent+Marker&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme:{
+    extend:{
+      fontFamily:{
+        mono:['"JetBrains Mono"','ui-monospace','monospace'],
+        sans:['Inter','system-ui','sans-serif'],
+        caveat:['Caveat','cursive'],
+        marker:['"Permanent Marker"','cursive'],
+        serif:['"Source Serif 4"','Georgia','serif'],
+      },
+      colors:{
+        aqua:'#d0ecf5', aqua2:'#b9e0ef', aqua3:'#eaf7fb', snow:'#f7fbfd',
+        deep:'#124a5e', ink:'#2c5f72', soft:'#5e8ea0', neon:'#3fa7c9', mint:'#7fd0b5',
+      },
+      animation:{
+        pop:'pop .6s cubic-bezier(.2,.7,.2,1) both',
+        drift:'drift 14s ease-in-out infinite',
+        sparkle:'sparkle 5s ease-in-out infinite',
+        shimmer:'shimmer 3.5s linear infinite',
+        bob:'bob 3s ease-in-out infinite',
+      },
+      keyframes:{
+        pop:{'0%':{opacity:0,transform:'scale(.94) translateY(10px)'},'100%':{opacity:1,transform:'scale(1) translateY(0)'}},
+        drift:{'0%,100%':{transform:'translate(0,0)'},'50%':{transform:'translate(40px,-30px)'}},
+        sparkle:{'0%,100%':{opacity:.2,transform:'scale(.7)'},'50%':{opacity:1,transform:'scale(1.15)'}},
+        shimmer:{'0%':{backgroundPosition:'0% 50%'},'100%':{backgroundPosition:'200% 50%'}},
+        bob:{'0%,100%':{transform:'translateY(0)'},'50%':{transform:'translateY(8px)'}},
+      }
+    }
+  }
+}
+</script>
+<style>
+  html,body{overflow-x:clip}
+  body{
+    font-family:'Inter',sans-serif;color:#1d4454;min-height:100vh;
+    background:
+      radial-gradient(1100px 600px at 8% -5%, rgba(127,208,181,.35), transparent 60%),
+      radial-gradient(1000px 700px at 100% 10%, rgba(63,167,201,.30), transparent 55%),
+      radial-gradient(900px 700px at 50% 120%, rgba(178,196,255,.30), transparent 60%),
+      linear-gradient(160deg,#cdeaf5 0%,#e6f6fa 45%,#eef4ff 100%);
+    background-attachment:fixed;
+  }
+  .hairline{border-color:rgba(29,68,84,.10)}
+  ::selection{background:rgba(63,167,201,.25)}
+  .sticky-card{
+    background:rgba(255,255,255,.62);backdrop-filter:blur(8px);
+    border:1px solid rgba(255,255,255,.7);border-radius:20px;
+    box-shadow:0 12px 34px rgba(29,78,102,.10), inset 0 1px 0 rgba(255,255,255,.8);position:relative;
+  }
+  .marker{font-family:'Permanent Marker',cursive;color:#124a5e;letter-spacing:.5px}
+  .hand{font-family:'Caveat',cursive}
+  .tape{position:absolute;width:110px;height:24px;top:-12px;left:50%;transform:translateX(-50%) rotate(-3deg);background:rgba(255,255,255,.5);backdrop-filter:blur(2px);border-radius:3px;box-shadow:0 3px 8px rgba(29,78,102,.12);border:1px solid rgba(255,255,255,.6)}
+  .grad-text{background-image:linear-gradient(100deg,#3fa7c9,#7fd0b5 45%,#8ea8ff 70%,#3fa7c9);background-size:220% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 6s linear infinite}
+  .hero-line{opacity:0;transform:translateY(26px);animation:heroline .9s cubic-bezier(.2,.7,.2,1) forwards}
+  @keyframes heroline{to{opacity:1;transform:none}}
+  .btn-soft{background:linear-gradient(120deg,#3fa7c9,#5fc4b0);color:#fff;border-radius:999px;box-shadow:0 10px 24px rgba(63,167,201,.35);transition:.3s;font-weight:600;position:relative;overflow:hidden}
+  .btn-soft::after{content:"";position:absolute;top:0;left:-80%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg);transition:.55s}
+  .btn-soft:hover::after{left:130%}
+  .btn-soft:hover{transform:translateY(-3px);box-shadow:0 16px 32px rgba(63,167,201,.45)}
+  .btn-ghost{background:rgba(255,255,255,.5);border:1px solid rgba(63,167,201,.35);color:#2c7290;backdrop-filter:blur(6px);border-radius:999px;transition:.3s;cursor:pointer}
+  .btn-ghost:hover{background:rgba(255,255,255,.8);transform:translateY(-3px)}
+  .btn-sel{background:#3fa7c9;color:#fff;border:none;border-radius:999px;padding:.6em 1.2em;font-family:'JetBrains Mono',monospace;font-size:.75rem;cursor:pointer;transition:.25s;box-shadow:0 6px 16px rgba(63,167,201,.35)}
+  .btn-sel:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(63,167,201,.45)}
+  .btn-sel.chosen{background:linear-gradient(120deg,#7fd0b5,#3fa7c9)}
+  .btn-demo{display:block;width:100%;background:rgba(255,255,255,.55);border:1px solid rgba(63,167,201,.4);color:#2c7290;font-family:'JetBrains Mono',monospace;font-size:.72rem;border-radius:999px;padding:.6em;cursor:pointer;transition:.25s;text-align:center}
+  .btn-demo:hover{background:#fff;transform:translateY(-2px);box-shadow:0 8px 18px rgba(63,167,201,.25);color:#3fa7c9}
+  .btn-demo.is-off{opacity:.5;cursor:not-allowed}
+  .cur-btn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:36px;border:1px solid rgba(63,167,201,.35);border-radius:10px;background:rgba(255,255,255,.6);color:#2c5f72;font-family:'JetBrains Mono',monospace;font-size:.85rem;cursor:pointer;transition:.2s}
+  .cur-btn:hover{background:#fff}
+  .cur-btn.on{background:linear-gradient(120deg,#3fa7c9,#5fc4b0);color:#fff;border-color:transparent}
+  .badge-tele{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.6);border:1px solid rgba(63,167,201,.25);border-radius:999px;padding:.5rem 1rem;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:#2c7290}
+  .badge-tele b{color:#3fa7c9}
+  .badge-tele .val{font-weight:700;font-size:.85rem;color:#124a5e}
+  .contrast-row{display:flex;align-items:flex-start;gap:10px;font-size:1rem;line-height:1.5}
+  .oc-x{width:22px;height:22px;flex:none;margin-top:1px;border-radius:50%;background:rgba(232,155,176,.25);color:#d0587c;display:grid;place-items:center;font-size:.82rem;font-weight:700}
+  .oc-check{width:22px;height:22px;flex:none;margin-top:1px;border-radius:50%;background:rgba(127,208,181,.3);color:#2e9b7f;display:grid;place-items:center;font-size:.82rem;font-weight:700}
+  .modal{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(18,45,60,.55);backdrop-filter:blur(4px);padding:1rem}
+  .modal-card{width:min(1000px,100%);max-height:88vh;background:#f4fafc;border-radius:20px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.3);display:flex;flex-direction:column}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:1rem 1.25rem;border-bottom:1px solid rgba(29,68,84,.12);background:#fff}
+  .modal-body{flex:1;overflow:hidden;position:relative}
+  .modal-body iframe{width:100%;height:100%;border:0;background:#fff;min-height:400px}
+  .x-btn{border:1px solid rgba(63,167,201,.4);background:#fff;color:#3fa7c9;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:1rem;line-height:1;transition:.2s}
+  .x-btn:hover{background:#eaf7fb}
+  .drawer{position:fixed;top:0;right:0;height:100vh;width:min(440px,100vw);z-index:70;background:#f4fafc;box-shadow:-20px 0 50px rgba(0,0,0,.2);display:flex;flex-direction:column;transition:transform .4s cubic-bezier(.2,.7,.2,1)}
+  .drawer-head{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.4rem;border-bottom:1px solid rgba(29,68,84,.12);background:#fff}
+  .drawer-body{padding:1.4rem;overflow-y:auto;flex:1}
+  .drstep-marker{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.2em;color:#3fa7c9;text-transform:uppercase}
+  .slots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .slot{background:#fff;border:1px solid rgba(63,167,201,.3);border-radius:10px;padding:.6rem .3rem;text-align:center;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#2c7290;cursor:pointer;transition:.2s}
+  .slot:hover{background:#eaf7fb}
+  .field{width:100%;background:rgba(255,255,255,.6);border:1px solid rgba(63,167,201,.25);border-radius:14px;padding:.9rem 1.1rem;color:#12384a;outline:none;transition:.25s;font-size:.92rem}
+  .field:focus{border-color:#3fa7c9;background:#fff;box-shadow:0 0 0 4px rgba(63,167,201,.14)}
+  .field::placeholder{color:#8fb3c2}
+  select.field{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%233fa7c9' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center}
+  .chip{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#3a7f9a;background:rgba(255,255,255,.55);border:1px solid rgba(63,167,201,.25);padding:.4em 1em;border-radius:999px;letter-spacing:1px;backdrop-filter:blur(4px)}
+  .dot{width:8px;height:8px;border-radius:50%;background:#7fd0b5;box-shadow:0 0 0 0 rgba(127,208,181,.6);animation:pulse 2s infinite}
+  @keyframes pulse{70%{box-shadow:0 0 0 9px rgba(127,208,181,0)}100%{box-shadow:0 0 0 0 rgba(127,208,181,0)}}
+  html{scrollbar-width:thin;scrollbar-color:#a9d9e8 transparent}
+  ::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{background:linear-gradient(#3fa7c9,#7fd0b5);border-radius:20px}::-webkit-scrollbar-track{background:transparent}
+  .card-hover{transition:transform .35s ease, box-shadow .35s ease}
+  .card-hover:hover{transform:translateY(-8px) rotate(-.4deg);box-shadow:0 22px 44px rgba(29,78,102,.16)}
+  .matrix-row:hover{background:rgba(255,255,255,.5)}
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+  .desc-box{background:rgba(255,255,255,.45);border:1px dashed rgba(63,167,201,.35);border-radius:12px;padding:.8rem .9rem;font-size:.9rem;color:#2c5f72;line-height:1.5;min-height:64px}
+  .addon{display:flex;align-items:flex-start;gap:10px;padding:.55rem .2rem;border-bottom:1px dashed rgba(63,167,201,.18);cursor:pointer}
+  .addon:last-child{border-bottom:none}
+  .addon input{accent-color:#3fa7c9;margin-top:2px;width:17px;height:17px;cursor:pointer}
+  .addon .t{font-size:.95rem;color:#1d4454}
+  .addon .c{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.85rem;color:#3fa7c9;white-space:nowrap}
+  .star-c{color:#f4c470}
+  .sk-serif{font-family:'Source Serif 4',Georgia,'Times New Roman',serif}
+  .upr{text-transform:uppercase;letter-spacing:.04em}
+  .pickbtn{display:inline-flex;align-items:center;gap:6px;font-family:'Inter',sans-serif;font-size:.82rem;color:#2c5f72;background:rgba(255,255,255,.6);border:1px solid rgba(63,167,201,.35);border-radius:999px;padding:.5rem .9rem;cursor:pointer;transition:.22s;user-select:none}
+  .pickbtn:hover{background:#fff;transform:translateY(-2px);box-shadow:0 6px 14px rgba(63,167,201,.18)}
+  .pickbtn.on{background:linear-gradient(120deg,#3fa7c9,#5fc4b0);color:#fff;border-color:transparent;box-shadow:0 8px 20px rgba(63,167,201,.35)}
+  .pickbtn .p{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#3fa7c9;}
+  .pickbtn.on .p{color:#eaf7fb}
+  .fmt-card{border:2px solid rgba(29,68,84,.14);border-radius:16px;padding:1rem 1.1rem;background:#fff;
+    text-align:left;cursor:pointer;transition:all .25s;font-family:'Inter',sans-serif}
+  .fmt-card:hover{border-color:rgba(63,167,201,.5);box-shadow:0 6px 20px rgba(63,167,201,.12)}
+  .fmt-card.sel{border-color:#3fa7c9;background:linear-gradient(135deg,rgba(63,167,201,.06),rgba(127,208,181,.08));
+    box-shadow:0 8px 24px rgba(63,167,201,.18)}
+  .fmt-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem}
+  .fmt-name{font-family:'Source Serif 4',Georgia,serif;font-style:italic;font-weight:600;color:#124a5e;font-size:1.05rem}
+  .fmt-check{width:22px;height:22px;border-radius:50%;border:2px solid rgba(29,68,84,.18);display:grid;
+    place-items:center;font-size:.62rem;color:transparent;transition:all .25s;background:#fff}
+  .fmt-card.sel .fmt-check{border-color:#3fa7c9;background:#3fa7c9;color:#fff}
+  .fmt-list{list-style:none;padding:0;margin:0;font-size:.74rem;color:#5e7f90;line-height:1.5}
+  .fmt-list li{padding-left:1rem;position:relative;margin-bottom:.3rem}
+  .fmt-list li::before{content:'';position:absolute;left:0;top:.48em;width:5px;height:5px;border-radius:50%;background:#3fa7c9;opacity:.5}
+  /* ===== K-Tron widget ===== */
+  .kfab{position:fixed;right:22px;bottom:22px;z-index:900;width:62px;height:62px;border-radius:50%;
+    background:linear-gradient(135deg,#3fa7c9,#7fd0b5);color:#fff;display:grid;place-items:center;
+    border:none;cursor:pointer;box-shadow:0 10px 30px rgba(63,167,201,.45);transition:transform .25s}
+  .kfab:hover{transform:translateY(-3px) scale(1.04)}
+  .kfab svg{width:30px;height:30px}
+  .kpanel{position:fixed;right:22px;bottom:96px;z-index:900;width:360px;max-width:calc(100vw - 44px);
+    height:520px;max-height:calc(100vh - 130px);border-radius:22px;overflow:hidden;display:flex;
+    flex-direction:column;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);
+    border:1px solid rgba(29,68,84,.14);box-shadow:0 20px 60px rgba(18,74,94,.25);
+    transform:translateY(12px) scale(.98);opacity:0;pointer-events:none;transition:.28s}
+  .kpanel.open{transform:none;opacity:1;pointer-events:auto}
+  .kpanel-head{display:flex;align-items:center;gap:10px;padding:14px 16px;
+    background:linear-gradient(120deg,#124a5e,#3fa7c9);color:#fff}
+  .kpanel-head .marker{font-size:1.05rem}
+  .kpanel-head .close{cursor:pointer;background:rgba(255,255,255,.18);width:28px;height:28px;border-radius:50%;
+    display:grid;place-items:center;margin-left:auto;border:none;color:#fff;font-size:1rem;transition:.2s}
+  .kpanel-head .close:hover{background:rgba(255,255,255,.32)}
+  .kbody{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+  .kmsg{max-width:85%;padding:9px 12px;font-size:.85rem;line-height:1.5;border-radius:15px;white-space:pre-wrap}
+  .kmsg.kuser{align-self:flex-end;background:linear-gradient(135deg,#3fa7c9,#5fc4b0);color:#fff;border-bottom-right-radius:4px}
+  .kmsg.kai{align-self:flex-start;background:#eef6fb;color:#124a5e;border:1px solid rgba(29,68,84,.1);border-bottom-left-radius:4px}
+  .ktyping{display:flex;gap:4px;padding:12px;align-self:flex-start}
+  .ktyping span{width:6px;height:6px;border-radius:50%;background:#3fa7c9;animation:kblink 1.2s infinite}
+  .ktyping span:nth-child(2){animation-delay:.2s}.ktyping span:nth-child(3){animation-delay:.4s}
+  @keyframes kblink{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+  .kinput{display:flex;gap:8px;padding:12px;border-top:1px solid rgba(29,68,84,.1);background:#fff}
+  .kinput textarea{flex:1;resize:none;border:1px solid rgba(29,68,84,.15);border-radius:12px;padding:9px 11px;
+    font-family:'Inter',sans-serif;font-size:.85rem;color:#124a5e;outline:none;background:#f7fbfd;max-height:90px}
+  .kinput textarea:focus{border-color:#3fa7c9}
+  .kinput button{border:none;border-radius:12px;padding:0 15px;background:linear-gradient(135deg,#3fa7c9,#7fd0b5);
+    color:#fff;font-weight:600;cursor:pointer;font-size:.85rem}
+  .ksugg{font-size:.75rem;padding:7px 11px;border:1px solid rgba(29,68,84,.15);background:#fff;border-radius:999px;
+    color:#2c5f72;cursor:pointer;transition:.2s}
+  .ksugg:hover{border-color:#3fa7c9;box-shadow:0 3px 10px rgba(63,167,201,.18)}
+</style>
+</head>
+<body class="text-deep">
+
+<!-- floating pastel blobs -->
+<div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+  <div class="absolute w-96 h-96 -top-16 -left-24 rounded-full bg-mint/30 blur-3xl animate-drift"></div>
+  <div class="absolute w-[28rem] h-[28rem] top-1/3 -right-24 rounded-full bg-neon/25 blur-3xl animate-drift" style="animation-delay:-5s"></div>
+  <div class="absolute w-80 h-80 bottom-0 left-1/4 rounded-full bg-indigo-200/40 blur-3xl animate-drift" style="animation-delay:-9s"></div>
+  <span class="absolute w-3 h-3 rounded-full bg-mint/70 top-40 left-[15%] animate-sparkle"></span>
+  <span class="absolute w-2 h-2 rounded-full bg-neon/70 top-64 right-[18%] animate-sparkle" style="animation-delay:-1s"></span>
+</div>
+
+<!-- ================= HEADER ================= -->
+<header class="sticky top-0 z-50 bg-white/70 backdrop-blur-md border-b hairline overflow-visible">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
+    <a href="#top" class="marker text-4xl leading-[1.4] grad-text">Krypton</a>
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-1 chip !py-1.5 !px-2" title="Global currency switcher">
+        <button type="button" class="cur-btn on" data-cur="usd" onclick="setCurrency('usd')">$</button>
+        <button type="button" class="cur-btn" data-cur="eur" onclick="setCurrency('eur')">€</button>
+        <button type="button" class="cur-btn" data-cur="inr" onclick="setCurrency('inr')">₹</button>
+      </div>
+      <div class="flex items-center gap-2 chip !text-[0.85rem] !py-2 !px-5">
+        <span class="dot !w-2.5 !h-2.5"></span>
+        <span class="mono !text-lg font-bold !text-deep" id="liveCount">000</span>
+        <span class="hidden sm:inline !text-sm !text-deep/80">SITES DELIVERED</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ================= TECH TELEMETRY ================= -->
+<section id="telemetry" class="relative z-10 border-b hairline py-10">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="sticky-card px-6 py-5 flex flex-wrap items-center justify-center gap-3 reveal">
+      <span class="badge-tele"><span class="dot"></span> Lighthouse Perf <b class="val">100/100</b></span>
+      <span class="badge-tele"><span class="dot"></span> Edge Latency <b class="val">&lt;50ms</b></span>
+      <span class="badge-tele">Zero-Maintenance <b class="val">CSS/CANVAS</b></span>
+      <span class="badge-tele">Single-File <b class="val">No Build Step</b></span>
+      <span class="badge-tele">Core Web Vitals <b class="val">Green</b></span>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================= HERO ================= -->
+<section id="top" class="relative z-10 border-b hairline">
+  <div class="max-w-6xl mx-auto px-6 py-28 md:py-36 relative text-center">
+    <span class="chip mb-10 hero-line" style="animation-delay:.05s">[ KRYPTON · EST. 2021 ]</span>
+    <h1 class="hand text-5xl sm:text-6xl md:text-8xl font-semibold text-deep/70 leading-[1.05] hero-line" style="animation-delay:.15s">Premium interactive architecture</h1>
+    <h1 class="marker text-6xl sm:text-7xl md:text-8xl leading-[1.05] mt-3 grad-text hero-line" style="animation-delay:.3s">pick a theme. we build it.</h1>
+    <p class="mt-10 max-w-2xl mx-auto text-deep/70 font-light text-xl leading-relaxed hero-line" style="animation-delay:.45s">
+      A library of polished, interaction-heavy website themes. Handed over with care — add features,
+      choose a speed, and we deliver the finished site on your schedule.
+    </p>
+    <div class="mt-10 flex flex-wrap gap-4 justify-center hero-line" style="animation-delay:.6s">
+      <a href="#catalog" class="btn-soft mono text-base px-10 py-5 inline-flex items-center gap-3">BROWSE THEMES →</a>
+      <a href="#contact" class="btn-ghost mono text-base px-10 py-5">REQUEST DELIVERY</a>
+    </div>
+    <div class="mt-14 hero-line inline-flex flex-col items-center gap-1 text-neon" style="animation-delay:.75s">
+      <span class="mono text-[0.7rem] tracking-[0.3em] text-neon/70">SCROLL</span>
+      <span class="text-2xl leading-none animate-bob" aria-hidden>⌄</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= THEME LIBRARY ================= -->
+<section id="catalog" class="relative z-10 border-b hairline py-20 md:py-24">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="flex items-baseline justify-between mb-14">
+      <h2 class="sk-serif text-4xl md:text-5xl font-semibold text-deep italic">Theme Library</h2>
+      <span class="chip"><span id="themeCount">00</span> TEMPLATES</span>
+    </div>
+    <p class="sk-serif italic text-2xl text-soft mb-10 max-w-3xl">Each theme is a finished website to be customized. Pick a theme, tick the features you want, and we'll quote the total.</p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="themeGrid"></div>
+
+    <div class="mt-8 sticky-card p-5 border-dashed !border-[rgba(63,167,201,.5)] text-center">
+      <p class="hand text-2xl text-deep">Receipt note</p>
+      <p class="text-deep/70 text-base mt-1">Total payment receipt will be submitted by the company official soon after confirmation.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= STYLE LIBRARY ================= -->
+<section id="stylelib" class="relative z-10 border-b hairline py-20 md:py-24">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="flex items-baseline justify-between mb-14">
+      <h2 class="sk-serif text-4xl md:text-5xl font-semibold text-deep italic">Style Library</h2>
+      <span class="chip"><span id="styleCount">00</span> STYLES</span>
+    </div>
+    <p class="sk-serif italic text-2xl text-soft mb-10 max-w-3xl">A style is the visual character of your build — how the theme looks, feels and moves. Pick one and it flows into your quote automatically.</p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5" id="styleGrid"></div>
+
+    <div class="mt-10 text-center">
+      <p class="hand text-xl text-soft">Selections sync with the application form and calculator below.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DELIVERY MATRIX ================= -->
+<section id="matrix" class="relative z-10 border-b hairline py-20 md:py-24">
+  <div class="max-w-4xl mx-auto px-6">
+    <div class="flex items-baseline justify-between mb-14">
+      <h2 class="sk-serif text-4xl md:text-5xl font-semibold text-deep italic">Delivery Speed Matrix</h2>
+      <span class="chip">RUSH FEES</span>
+    </div>
+
+    <div class="sticky-card overflow-hidden reveal">
+      <div class="grid grid-cols-12 items-center px-6 py-4 mono text-xs text-neon tracking-widest border-b hairline">
+        <span class="col-span-5 md:col-span-4">INTERVAL</span>
+        <span class="col-span-4 md:col-span-3">RUSH FEE</span>
+        <span class="hidden md:block col-span-5">SCOPE</span>
+      </div>
+      <div class="matrix-row grid grid-cols-12 items-center px-6 md:px-8 py-7 transition duration-300">
+        <div class="col-span-6 md:col-span-4 font-sans text-2xl font-semibold">1 Month</div>
+        <div class="col-span-6 md:col-span-3 hand text-3xl grad-text font-semibold">FREE</div>
+        <div class="hidden md:block col-span-5 text-deep/60 text-base">Full design + build, standard queue</div>
+      </div>
+      <div class="matrix-row grid grid-cols-12 items-center px-6 md:px-8 py-7 transition duration-300">
+        <div class="col-span-6 md:col-span-4 font-sans text-2xl font-semibold">1 Week</div>
+        <div class="col-span-6 md:col-span-3 hand text-3xl text-neon">+$100</div>
+        <div class="hidden md:block col-span-5 text-deep/60 text-base">Prioritized build, weekly check-ins</div>
+      </div>
+      <div class="matrix-row grid grid-cols-12 items-center px-6 md:px-8 py-7 transition duration-300">
+        <div class="col-span-6 md:col-span-4 font-sans text-2xl font-semibold">3 Days</div>
+        <div class="col-span-6 md:col-span-3 hand text-3xl text-neon">+$500</div>
+        <div class="hidden md:block col-span-5 text-deep/60 text-base">Dedicated sprint, daily builds</div>
+      </div>
+      <div class="matrix-row grid grid-cols-12 items-center px-6 md:px-8 py-7 transition duration-300">
+        <div class="col-span-6 md:col-span-4 font-sans text-2xl font-semibold">1 Day</div>
+        <div class="col-span-6 md:col-span-3 hand text-3xl text-neon">+$1,000</div>
+        <div class="hidden md:block col-span-5 text-deep/60 text-base">Express build, priority queue</div>
+      </div>
+    </div>
+
+    <p class="hand text-lg text-soft mt-6">Rush fees are flat and non-negotiable. Quote locks at signing.</p>
+  </div>
+</section>
+
+<!-- ================= CONTRAST TABLE ================= -->
+<section id="contrast" class="relative z-10 border-b hairline py-20 md:py-24">
+  <div class="max-w-5xl mx-auto px-6">
+    <div class="flex items-baseline justify-between mb-12">
+      <h2 class="sk-serif text-4xl md:text-5xl font-semibold text-deep italic">Krypton vs. the Old Way</h2>
+      <span class="chip">PROOF OF ENGINE</span>
+    </div>
+    <div class="sticky-card overflow-hidden reveal">
+      <div class="grid grid-cols-2 gap-px bg-[rgba(63,167,201,.15)]">
+        <div class="bg-white/70 p-6 md:p-8">
+          <div class="mono text-xs tracking-widest text-soft mb-4">TRADITIONAL AGENCY</div>
+          <ul class="space-y-4 text-deep/80">
+            <li class="contrast-row"><span class="oc-x">✕</span> 6–8 week timeline</li>
+            <li class="contrast-row"><span class="oc-x">✕</span> $8,000+ quote</li>
+            <li class="contrast-row"><span class="oc-x">✕</span> Hidden scope fees</li>
+            <li class="contrast-row"><span class="oc-x">✕</span> Slow update cycles</li>
+            <li class="contrast-row"><span class="oc-x">✕</span> Static preview, no live test</li>
+          </ul>
+        </div>
+        <div class="bg-white/80 p-6 md:p-8">
+          <div class="mono text-xs tracking-widest text-neon mb-4">KRYPTON STUDIO</div>
+          <ul class="space-y-4 text-deep">
+            <li class="contrast-row"><span class="oc-check">✓</span> 1–3 day delivery</li>
+            <li class="contrast-row"><span class="oc-check">✓</span> from <span class="font-semibold">$1,000</span> flat transparent quote</li>
+            <li class="contrast-row"><span class="oc-check">✓</span> Zero bloat, zero bloat fees</li>
+            <li class="contrast-row"><span class="oc-check">✓</span> Interactive live preview</li>
+            <li class="contrast-row"><span class="oc-check">✓</span> Global currency, receipt to company</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CONTACT + CALCULATOR ================= -->
+<section id="contact" class="relative z-10 py-20 md:py-24">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="flex items-baseline justify-between mb-12">
+      <h2 class="sk-serif text-4xl md:text-5xl font-semibold text-deep italic">Transmission</h2>
+      <span class="chip">SECURE CHANNEL</span>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- form -->
+      <div class="sticky-card p-8 md:p-10 reveal">
+        <form id="contactForm" novalidate>
+          <label class="block hand text-2xl text-ink mb-2">Company Name <span class="text-sm text-soft">*required</span></label>
+          <input id="company" required placeholder="Acme Industries" class="field mb-6" />
+
+          <label class="block hand text-2xl text-ink mb-2">Applicant Name <span class="text-sm text-soft">*required</span></label>
+          <input id="applicant" required placeholder="Your full name" class="field mb-6" />
+
+          <label class="block hand text-2xl text-ink mb-2">Post / Position <span class="text-sm text-soft">*required</span></label>
+          <input id="post" required placeholder="e.g. Marketing Manager, Founder, Head of Growth" class="field mb-6" />
+
+          <label class="block hand text-2xl text-ink mb-2">Contact Email <span class="text-sm text-soft">*required</span></label>
+          <input id="email" type="email" required value="mrcat4005@gmail.com" placeholder="mrcat4005@gmail.com" class="field mb-6" />
+
+          <label class="block hand text-2xl text-ink mb-2">Selected Theme</label>
+          <select id="asset" onchange="assetChanged()" class="field mb-6"></select>
+
+          <label class="block hand text-2xl text-ink mb-2">Delivery Speed</label>
+          <select id="speed" onchange="updateCalc()" class="field mb-6">
+            <option value="0" class="bg-white">1 Month — FREE</option>
+            <option value="100" class="bg-white">1 Week — +$100</option>
+            <option value="500" class="bg-white">3 Days — +$500</option>
+            <option value="1000" class="bg-white">1 Day — +$1,000</option>
+          </select>
+
+          <label class="block hand text-2xl text-ink mb-2">Website Length</label>
+          <select id="formLen" onchange="setLen(this.value)" class="field mb-6"></select>
+
+          <label class="block hand text-2xl text-ink mb-2">Style</label>
+          <select id="formStyle" onchange="setStyle(this.value)" class="field mb-6"></select>
+
+          <label class="block hand text-2xl text-ink mb-2">Delivery Format</label>
+          <p class="text-sm text-deep/55 mb-3 leading-relaxed">How would you like the finished project handed over? Both are built the same — this is just how the files are packaged.</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+            <button type="button" class="fmt-card sel" data-fmt="single" onclick="setFmt(this)">
+              <div class="fmt-head">
+                <span class="fmt-name">Single .html file</span>
+                <span class="fmt-check">✓</span>
+              </div>
+              <ul class="fmt-list">
+                <li>One self-contained file — styles &amp; code all-in</li>
+                <li>Drag onto any server or open locally, no setup</li>
+                <li>Easy to email, hand off, or embed in an iframe</li>
+                <li>Best for landing pages, prototypes, quick launches</li>
+              </ul>
+            </button>
+            <button type="button" class="fmt-card" data-fmt="multi" onclick="setFmt(this)">
+              <div class="fmt-head">
+                <span class="fmt-name">Multiple files</span>
+                <span class="fmt-check">✓</span>
+              </div>
+              <ul class="fmt-list">
+                <li>Separate HTML, CSS &amp; JS — clean separation</li>
+                <li>Easier to maintain and edit as the site grows</li>
+                <li>Standard structure any developer can navigate</li>
+                <li>Best for shops, multi-page sites, client handoffs</li>
+              </ul>
+            </button>
+          </div>
+
+          <label class="block hand text-2xl text-ink mb-2">Add-on Features</label>
+          <div class="addon-area border hairline rounded-2xl px-4 mb-6">
+            <div class="mono text-xs text-neon tracking-widest my-2">ADD-ON FEATURES</div>
+            <div id="addonList"></div>
+          </div>
+
+          <label class="block hand text-2xl text-ink mb-2">Project Description</label>
+          <textarea id="desc" rows="4" placeholder="Tell us about your website — goals, content, must-haves, inspiration..." class="field mb-6 resize-none"></textarea>
+
+          <label class="block hand text-2xl text-ink mb-2">Tip <span class="text-sm text-soft">(optional)</span></label>
+          <p class="text-sm text-deep/55 mb-3 leading-relaxed">If you're happy with the work, a tip goes a long way. Every rupee stays with the studio.</p>
+          <select id="tip" onchange="updateCalc()" class="field mb-6">
+            <option value="0" class="bg-white">No tip</option>
+            <option value="10" class="bg-white">$10 — small thank you</option>
+            <option value="25" class="bg-white">$25 — nice one</option>
+            <option value="50" class="bg-white">$50 — generous</option>
+            <option value="100" class="bg-white">$100 — legend</option>
+          </select>
+
+          <div class="rounded-2xl border border-mint/50 bg-mint/10 p-4 mb-6 text-center">
+            <p class="hand text-xl text-deep">Receipt</p>
+            <p class="text-sm text-deep/70">Total payment receipt submitted by the company official soon.</p>
+          </div>
+
+          <!-- inline success -->
+          <div id="successBox" class="hidden mb-6 rounded-2xl border border-mint/50 bg-mint/10 p-5 text-center">
+            <div class="mx-auto mb-2 w-12 h-12 rounded-full bg-gradient-to-br from-neon to-mint grid place-items-center">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+            <h4 class="marker text-2xl mb-1">Transmission Successful!</h4>
+            <p class="text-sm text-deep/70">Application received. Keep this card safe — it's reserved for delivery of your website.</p>
+            <div id="appCard" class="hidden mt-4 rounded-2xl p-5 text-left" style="background:linear-gradient(135deg,#124a5e,#3fa7c9);border:1px solid rgba(127,208,181,.45)">
+              <div class="flex items-center justify-between">
+                <span class="marker text-sm" style="color:#fff">Krypton Studio</span>
+                <span class="mono text-[10px] tracking-[.2em]" style="color:#7fd0b5">K-TRON</span>
+              </div>
+              <div class="mt-4 flex items-end justify-between">
+                <div>
+                  <div class="mono text-[10px] tracking-[.18em] mb-1" style="color:#7fd0b5">APPLICATION NO.</div>
+                  <div id="appNoUi" class="mono text-lg tracking-widest" style="color:#fff">—</div>
+                </div>
+                <div class="text-right">
+                  <div class="mono text-[10px] tracking-[.18em] mb-1" style="color:#7fd0b5">APPLICATION ID</div>
+                  <div id="appIdUi" class="mono text-sm tracking-[.14em]" style="color:#fff">—</div>
+                </div>
+              </div>
+              <div class="mt-4 mono text-[10px] tracking-[.18em]" style="color:#7fd0b5">DELIVERY PASSCODE <span class="normal-case">(for website delivery)</span></div>
+              <div id="appCodeUi" class="mono text-2xl font-bold tracking-[.35em] mt-1" style="color:#fff">—</div>
+              <p class="mt-3 text-[11px] leading-relaxed" style="color:rgba(255,255,255,.75)">If lost, reissuing a new passcode takes time and a reissue charge applies. Don't share it.</p>
+            </div>
+          </div>
+
+          <div class="mb-6 rounded-2xl border border-neon/35 bg-white/80 p-4">
+            <label class="flex items-start gap-3 cursor-pointer hand">
+              <input id="privacyConsent" type="checkbox" class="mt-0.5 w-5 h-5 shrink-0 cursor-pointer" style="accent-color:#3fa7c9" autocomplete="off">
+              <span class="text-sm text-deep/80 leading-relaxed">
+                I understand and agree to Krypton Studio's
+                <button type="button" onclick="openPrivacy(event)" class="underline font-semibold hand" style="background:none;border:none;padding:0;cursor:pointer;color:#3fa7c9">Privacy Policy</button>
+                covering how the company details, contact information and project data I submit are used, stored and protected.
+              </span>
+            </label>
+            <p id="privacyErr" class="hidden mt-2 text-xs font-medium" style="color:#e2332e">Please read and accept the Privacy Policy to submit your application.</p>
+          </div>
+
+          <button type="submit" class="btn-soft w-full mono text-base py-5 rounded-full cursor-pointer">SUBMIT APPLICATION ⤴</button>
+        </form>
+      </div>
+
+      <!-- calculator + configurator + add-ons -->
+      <div class="sticky-card p-8 md:p-10 flex flex-col reveal">
+        <h3 class="hand text-2xl text-ink mb-2">Live Investment Calculator</h3>
+        <p class="hand text-lg text-soft mb-5">Choose your build. Every selection updates the total.</p>
+
+        <div class="space-y-4 flex-1">
+          <div class="flex justify-between items-baseline border-b hairline pb-3">
+            <span>Theme Length</span><span class="mono text-xl" id="calcLen">—</span>
+          </div>
+          <div class="flex justify-between items-baseline border-b hairline pb-3">
+            <span>Length Selection</span><span class="mono text-2xl" id="calcLenCost">$0</span>
+          </div>
+          <div class="flex justify-between items-baseline border-b hairline pb-3">
+            <span>Style Selection</span><span class="mono text-2xl" id="calcStyleCost">$0</span>
+          </div>
+          <div class="flex justify-between items-baseline border-b hairline pb-3">
+            <span>Theme Base</span><span class="mono text-2xl" id="calcBase">$0</span>
+          </div>
+          <div class="flex justify-between items-baseline border-b hairline pb-3">
+            <span>Features</span><span class="mono text-2xl" id="calcAdd">$0</span>
+          </div>
+          <div class="flex justify-between items-baseline border-b hairline pb-3">
+            <span>Rush Fee</span><span class="mono text-2xl" id="calcRush">$0</span>
+          </div>
+          <div class="flex justify-between items-baseline border-b hairline pb-3">
+            <span>Tip</span><span class="mono text-2xl" id="calcTip">$0</span>
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-neon/40 bg-gradient-to-br from-aqua3 to-white/80 p-7 mt-6">
+          <div class="hand text-2xl text-neon mb-2">total investment</div>
+          <div class="text-5xl font-bold text-deep price-pop" id="calcTotal">$0</div>
+          <div class="hand text-xl text-soft mt-2" id="calcINR">$0</div>
+        </div>
+
+        <button type="button" onclick="openDeposit()" class="btn-soft w-full mono text-base py-4 mt-4 rounded-full cursor-pointer">RESERVE SLOT — <span id="depositBtn">$250</span> DEPOSIT</button>
+        <p class="hand text-lg text-soft mt-3 text-center">Lock your sprint with a booking deposit. Receipt from the company official.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer class="relative z-10 border-t hairline py-12">
+  <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+    <span class="marker text-2xl grad-text">Krypton</span>
+    <div class="hand text-lg text-soft space-x-6">
+      <a href="#catalog" class="hover:text-neon transition">Themes</a>
+      <a href="#stylelib" class="hover:text-neon transition">Styles</a>
+      <a href="#matrix" class="hover:text-neon transition">Matrix</a>
+      <a href="#contact" class="hover:text-neon transition">Contact</a>
+    </div>
+    <span class="hand text-lg text-soft">© 2026 · KRYPTON STUDIO</span>
+  </div>
+</footer>
+
+<!-- ================= PRIVACY POLICY MODAL ================= -->
+<div id="privacyModal" class="modal hidden">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3 class="sk-serif text-2xl font-semibold italic">Privacy Policy</h3>
+      <button class="x-btn" onclick="closePrivacy()" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body" style="overflow-y:auto;padding:1.4rem 1.6rem">
+      <div class="mono text-[11px] tracking-[.18em]" style="color:#3fa7c9">LAST UPDATED · 2026 · KRYPTON STUDIO</div>
+      <p class="text-sm leading-relaxed mt-3" style="color:#2c5f72">
+        Krypton Studio ("we", "Krypton") builds premium interactive websites for companies. This policy explains what
+        we do with the information you send through this application form.
+      </p>
+
+      <h4 class="mono text-sm mb-1 mt-6" style="color:#124a5e">WHAT WE COLLECT</h4>
+      <p class="text-sm leading-relaxed" style="color:#2c5f72">
+        Company name, applicant name and position, a contact email, and the project details you choose — theme, page
+        length, style, delivery format, features, delivery speed, tip and the calculated quote. We also generate an
+        Application No., an Application ID, and a Delivery Passcode for your submission.
+      </p>
+
+      <h4 class="mono text-sm mb-1 mt-6" style="color:#124a5e">HOW WE USE IT</h4>
+      <p class="text-sm leading-relaxed" style="color:#2c5f72">
+        To process your application, prepare an accurate quote and receipt, contact you about the project, and deliver
+        the finished website. The Delivery Passcode is reserved for that delivery — it protects handover to you.
+      </p>
+
+      <h4 class="mono text-sm mb-1 mt-6" style="color:#124a5e">STORAGE & TRANSMISSION</h4>
+      <p class="text-sm leading-relaxed" style="color:#2c5f72">
+        Submission details are received by our local server and confirmation emails are sent through our email provider
+        (Gmail) over encrypted connections. We keep a record for project delivery, billing and correspondence.
+      </p>
+
+      <h4 class="mono text-sm mb-1 mt-6" style="color:#124a5e">SHARING & SELLING</h4>
+      <p class="text-sm leading-relaxed" style="color:#2c5f72">
+        We never sell your data and never share it with third parties for marketing. It is only used to run your project
+        and correspond with you about it.
+      </p>
+
+      <h4 class="mono text-sm mb-1 mt-6" style="color:#124a5e">YOUR DELIVERY PASSCODE</h4>
+      <p class="text-sm leading-relaxed" style="color:#2c5f72">
+        Keep your Delivery Passcode safe — it is required at website handover. If it is lost, reissuing a new passcode
+        takes time and a reissue charge applies.
+      </p>
+
+      <h4 class="mono text-sm mb-1 mt-6" style="color:#124a5e">YOUR RIGHTS</h4>
+      <p class="text-sm leading-relaxed" style="color:#2c5f72">
+        You can ask us to correct or delete the information we hold about your company at any time by replying to your
+        confirmation email or writing to mrcat4005@gmail.com. We'll action it promptly.
+      </p>
+
+      <p class="text-sm leading-relaxed mt-6" style="color:#5e8ea0">— by <strong style="color:#124a5e">Krypton Studio</strong></p>
+    </div>
+  </div>
+</div>
+<div id="demoModal" class="modal hidden">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3 class="sk-serif text-2xl font-semibold italic" id="demoTitle">Live Build</h3>
+      <button class="x-btn" onclick="closeDemo()" aria-label="Close">✕</button>
+    </div>
+    <div id="demoNoLive" class="hidden text-center text-deep/60 p-10 hand text-2xl">Preview build arriving soon — request it via the form.</div>
+    <div id="demoHasLive" class="modal-body">
+      <iframe id="demoFrame" title="Live build preview"></iframe>
+    </div>
+  </div>
+</div>
+
+<!-- ================= DEPOSIT / RESERVATION DRAWER ================= -->
+<div id="depositDrawer" class="drawer translate-x-full">
+  <div class="drawer-head">
+    <h3 class="sk-serif text-2xl font-semibold italic">Reserve Your Sprint</h3>
+    <button class="x-btn" onclick="closeDeposit()" aria-label="Close drawer">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div id="depVacancy" class="badge-tele mb-5 !font-normal"></div>
+
+    <div id="depStep1">
+      <div class="drstep-marker mb-1">STEP 1 · DETAILS</div>
+      <label class="block hand text-2xl text-ink mb-2">Contact Email</label>
+      <input id="depEmail" type="email" placeholder="founder@company.com" class="field mb-5" />
+
+      <div class="drstep-marker mb-2">PICK A SPRINT DATE</div>
+      <select id="depDate" class="field mb-5"></select>
+
+      <button class="btn-soft w-full mono text-base py-4 rounded-full cursor-pointer" onclick="doDeposit()">CONTINUE TO DEPOSIT →</button>
+    </div>
+
+    <div id="depStep2" class="hidden">
+      <div class="drstep-marker mb-3">STEP 2 · CONFIRM DEPOSIT</div>
+      <div class="addon-area border hairline rounded-2xl px-4 py-3 mb-5">
+        <div class="flex justify-between py-1.5"><span class="text-deep/70">Founder</span><span class="mono" id="depConfirmEmail">—</span></div>
+        <div class="flex justify-between py-1.5"><span class="text-deep/70">Sprint</span><span class="mono" id="depConfirmDate">—</span></div>
+        <div class="flex justify-between py-1.5 border-t hairline mt-1 pt-2"><span class="font-semibold">Booking Deposit</span><span class="mono text-xl font-semibold" id="depConfirmAmt">—</span></div>
+      </div>
+      <button class="btn-soft w-full mono text-base py-4 rounded-full cursor-pointer" onclick="confirmDeposit()">PAY <span id="depositTotal">$250</span> DEPOSIT</button>
+      <p id="depositNote" class="hidden mt-4 text-center text-deep/70 text-sm border border-mint/50 bg-mint/10 rounded-2xl p-4 hand text-xl"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============ live template counter ============ */
+(function(){
+  let n = 312; const el = document.getElementById('liveCount');
+  el.textContent = String(n).padStart(3,'0');
+  setInterval(()=>{ n = 312 + Math.floor(Math.random()*18); el.textContent = String(n).padStart(3,'0'); }, 4000);
+})();
+
+/* ============ theme library data ============ */
+const THEMES = [
+  {name:'Agentic Tech', desc:'SaaS-style landing with routing dashboard, live status and trace highlights.', len:'≈ 4 pages', base:420, acc:'#3fa7c9', tags:'SAAS · TECH', demo:'synapse.html'},
+  {name:'Deep-Tech', desc:'Scientific micro-site with canvas simulations and a research manifesto.', len:'≈ 5 pages', base:460, acc:'#8f7bf5', tags:'SCIENCE · SIM', demo:'quantum.html'},
+  {name:'Luxury Real Estate', desc:'Editorial property showcase with gallery crossfades and refined scroll.', len:'≈ 6 pages', base:500, acc:'#e89bb0', tags:'REAL ESTATE', demo:'valerian.html'},
+  {name:'Editorial Zine', desc:'Grid-breaking magazine layout with kinetic typography and bold pacing.', len:'≈ 5 pages', base:380, acc:'#e0a93e', tags:'EDITORIAL', demo:'pens.html'},
+  {name:'Personal Portfolio', desc:'Minimal founder CV with project timeline and a clean contact flow.', len:'≈ 3 pages', base:250, acc:'#3fa7c9', tags:'PORTFOLIO', demo:null},
+  {name:'Fashion Store', desc:'Product-led boutique with lookbook pages and a soft pastel storefront.', len:'≈ 7 pages', base:440, acc:'#e89bb0', tags:'E-COMMERCE', demo:'blush.html'},
+  {name:'Restaurant Menu', desc:'Appetite-driven menu site with dish cards and reservation section.', len:'≈ 4 pages', base:320, acc:'#f4c470', tags:'HOSPITALITY', demo:null},
+  {name:'Travel Journal', desc:'Wanderlust blog with destination cards, photo grids and itinerary maps.', len:'≈ 6 pages', base:360, acc:'#8f7bf5', tags:'TRAVEL', demo:null},
+  {name:'Music Player', desc:'Neon audio experience with live waveform visualizer and playlists.', len:'≈ 4 pages', base:420, acc:'#3fa7c9', tags:'MUSIC', demo:'meridian.html'},
+  {name:'Startup Pitch', desc:'One-screen investor pitch with metric counters and a crisp CTA.', len:'≈ 2 pages', base:300, acc:'#7fd0b5', tags:'STARTUP', demo:null},
+  {name:'Fitness Brand', desc:'High-energy coaching site with program cards and class schedule.', len:'≈ 5 pages', base:340, acc:'#e0a93e', tags:'FITNESS', demo:null},
+  {name:'Architecture Firm', desc:'Refined studio portfolio with project grids and refined spacing.', len:'≈ 6 pages', base:460, acc:'#e89bb0', tags:'STUDIO', demo:null},
+  {name:'Coffee Roaster', desc:'Warm artisanal storefront with bean stories and brew guides.', len:'≈ 4 pages', base:280, acc:'#f4c470', tags:'F&B', demo:null},
+  {name:'Tech Conference', desc:'Event micro-site with speakers, agenda and live ticket flow.', len:'≈ 5 pages', base:390, acc:'#8f7bf5', tags:'EVENT', demo:null},
+  {name:'Agency Service', desc:'Premium digital studio site with capability cards and case studies.', len:'≈ 7 pages', base:480, acc:'#3fa7c9', tags:'AGENCY', demo:null},
+];
+
+const ADDONS = [
+  {key:'cms', label:'CMS / content editor', cost:120},
+  {key:'multi', label:'Multi-language support', cost:150},
+  {key:'anim', label:'Advanced scroll animations', cost:90},
+  {key:'ecom', label:'Shop / checkout module', cost:200},
+  {key:'auth', label:'Login + member area', cost:160},
+  {key:'seo', label:'SEO + analytics setup', cost:70},
+  {key:'custom', label:'Custom illustrations', cost:110},
+  {key:'mail', label:'Newsletter & automation', cost:95},
+];
+
+const RUSH = { "0":0, "100":100, "500":500, "1000":1000 };
+const SPEED_LBL = { "0":"1 Month","100":"1 Week","500":"3 Days","1000":"1 Day" };
+const LENGTHS = [
+  {key:'1', label:'1–2 pages', cost:0},
+  {key:'3', label:'3–4 pages', cost:120},
+  {key:'5', label:'5–6 pages', cost:240},
+  {key:'7', label:'7–8 pages', cost:360},
+  {key:'9', label:'9+ pages', cost:480},
+];
+
+const STYLES = [
+  {key:'modern', label:'Modern', cost:0, acc:'#3fa7c9', desc:'Crisp lines, open whitespace, quiet confidence. The sharp agency default — clean, current and always on-brand.'},
+  {key:'luxe', label:'Luxe', cost:0, acc:'#c9a227', desc:'Dark, gilded and restrained. Serif monograms, gold foils and cinematic pacing for premium and private brands.'},
+  {key:'boho', label:'Boho', cost:0, acc:'#8a9a5b', desc:'Hand-crafted and earthy. Woven textures, organic shapes and warm palette for studios, makers and lifestyle brands.'},
+  {key:'corporate', label:'Corporate', cost:0, acc:'#2c5f72', desc:'Structured, trustworthy and buttoned-up. Dense grids, formal type and calm authority for B2B and finance.'},
+  {key:'retro', label:'Retro', cost:0, acc:'#e0783a', desc:'70s groove — burnt orange, checkerboards and bold geometric shapes. Pure nostalgia for cafes, vinyl and indie labels.'},
+  {key:'editorial', label:'Editorial', cost:0, acc:'#b13b52', desc:'Magazine energy. Kinetic serif headlines, editorial columns and strong visual pacing for media and portfolios.'},
+  {key:'noir', label:'Neo-Noir', cost:0, acc:'#8f7bf5', desc:'Night-glow glassmorphism. Neon gradients, blurred glass panels and futuristic motion for tech and AI products.'},
+  {key:'candy', label:'Candy', cost:0, acc:'#e85b9c', desc:'Playful, bouncy and warm. Rounded shapes, candy tones and joyful details for kids, toys and lifestyle fun.'},
+];
+
+let selLenKey = '1';
+let selStyleKey = 'modern';
+let delivFmt = 'single';
+let currentTheme = null;
+let displayVal = 0;
+let animId = null;
+
+/* ============ global currency ============ */
+const RATES = { usd:1, eur:0.92, inr:87 };
+const SYM = { usd:'$', eur:'€', inr:'₹' };
+const CUR_LBL = { usd:'USD', eur:'EUR', inr:'INR' };
+let cur = 'usd';
+
+function money(x){ return (x*RATES[cur]).toLocaleString('en-US',{maximumFractionDigits:0}); }
+function fmt(x){ return SYM[cur] + money(x); }
+function others(x){
+  return Object.keys(RATES).filter(k=>k!==cur)
+    .map(k=> SYM[k]+(x*RATES[k]).toLocaleString('en-US',{maximumFractionDigits:0})).join(' · ');
+}
+function convInr(x){ return Math.round(x*RATES.inr); }
+
+function setCurrency(c){
+  cur = c;
+  document.querySelectorAll('[data-cur]').forEach(b=>b.classList.toggle('on', b.dataset.cur===c));
+  buildThemes();
+  buildAddons();
+  renderPickers();
+  fillLayerOptions();
+  if(typeof updateDepositUI==='function') updateDepositUI();
+  updateCalc();
+}
+
+/* ============ build theme grid ============ */
+function buildThemes(){
+  const grid = document.getElementById('themeGrid');
+  grid.innerHTML = THEMES.map((t,i)=>`
+    <article class="sticky-card card-hover p-6 reveal" data-theme="${t.name}" style="border-top:3px solid ${t.acc};display:flex;flex-direction:column">
+      <span class="tape"></span>
+      <div class="mono text-xs tracking-widest mb-2 uppercase" style="color:${t.acc}">theme ${i+1}</div>
+      <h3 class="sk-serif text-2xl font-semibold text-deep italic mb-3">${t.name}</h3>
+      <div class="desc-box mb-4" title="Your website">${t.desc}</div>
+      <div class="flex items-center justify-between mb-4">
+        <span class="mono text-xs tracking-wide px-2.5 py-1 rounded-full" style="color:${t.acc};background:${t.acc}14;border:1px solid ${t.acc}55">${t.len}</span>
+        <span class="mono text-xs tracking-wide" style="color:${t.acc}">${t.tags}</span>
+      </div>
+      <div class="mt-auto">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <div class="flex items-baseline gap-1.5">
+              <span class="mono text-[0.65rem] tracking-widest text-soft">FROM</span>
+              <span class="text-3xl font-semibold Nprice" data-price="${t.base}">${fmt(t.base)}</span>
+            </div>
+            <div class="mono text-sm text-soft">${others(t.base)}</div>
+          </div>
+          <button class="btn-sel" data-pick="${t.name}" onclick="pickTheme('${t.name.replace(/'/g,"\\'")}')">SELECT</button>
+        </div>
+        <button class="btn-demo ${t.demo?'':'is-off'}" onclick="launchDemo('${t.name.replace(/'/g,"\\'")}')">
+          ${t.demo?'LAUNCH DEMO ↗':'PREVIEW SOON'}
+        </button>
+      </div>
+    </article>`).join('');
+  document.getElementById('themeCount').textContent = String(THEMES.length).padStart(2,'0');
+  grid.querySelectorAll('.reveal').forEach(el=>revealObs.observe(el));
+}
+
+/* ============ build style library ============ */
+function buildStyles(){
+  const grid = document.getElementById('styleGrid');
+  grid.innerHTML = STYLES.map((s,i)=>`
+    <article class="sticky-card card-hover p-5 reveal" data-style="${s.key}" style="border-top:3px solid ${s.acc};display:flex;flex-direction:column">
+      <div class="flex items-center justify-between mb-3">
+        <span class="mono text-xs tracking-widest uppercase" style="color:${s.acc}">style ${i+1}</span>
+        <span class="mono text-xs tracking-wide px-2 py-0.5 rounded-full" style="color:${s.acc};background:${s.acc}14;border:1px solid ${s.acc}55">${s.cost?'+ '+fmt(s.cost):'FREE'}</span>
+      </div>
+      <h3 class="sk-serif text-2xl font-semibold text-deep italic mb-2">${s.label}</h3>
+      <div class="flex-1 desc-box mb-4" title="Visual character" style="min-height:64px">${s.desc}</div>
+      <button class="btn-sel" data-sel="${s.key}" onclick="pickStyle('${s.key}')">SELECT</button>
+    </article>`).join('');
+  document.getElementById('styleCount').textContent = String(STYLES.length).padStart(2,'0');
+  grid.querySelectorAll('.reveal').forEach(el=>revealObs.observe(el));
+  syncStyleSel();
+}
+
+function syncStyleSel(){
+  document.querySelectorAll('[data-style]').forEach(c=>{
+    const on = c.dataset.style===selStyleKey;
+    const btn = c.querySelector('.btn-sel');
+    if(btn){ btn.classList.toggle('chosen', on); btn.textContent = on? 'SELECTED ✓':'SELECT'; }
+  });
+}
+
+function pickStyle(key){
+  selStyleKey = key;
+  syncFormOrigin();
+  syncStyleSel();
+  updateCalc();
+}
+
+/* ============ pick theme ============ */
+function pickTheme(name){
+  const t = THEMES.find(x=>x.name===name);
+  currentTheme = name;
+  document.getElementById('asset').value = name;
+  document.querySelectorAll('[data-theme]').forEach(c=>{
+    const on = c.dataset.theme===name;
+    c.style.outline = on? '2px solid '+t.acc : 'none';
+    c.style.outlineOffset = on? '3px':'0';
+    const btn = c.querySelector('.btn-sel');
+    if(btn){ btn.classList.toggle('chosen', on); btn.textContent = on? 'SELECTED ✓':'SELECT'; }
+  });
+  updateCalc();
+}
+
+/* ============ asset dropdown change ============ */
+function assetChanged(){
+  currentTheme = document.getElementById('asset').value;
+  document.querySelectorAll('[data-theme]').forEach(c=>{
+    const on = c.dataset.theme===currentTheme;
+    const t = THEMES.find(x=>x.name===currentTheme);
+    c.style.outline = on && t? '2px solid '+t.acc : 'none';
+    c.style.outlineOffset = on? '3px':'0';
+    const btn = c.querySelector('.btn-sel');
+    if(btn){ btn.classList.toggle('chosen', on); btn.textContent = on? 'SELECTED ✓':'SELECT'; }
+  });
+  updateCalc();
+}
+
+/* ============ build add-ons ============ */
+function buildAddons(){
+  document.getElementById('addonList').innerHTML = ADDONS.map(a=>`
+    <label class="addon"><input type="checkbox" data-key="${a.key}" onchange="updateCalc()">
+      <span class="t">${a.label}</span><span class="c">+${fmt(a.cost)}</span></label>`).join('');
+}
+
+/* ============ build length + style pickers ============ */
+function renderPickers(){
+  const lp = document.getElementById('lenPicker');
+  const sp = document.getElementById('stylePicker');
+  if(lp) lp.innerHTML = LENGTHS.map(l=>`
+    <button type="button" class="pickbtn ${selLenKey===l.key?'on':''}" onclick="setLen('${l.key}')">
+      ${l.label}<span class="p">${fmt(l.cost)}</span></button>`).join('');
+  if(sp) sp.innerHTML = STYLES.map(s=>`
+    <button type="button" class="pickbtn ${selStyleKey===s.key?'on':''}" onclick="setStyle('${s.key}')">
+      ${s.label}<span class="p">FREE</span></button>`).join('');
+}
+function setLen(k){ selLenKey = k; syncFormOrigin(); renderPickers(); updateCalc(); }
+function setStyle(k){ selStyleKey = k; syncFormOrigin(); syncStyleSel(); renderPickers(); updateCalc(); }
+function setFmt(btn){
+  delivFmt = btn.dataset.fmt;
+  document.querySelectorAll('.fmt-card').forEach(c=>c.classList.toggle('sel', c===btn));
+}
+function syncFormOrigin(){
+  const fl = document.getElementById('formLen');
+  const fs = document.getElementById('formStyle');
+  if(fl && fl.value !== selLenKey) fl.value = selLenKey;
+  if(fs && fs.value !== selStyleKey) fs.value = selStyleKey;
+}
+function fillLayerOptions(){
+  const fl = document.getElementById('formLen');
+  const fs = document.getElementById('formStyle');
+  if(fl) fl.innerHTML = LENGTHS.map(l=>`<option value="${l.key}" class="bg-white">${l.label} — ${fmt(l.cost)}</option>`).join('');
+  if(fs) fs.innerHTML = STYLES.map(s=>`<option value="${s.key}" class="bg-white">${s.label} — FREE</option>`).join('');
+  const spd = document.getElementById('speed');
+  if(spd) spd.innerHTML = Object.keys(RUSH).map(k=>`<option value="${k}" class="bg-white">${SPEED_LBL[k]} — ${fmt(RUSH[k])}</option>`).join('');
+  syncFormOrigin();
+}
+
+/* ============ live calculator ============ */
+function themeByName(name){ return THEMES.find(t=>t.name===name); }
+
+function updateCalc(){
+  const t = themeByName(document.getElementById('asset').value);
+  const base = t? t.base : 0;
+  const lenObj = LENGTHS.find(l=>l.key===selLenKey) || LENGTHS[0];
+  const styleObj = STYLES.find(s=>s.key===selStyleKey) || STYLES[0];
+  const lenCost = lenObj.cost;
+  const styleCost = styleObj.cost;
+  const add = [...document.querySelectorAll('#addonList input:checked')]
+    .reduce((s,el)=> s + (ADDONS.find(a=>a.key===el.dataset.key)?.cost||0), 0);
+  const rush = RUSH[document.getElementById('speed').value] || 0;
+  const tip = Number(document.getElementById('tip').value) || 0;
+  const newTotal = base + lenCost + styleCost + add + rush + tip;
+  const totalEl = document.getElementById('calcTotal');
+  if(animId) cancelAnimationFrame(animId);
+  const start = displayVal, dur = 420, t0 = performance.now();
+  function tick(now){
+    const p = Math.min(1,(now-t0)/dur), e = 1-Math.pow(1-p,3);
+    const v = Math.round(start + (newTotal-start)*e);
+    displayVal = v;
+    totalEl.textContent = fmt(v);
+    if(p<1){ animId = requestAnimationFrame(tick); }
+    else { animId = null; totalEl.classList.remove('price-pop'); void totalEl.offsetWidth; totalEl.classList.add('price-pop'); }
+  }
+  animId = requestAnimationFrame(tick);
+  document.getElementById('calcLen').textContent = t? t.len : '—';
+  document.getElementById('calcLenCost').textContent = lenCost?'+'+fmt(lenCost):fmt(0);
+  document.getElementById('calcStyleCost').textContent = styleCost?'+'+fmt(styleCost):fmt(0);
+  document.getElementById('calcBase').textContent = fmt(base);
+  document.getElementById('calcAdd').textContent = add?'+'+fmt(add):fmt(0);
+  document.getElementById('calcRush').textContent = rush?'+'+fmt(rush):fmt(0);
+  document.getElementById('calcTip').textContent = tip?'+'+fmt(tip):fmt(0);
+  document.getElementById('calcINR').textContent = others(newTotal);
+}
+
+/* ============ submit ============ */
+document.getElementById('contactForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const consentBox = document.getElementById('privacyConsent');
+  const errEl = document.getElementById('privacyErr');
+  if (!consentBox || !consentBox.checked){
+    if (errEl) errEl.classList.remove('hidden');
+    if (consentBox) consentBox.focus();
+    return;
+  }
+  if (errEl) errEl.classList.add('hidden');
+  const t = themeByName(document.getElementById('asset').value);
+  const addons = [...document.querySelectorAll('#addonList input:checked')]
+    .map(el=>({name:ADDONS.find(a=>a.key===el.dataset.key).label, cost:ADDONS.find(a=>a.key===el.dataset.key).cost}));  const base = t? t.base : 0;
+  const addCost = addons.reduce((s,a)=>s+a.cost,0);
+  const selLen = LENGTHS.find(l=>l.key===selLenKey) || LENGTHS[0];
+  const selStyle = STYLES.find(s=>s.key===selStyleKey) || STYLES[0];
+  const lenCost = selLen.cost;
+  const styleCost = selStyle.cost;
+  const rush = RUSH[document.getElementById('speed').value]||0;
+  const tip = Number(document.getElementById('tip').value) || 0;
+  const total = base + lenCost + styleCost + addCost + rush + tip;
+  const payload = {
+    company: document.getElementById('company').value.trim(),
+    applicant: document.getElementById('applicant').value.trim(),
+    post: document.getElementById('post').value.trim(),
+    founderEmail: document.getElementById('email').value.trim(),
+    theme: document.getElementById('asset').value,
+    themeLength: t? t.len : null,
+    lengthSelection: selLen.label,
+    lengthSelectionUSD: lenCost,
+    styleSelection: selStyle.label,
+    styleSelectionUSD: styleCost,
+    deliveryFormat: delivFmt === 'multi' ? 'Multiple files (HTML / CSS / JS)' : 'Single .html file',
+    projectDescription: document.getElementById('desc').value.trim(),
+    themeBaseUSD: base,
+    addOns: addons,
+    addOnsTotalUSD: addCost,
+    deliverySpeed: SPEED_LBL[document.getElementById('speed').value],
+    rushFeeUSD: rush,
+    tipUSD: tip,
+    currency: CUR_LBL[cur],
+    totalUSD: total,
+    totalINR: Math.round(total*87),
+    privacyConsent: true,
+    privacyPolicyAccepted: 'Krypton Studio Privacy Policy (2026)',
+    receipt: 'total payment receipt will be submitted by the company official soon',
+    timestamp: new Date().toISOString()
+  };
+  console.log('[KRYPTON] TRANSMISSION PAYLOAD →', payload);
+  const submitBtn = document.getElementById('submitBtn');
+  if (submitBtn){ submitBtn.disabled = true; submitBtn.textContent = 'Sending…'; }
+  fetch('/api/apply', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data && data.ok){
+      if (data.application){
+        const a = data.application;
+        const ui = { appNoUi:'—', appIdUi:'—', appCodeUi:'—' };
+        if (a.appNo) ui.appNoUi = a.appNo;
+        if (a.appId) ui.appIdUi = a.appId;
+        if (a.appCode != null) ui.appCodeUi = String(a.appCode).split('').join(' ');
+        for (const k in ui) { const el = document.getElementById(k); if (el) el.textContent = ui[k]; }
+        document.getElementById('appCard').classList.remove('hidden');
+      }
+      document.getElementById('successBox').classList.remove('hidden');
+      document.getElementById('successBox').scrollIntoView({behavior:'smooth', block:'center'});
+    } else {
+      throw new Error((data && data.error) || 'Server rejected application');
+    }
+    if (submitBtn){ submitBtn.disabled = false; submitBtn.textContent = 'Submit Application'; }
+  })
+  .catch(err => {
+    console.warn('[KRYPTON] apply request failed:', err && err.message);
+    if (submitBtn){ submitBtn.disabled = false; submitBtn.textContent = 'Submit Application'; }
+    const box = document.getElementById('successBox');
+    if (box){
+      box.classList.remove('hidden');
+      box.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+  });
+});
+
+/* ============ live demo launcher ============ */
+function launchDemo(name){
+  const t = THEMES.find(x=>x.name===name);
+  const frame = document.getElementById('demoFrame');
+  if(!t || !t.demo){
+    document.getElementById('demoTitle').textContent = name + ' — Preview Soon';
+    frame.srcdoc = '';
+    const noDemo = document.getElementById('demoNoLive');
+    if(noDemo) noDemo.classList.remove('hidden');
+    const yes = document.getElementById('demoHasLive');
+    if(yes) yes.classList.add('hidden');
+  } else {
+    document.getElementById('demoTitle').textContent = name + ' — Live Build';
+    frame.src = t.demo;
+    const yes = document.getElementById('demoHasLive');
+    if(yes) yes.classList.remove('hidden');
+    const noDemo = document.getElementById('demoNoLive');
+    if(noDemo) noDemo.classList.add('hidden');
+  }
+  document.getElementById('demoModal').classList.remove('hidden');
+  document.getElementById('demoModal').style.display='flex';
+  document.body.style.overflow='hidden';
+}
+function closeDemo(){
+  const m = document.getElementById('demoModal');
+  m.classList.add('hidden'); m.style.display='none';
+  document.getElementById('demoFrame').src='about:blank';
+  document.body.style.overflow='';
+}
+
+/* ============ privacy policy modal ============ */
+function openPrivacy(e){
+  if (e){ e.preventDefault(); e.stopPropagation(); }
+  const m = document.getElementById('privacyModal');
+  m.classList.remove('hidden'); m.style.display='flex';
+  document.body.style.overflow='hidden';
+}
+function closePrivacy(){
+  const m = document.getElementById('privacyModal');
+  m.classList.add('hidden'); m.style.display='none';
+  document.body.style.overflow='';
+}
+
+/* ============ slot reservation + deposit drawer ============ */
+const DEPOSIT = 250;
+let sprintSlots = [];
+function fillSprintSlots(){
+  sprintSlots = [];
+  for(let i=1;i<=12;i++){
+    const d = new Date(); const day = d.getDay();
+    let add = day===5?3 : day===6?2 : day===0?1 : 1;
+    d.setDate(d.getDate()+add+i-1);
+    while(d.getDay()===0 || d.getDay()===6){ d.setDate(d.getDate()+1); }
+    sprintSlots.push(d.toISOString().slice(0,10));
+  }
+  const sel = document.getElementById('depDate');
+  if(sel){ sel.innerHTML = sprintSlots.map(d=>`<option value="${d}" class="bg-white">${d}</option>`).join(''); sel.value = sprintSlots[0]; }
+  const vac = document.getElementById('depVacancy');
+  if(vac) vac.textContent = '3 sprint slots open · first available ' + sprintSlots[0];
+}
+function openDeposit(){
+  document.getElementById('depositDrawer').classList.remove('translate-x-full');
+  document.getElementById('depositDrawer').classList.add('translate-x-0');
+  document.body.style.overflow='hidden';
+  updateDepositUI();
+}
+function closeDeposit(){
+  document.getElementById('depositDrawer').classList.remove('translate-x-0');
+  document.getElementById('depositDrawer').classList.add('translate-x-full');
+  document.body.style.overflow='';
+}
+function updateDepositUI(){
+  const el = document.getElementById('depositBtn');
+  if(el) el.textContent = fmt(DEPOSIT);
+  const amt = document.getElementById('depAmt');
+  if(amt) amt.textContent = fmt(DEPOSIT);
+  const pay = document.getElementById('depositTotal');
+  if(pay) pay.textContent = fmt(DEPOSIT);
+  const vac = document.getElementById('depVacancy');
+  if(vac) vac.textContent = '3 sprint slots open · first available ' + (sprintSlots[0]||nextWorkingDay());
+}
+function doDeposit(){
+  const email = document.getElementById('depEmail').value.trim();
+  const date = document.getElementById('depDate').value;
+  const step1 = document.getElementById('depStep1');
+  const step2 = document.getElementById('depStep2');
+  if(!email || !date){ alert('Please add your email and pick a sprint date.'); return; }
+  const confirmEmail = document.getElementById('depConfirmEmail');
+  if(confirmEmail) confirmEmail.textContent = email;
+  const confirmDate = document.getElementById('depConfirmDate');
+  if(confirmDate) confirmDate.textContent = date;
+  const confirmAmt = document.getElementById('depConfirmAmt');
+  if(confirmAmt) confirmAmt.textContent = fmt(DEPOSIT);
+  if(step1) step1.classList.add('hidden');
+  if(step2) step2.classList.remove('hidden');
+}
+function confirmDeposit(){
+  const total = document.getElementById('depositTotal');
+  if(total) total.textContent = fmt(DEPOSIT);
+  const note = document.getElementById('depositNote');
+  if(note){
+    note.classList.remove('hidden');
+    note.textContent = 'Deposit request logged (' + fmt(DEPOSIT) + '). Receipt submitted by the company official soon.';
+  }
+  console.log('[KRYPTON] DEPOSIT →', {
+    founderEmail: document.getElementById('depConfirmEmail').textContent,
+    sprintDate: document.getElementById('depConfirmDate').textContent,
+    depositUSD: DEPOSIT,
+    currency: CUR_LBL[cur],
+    timestamp: new Date().toISOString()
+  });
+}
+function nextWorkingDay(){
+  const d = new Date();
+  const day = d.getDay();
+  const add = day===5?3 : day===6?2 : day===0?1 : 1;
+  d.setDate(d.getDate()+add);
+  return d.toISOString().slice(0,10);
+}
+
+/* ============ reveal on scroll ============ */
+const revealObs = new IntersectionObserver((entries)=>{
+  entries.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add('in'); revealObs.unobserve(en.target); } });
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>revealObs.observe(el));
+
+/* reduce duplicate observe (grid ones added in buildThemes) — skip */
+buildThemes();
+buildStyles();
+buildAddons();
+renderPickers();
+document.getElementById('asset').innerHTML = THEMES.map(t=>`<option class="bg-white">${t.name}</option>`).join('');
+fillLayerOptions();
+fillSprintSlots();
+updateDepositUI();
+updateCalc();
+</script>
+
+<!-- ================= K-TRON WIDGET ================= -->
+<div class="kpanel" id="kPanel">
+  <div class="kpanel-head">
+    <div class="marker" style="font-size:1.05rem">K-Tron</div>
+    <span style="font-size:.68rem;letter-spacing:.05em;text-transform:uppercase;opacity:.85">AI copilot · live</span>
+    <button class="close" onclick="toggleKTron(false)" aria-label="Close">✕</button>
+  </div>
+  <div class="kbody" id="kBody">
+    <div class="kmsg kai">Hey, I'm K-Tron — Krypton's AI copilot. Ask me about pricing, themes, or what to build.</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;padding-bottom:6px" id="kSugg">
+      <button class="ksugg" onclick="kQuestion('How much does a landing page cost?')">Landing page price</button>
+      <button class="ksugg" onclick="kQuestion('Which theme fits a coffee brand?')">Coffee brand theme</button>
+      <button class="ksugg" onclick="kQuestion('Help me scope a small business site')">Scope a site</button>
+    </div>
+  </div>
+  <div class="kinput">
+    <textarea id="kInput" rows="1" placeholder="Ask K-Tron…"></textarea>
+    <button onclick="kSend()">Send</button>
+  </div>
+</div>
+<button class="kfab" id="kFab" onclick="toggleKTron(true)" aria-label="Open K-Tron">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+</button>
+
+<script>
+/* ===== K-Tron widget ===== */
+function toggleKTron(open){
+  const panel = document.getElementById('kPanel');
+  const fab = document.getElementById('kFab');
+  if(open === undefined) open = !panel.classList.contains('open');
+  panel.classList.toggle('open', open);
+  fab.style.display = open ? 'none' : 'grid';
+  if(open) document.getElementById('kInput').focus();
+}
+function kAdd(role, text){
+  const body = document.getElementById('kBody');
+  const d = document.createElement('div');
+  d.className = 'kmsg ' + (role==='user' ? 'kuser' : 'kai');
+  d.textContent = text;
+  body.appendChild(d);
+  body.scrollTop = body.scrollHeight;
+  return d;
+}
+function kTyping(){
+  const body = document.getElementById('kBody');
+  const d = document.createElement('div');
+  d.className = 'ktyping';
+  d.innerHTML = '<span></span><span></span><span></span>';
+  body.appendChild(d);
+  body.scrollTop = body.scrollHeight;
+  return d;
+}
+async function kSendText(text){
+  if(!text.trim()) return;
+  kAdd('user', text);
+  document.getElementById('kInput').value = '';
+  const typing = kTyping();
+  try{
+    const res = await fetch('/api/chat', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ messages:[{ role:'user', content:text }] }) });
+    const data = await res.json();
+    typing.remove();
+    kAdd('ai', res.ok ? (data.choices?.[0]?.message?.content?.trim() || '(no reply)')
+                      : ('K-Tron is offline: ' + (data.error || 'server not reachable')));
+  }catch(e){
+    typing.remove();
+    kAdd('ai', 'Could not reach K-Tron. Start the server (node --env-file=.env ktron-server.js).');
+  }
+}
+function kSend(){ kSendText(document.getElementById('kInput').value); }
+function kQuestion(t){ toggleKTron(true); kSendText(t); }
+document.getElementById('kInput').addEventListener('keydown', function(e){
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); kSend(); }
+});
+</script>
+</body>
+</html>

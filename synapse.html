@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SYNAPSE · Agentic Orchestration Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#030303; --panel:#0a0a0a; --panel2:#101010;
+  --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
+  --text:#f5f5f5; --muted:#9a9a9a; --dim:#6a6a6a;
+  --green:#2fe89a; --green-dim:rgba(47,232,154,.14);
+  --cyan:#39c5ff; --violet:#a78bfa; --amber:#fbbf24; --red:#f87171;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:"Inter",-apple-system,system-ui,sans-serif;
+  line-height:1.6; overflow-x:hidden;
+}
+/* dot-matrix grid */
+body::before{
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image:radial-gradient(rgba(255,255,255,.06) 1px, transparent 1.4px);
+  background-size:22px 22px;
+}
+a{color:inherit;text-decoration:none}
+img{max-width:100%}
+
+/* cursor radial hover glow */
+.radial-glow{
+  position:fixed; top:0; left:0; width:520px; height:520px; z-index:0; pointer-events:none;
+  background:radial-gradient(circle, rgba(57,197,255,.07), transparent 60%);
+  transform:translate(-50%,-50%); opacity:0; transition:opacity .4s; border-radius:50%;
+}
+body:hover .radial-glow{opacity:1}
+
+.mono{font-family:var(--mono)}
+.wrap{position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:0 24px}
+
+/* ===== top nav ===== */
+nav.topbar{
+  position:sticky; top:0; z-index:50;
+  background:rgba(3,3,3,.72); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.tb-inner{max-width:1180px; margin:0 auto; padding:14px 24px; display:flex; align-items:center; gap:22px}
+.brand{display:flex; align-items:center; gap:11px; font-weight:700; letter-spacing:.5px}
+.syn-mark{
+  width:26px; height:26px; border-radius:7px; display:grid; place-items:center;
+  background:linear-gradient(135deg,#39c5ff,#a78bfa); font-family:var(--mono); font-weight:700; font-size:.9rem; color:#030303;
+}
+.brand small{color:var(--muted); font-weight:400; font-family:var(--mono); font-size:.72rem; letter-spacing:1px}
+.tb-links{display:flex; gap:4px; margin-left:6px; flex-wrap:wrap}
+.tb-links a{
+  font-size:.82rem; color:var(--muted); padding:6px 11px; border-radius:6px; transition:.2s;
+}
+.tb-links a:hover{color:var(--text); background:rgba(255,255,255,.05)}
+.tb-right{margin-left:auto; display:flex; align-items:center; gap:16px}
+.health{display:flex; align-items:center; gap:6px; font-family:var(--mono); font-size:.72rem; color:var(--green)}
+.pulse{width:8px; height:8px; border-radius:50%; background:var(--green); position:relative}
+.pulse::after{content:""; position:absolute; inset:-4px; border-radius:50%; border:1px solid var(--green); animation:ping 2s infinite}
+@keyframes ping{0%{transform:scale(.6);opacity:1}100%{transform:scale(1.6);opacity:0}}
+.cmd-hint{
+  display:flex; align-items:center; gap:7px; font-family:var(--mono); font-size:.74rem; color:var(--muted);
+  border:1px solid var(--line); border-radius:7px; padding:5px 10px; cursor:pointer; transition:.2s;
+}
+.cmd-hint:hover{border-color:var(--line2); color:var(--text); background:rgba(255,255,255,.04)}
+kbd{font-family:var(--mono); font-size:.68rem; border:1px solid var(--line2); border-bottom-width:2px; border-radius:4px; padding:1px 5px; color:var(--muted)}
+
+/* ===== hero ===== */
+.hero{padding:120px 0 90px; text-align:center; position:relative}
+.hero .chip{
+  display:inline-flex; align-items:center; gap:9px; font-family:var(--mono); font-size:.74rem;
+  border:1px solid var(--line); background:rgba(255,255,255,.03); padding:.4em 1em; border-radius:30px; color:var(--muted);
+  margin-bottom:26px; letter-spacing:.5px;
+}
+.hero .chip .dotln{display:flex; gap:4px}
+.hero h1{
+  font-size:clamp(2.6rem,7vw,5.5rem); font-weight:800; letter-spacing:-2px; line-height:1.02;
+}
+.hero h1 .grad{background:linear-gradient(90deg,#39c5ff,#a78bfa 55%,#2fe89a); -webkit-background-clip:text; background-clip:text; color:transparent}
+.hero .sub{max-width:640px; margin:22px auto 0; color:var(--muted); font-size:1.08rem}
+.metrics{display:flex; justify-content:center; gap:18px; flex-wrap:wrap; margin-top:44px}
+.metric{
+  border:1px solid var(--line); border-radius:12px; padding:16px 24px; min-width:150px;
+  background:rgba(255,255,255,.02);
+}
+.metric .v{font-family:var(--mono); font-size:1.5rem; font-weight:700}
+.metric .l{font-size:.74rem; color:var(--dim); font-family:var(--mono); margin-top:2px; letter-spacing:.5px}
+.metric .live{display:flex; align-items:center; gap:5px; margin-top:8px; font-family:var(--mono); font-size:.68rem; color:var(--green)}
+.pulse.sm{width:6px;height:6px}
+.metric .live .pulse::after{inset:-3px}
+.cta{display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-top:44px}
+.btn{
+  font-family:var(--mono); font-size:.82rem; padding:13px 26px; border-radius:9px; cursor:pointer;
+  border:1px solid var(--line2); background:transparent; color:var(--text); transition:.25s; font-weight:500;
+}
+.btn:hover{border-color:rgba(255,255,255,.35); background:rgba(255,255,255,.05); transform:translateY(-2px)}
+.btn.primary{background:linear-gradient(135deg,#39c5ff,#a78bfa); border:none; color:#030303; font-weight:700}
+.btn.primary:hover{box-shadow:0 0 34px rgba(57,197,255,.4)}
+
+/* ===== sections ===== */
+.sec{padding:90px 0; border-top:1px solid var(--line); position:relative}
+.sec-head{max-width:680px; margin-bottom:44px}
+.sec-tag{font-family:var(--mono); font-size:.72rem; color:var(--cyan); letter-spacing:3px; text-transform:uppercase; margin-bottom:14px}
+.sec-head h2{font-size:clamp(1.7rem,4vw,2.5rem); font-weight:800; letter-spacing:-1px}
+.sec-head p{color:var(--muted); margin-top:12px}
+.card{
+  border:1px solid var(--line); border-radius:16px; background:var(--panel);
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+}
+
+/* ===== featured grid ===== */
+.feat{display:grid; grid-template-columns:1.5fr 1fr; gap:22px; align-items:stretch}
+.feat .card{padding:30px}
+.feat h3{font-size:1.3rem; font-weight:700; letter-spacing:-.5px; margin-bottom:10px}
+.feat p{color:var(--muted); font-size:.98rem}
+.feature-list{display:flex; flex-direction:column; gap:14px; margin-top:24px}
+.fi{display:flex; gap:12px; align-items:flex-start}
+.fi .ico{width:32px; height:32px; flex:0 0 32px; border-radius:8px; border:1px solid var(--line); display:grid; place-items:center; font-size:1rem; background:rgba(255,255,255,.03)}
+.fi b{display:block; font-size:.95rem}
+.fi span{color:var(--dim); font-size:.85rem}
+.big-number{font-family:var(--mono); font-size:3.2rem; font-weight:700; text-align:center; color:var(--green); margin:20px 0 6px}
+.big-small{text-align:center; color:var(--dim); font-size:.8rem; font-family:var(--mono)}
+
+/* ===== workflow builder ===== */
+.wf{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:24px}
+.wf-top{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:18px}
+.wf-top .t{font-family:var(--mono); font-size:.78rem; color:var(--muted); letter-spacing:1px}
+.wf-tools{display:flex; gap:10px}
+.tool{font-family:var(--mono); font-size:.72rem; border:1px solid var(--line); border-radius:6px; padding:5px 10px; cursor:pointer; color:var(--muted); transition:.2s}
+.tool:hover{color:var(--text); border-color:var(--line2)}
+.tool.active{color:var(--green); border-color:rgba(47,232,154,.4); background:var(--green-dim)}
+#wfCanvas{width:100%; height:440px; display:block; background:rgba(0,0,0,.35); border:1px solid var(--line); border-radius:10px; touch-action:none}
+.wf-hint{text-align:center; color:var(--dim); font-size:.74rem; font-family:var(--mono); margin-top:14px}
+
+/* ===== terminal ===== */
+.term{overflow:hidden}
+.term-head{display:flex; align-items:center; gap:14px; background:var(--panel2); border-bottom:1px solid var(--line); padding:12px 18px}
+.tabbtns{display:flex; gap:2px}
+.tab{
+  font-family:var(--mono); font-size:.76rem; padding:6px 13px; border-radius:6px; cursor:pointer; color:var(--muted); transition:.2s; border:none; background:transparent;
+}
+.tab.act{color:var(--text); background:rgba(255,255,255,.07)}
+.run-pill{
+  margin-left:auto; font-family:var(--mono); font-size:.74rem; color:#030303; background:var(--green);
+  border:none; border-radius:6px; padding:7px 14px; cursor:pointer; font-weight:700; transition:.2s;
+}
+.run-pill:hover{box-shadow:0 0 22px rgba(47,232,154,.5)}
+.term-body{display:grid; grid-template-columns:1fr 1fr; min-height:340px}
+.codebox{position:relative; padding:20px; overflow:auto; font-family:var(--mono); font-size:.8rem; line-height:1.65; color:#d7e6ff; border-right:1px solid var(--line)}
+.codebox pre{white-space:pre}
+.tok-k{color:#39c5ff}.tok-s{color:#2fe89a}.tok-c{color:#6a6a6a}.tok-f{color:#a78bfa}
+.console{padding:20px; overflow:auto; font-family:var(--mono); font-size:.8rem; line-height:1.6}
+.console .caret{display:inline-block; width:8px; height:14px; background:var(--green); vertical-align:middle; animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.console .ln{white-space:pre-wrap; word-break:break-all}
+.console .ok{color:var(--green)} .console .inf{color:var(--cyan)} .console .dim{color:var(--dim)}
+
+/* ===== cost calculator ===== */
+.calc{display:grid; grid-template-columns:1fr 1fr; gap:0}
+.calc-side{padding:30px; border-right:1px solid var(--line)}
+.calc-growth{display:flex; flex-direction:column; gap:22px; margin-top:26px}
+.ctl .c-label{display:flex; justify-content:space-between; font-size:.82rem; color:var(--muted); margin-bottom:10px; font-family:var(--mono)}
+.ctl .c-label b{color:var(--text); font-family:var(--mono)}
+input[type=range]{width:100%; -webkit-appearance:none; appearance:none; height:3px; background:rgba(255,255,255,.15); border-radius:3px; outline:none}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:#39c5ff; cursor:pointer; border:3px solid #030303; box-shadow:0 0 0 1px #39c5ff,0 0 16px rgba(57,197,255,.5);
+}
+.std-cost{display:flex; justify-content:space-between; padding:16px; border:1px solid var(--line); border-radius:10px; background:rgba(255,255,255,.02); margin-top:24px}
+.std-cost .l{font-size:.78rem; color:var(--dim); font-family:var(--mono)}
+.std-cost .v{font-size:1.5rem; font-weight:700; font-family:var(--mono)}
+.save-banner{margin-top:16px; text-align:center; font-family:var(--mono); font-size:.85rem; padding:12px; border-radius:9px; background:var(--green-dim); color:var(--green); border:1px solid rgba(47,232,154,.3)}
+.graph-side{padding:22px; display:flex; flex-direction:column}
+.graph-side h4{font-family:var(--mono); font-size:.74rem; color:var(--dim); letter-spacing:1px; margin-bottom:10px}
+
+/* ===== command palette ===== */
+.palette-backdrop{
+  position:fixed; inset:0; z-index:90; background:rgba(0,0,0,.6);
+  -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+  display:none; align-items:flex-start; justify-content:center; padding-top:16vh;
+}
+.palette-backdrop.open{display:flex}
+.palette{width:min(560px,92vw); background:#0c0c0c; border:1px solid var(--line2); border-radius:14px; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,.8); animation:pop .15s ease}
+@keyframes pop{from{transform:scale(.97);opacity:0}to{transform:scale(1);opacity:1}}
+.pal-input{display:flex; align-items:center; gap:12px; padding:16px 18px; border-bottom:1px solid var(--line)}
+.pal-input svg{flex:0 0 auto; opacity:.6}
+.pal-input input{flex:1; background:none; border:none; outline:none; color:var(--text); font-family:var(--mono); font-size:1rem}
+.pal-input input::placeholder{color:var(--dim)}
+.pal-results{max-height:380px; overflow:auto; padding:8px}
+.pal-item{display:flex; align-items:center; gap:13px; padding:11px 12px; border-radius:9px; cursor:pointer; transition:.12s}
+.pal-item.sel{background:rgba(255,255,255,.08)}
+.pal-item .p-ico{width:34px; height:34px; flex:0 0 34px; border-radius:8px; border:1px solid var(--line); display:grid; place-items:center; font-size:.95rem; background:rgba(255,255,255,.03)}
+.pal-item .p-title{font-size:.92rem; font-weight:500}
+.pal-item .p-sub{font-size:.75rem; color:var(--dim); font-family:var(--mono)}
+.pal-item .p-kind{margin-left:auto; font-family:var(--mono); font-size:.66rem; color:var(--dim); border:1px solid var(--line); padding:2px 7px; border-radius:5px}
+.pal-empty{padding:28px; text-align:center; color:var(--dim); font-family:var(--mono); font-size:.85rem}
+.pal-foot{display:flex; gap:16px; padding:10px 16px; border-top:1px solid var(--line); font-family:var(--mono); font-size:.68rem; color:var(--dim)}
+.pal-foot span{display:flex; align-items:center; gap:6px}
+
+/* ===== steps ===== */
+.steps{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px}
+.step{border:1px solid var(--line); border-radius:13px; padding:24px; position:relative; background:var(--panel); transition:.25s}
+.step:hover{transform:translateY(-4px); border-color:var(--line2)}
+.step .n{font-family:var(--mono); font-size:.72rem; color:var(--cyan); letter-spacing:1px}
+.step b{display:block; font-size:1.05rem; margin:10px 0 6px}
+.step p{color:var(--dim); font-size:.88rem}
+
+/* ===== status cards (capabilities) ===== */
+.status-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px}
+.status-card{border:1px solid var(--line); border-radius:14px; padding:26px; background:var(--panel); position:relative; transition:.25s; overflow:hidden}
+.status-card:hover{transform:translateY(-5px); border-color:var(--line2); background:#0d0d0d}
+.status-card::before{content:""; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--sc,#39c5ff),transparent); opacity:0; transition:.3s}
+.status-card:hover::before{opacity:1}
+.sc-head{display:flex; align-items:center; gap:12px; margin-bottom:14px}
+.sc-badge{width:36px; height:36px; flex:0 0 36px; border-radius:9px; border:1px solid var(--line); background:rgba(255,255,255,.03); display:grid; place-items:center; font-family:var(--mono); font-weight:700; color:var(--sc,#39c5ff); font-size:.85rem}
+.status-card h3{font-size:1.08rem; font-weight:600; letter-spacing:-.3px}
+.status-card .desc{color:var(--dim); font-size:.88rem; margin-top:4px}
+.status-card .stat{display:flex; justify-content:space-between; align-items:center; margin-top:18px; padding-top:14px; border-top:1px solid var(--line)}
+.status-card .stat .k{font-family:var(--mono); font-size:.7rem; color:var(--dim); letter-spacing:.5px}
+.status-card .stat .v{font-family:var(--mono); font-size:.82rem; color:var(--text)}
+
+/* ===== plans ===== */
+.plans{display:grid; grid-template-columns:repeat(auto-fit,minmax(270px,1fr)); gap:22px; align-items:stretch}
+.plan{position:relative; border:1px solid var(--line); border-radius:16px; padding:28px; background:var(--panel); display:flex; flex-direction:column; transition:.25s}
+.plan:hover{transform:translateY(-6px); border-color:var(--line2)}
+.plan.popular{border-color:rgba(57,197,255,.5); background:linear-gradient(180deg,rgba(57,197,255,.07),transparent 45%); box-shadow:0 0 44px rgba(57,197,255,.12)}
+.plan .pl-tag{position:absolute; top:-12px; left:22px; font-family:var(--mono); font-size:.66rem; color:#030303; background:linear-gradient(90deg,#39c5ff,#a78bfa); padding:4px 11px; border-radius:20px; font-weight:700; letter-spacing:.5px; display:none}
+.plan.popular .pl-tag{display:inline-block}
+.plan .pl-name{font-family:var(--mono); font-size:.8rem; color:var(--cyan); letter-spacing:1px}
+.plan .pl-price{margin:16px 0 4px; font-size:2.6rem; font-weight:800; letter-spacing:-2px}
+.plan .pl-price small{font-size:1rem; font-weight:500; color:var(--dim); letter-spacing:0}
+.plan .pl-desc{color:var(--dim); font-size:.86rem; min-height:40px}
+.plan .pl-feats{list-style:none; margin:20px 0 26px; flex:1}
+.plan .pl-feats li{display:flex; align-items:center; gap:11px; padding:7px 0; font-size:.9rem; color:var(--muted)}
+.plan .pl-feats li .ck{color:var(--green); font-family:var(--mono)}
+.plan .pl-feats li .no{color:var(--dim); font-family:var(--mono)}
+.plan .btn{width:100%; text-align:center}
+
+/* ===== integrations ===== */
+.int-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px}
+.int-card{border:1px solid var(--line); border-radius:13px; padding:20px; background:var(--panel); display:flex; align-items:center; gap:14px; transition:.22s; cursor:default}
+.int-card:hover{transform:translateY(-4px); border-color:var(--line2); background:#0d0d0d}
+.int-logo{width:40px; height:40px; flex:0 0 40px; border-radius:10px; display:grid; place-items:center; font-family:var(--mono); font-weight:800; font-size:.8rem; color:#030303; background:var(--il,#2fe89a)}
+.int-card b{font-size:.95rem; display:block}
+.int-card span{font-family:var(--mono); font-size:.66rem; color:var(--dim); letter-spacing:.5px}
+.int-live{margin-left:auto; font-family:var(--mono); font-size:.62rem; color:var(--green); display:flex; align-items:center; gap:5px}
+
+/* ===== testimonials ===== */
+.testi-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:20px}
+.testi{border:1px solid var(--line); border-radius:15px; padding:26px; background:var(--panel); position:relative}
+.testi .q{font-size:1.05rem; line-height:1.6; color:var(--text)}
+.testi .q .hl{color:var(--cyan)}
+.testi .who{display:flex; align-items:center; gap:12px; margin-top:20px; padding-top:16px; border-top:1px solid var(--line)}
+.testi .avatar{width:38px; height:38px; border-radius:50%; display:grid; place-items:center; font-family:var(--mono); font-weight:700; font-size:.78rem; color:#030303; background:var(--av,#39c5ff)}
+.testi .who b{display:block; font-size:.92rem}
+.testi .who span{font-size:.76rem; color:var(--dim); font-family:var(--mono)}
+.testi .stars{margin-left:auto; color:var(--amber); font-family:var(--mono); font-size:.8rem; letter-spacing:1px}
+
+/* ===== api table ===== */
+.api{border:1px solid var(--line); border-radius:15px; overflow:hidden}
+.api .api-row{display:grid; grid-template-columns:130px 1fr auto; gap:16px; align-items:center; padding:15px 22px; border-bottom:1px solid var(--line); transition:.15s}
+.api .api-row:last-child{border-bottom:none}
+.api .api-row:hover{background:rgba(255,255,255,.025)}
+.api .method{font-family:var(--mono); font-size:.7rem; font-weight:700; padding:4px 10px; border-radius:6px; width:fit-content; letter-spacing:.5px}
+.method.get{color:var(--green); background:var(--green-dim); border:1px solid rgba(47,232,154,.3)}
+.method.post{color:var(--cyan); background:rgba(57,197,255,.1); border:1px solid rgba(57,197,255,.3)}
+.method.del{color:var(--red); background:rgba(248,113,113,.1); border:1px solid rgba(248,113,113,.3)}
+.api .path{font-family:var(--mono); font-size:.86rem; color:var(--text)}
+.api .path .p{color:var(--dim)}
+.api .desc{font-size:.8rem; color:var(--dim); text-align:right; font-family:var(--mono)}
+.api-foot{display:flex; gap:18px; justify-content:center; margin-top:18px; font-family:var(--mono); font-size:.72rem; color:var(--dim); flex-wrap:wrap}
+
+/* ===== footer ===== */
+footer{border-top:1px solid var(--line); padding:44px 0 60px; text-align:center}
+.foot-links{display:flex; justify-content:center; gap:20px; flex-wrap:wrap; margin:18px 0}
+.foot-links a{color:var(--muted); font-size:.85rem}
+.foot-links a:hover{color:var(--text)}
+footer .muted{color:var(--dim); font-size:.8rem; font-family:var(--mono)}
+.glow-orb{position:absolute; width:500px; height:500px; border-radius:50%; filter:blur(120px); opacity:.12; pointer-events:none}
+@media(max-width:820px){
+  .feat,.calc,.term-body{grid-template-columns:1fr}
+  .calc-side{border-right:none; border-bottom:1px solid var(--line)}
+  .codebox{border-right:none; border-bottom:1px solid var(--line)}
+  .hero{padding:90px 0 70px}
+  .api .api-row{grid-template-columns:1fr; gap:6px}
+  .api .desc{text-align:left}
+}
+</style>
+</head>
+<body>
+<div class="radial-glow" id="radialGlow"></div>
+
+<!-- ===== nav ===== -->
+<nav class="topbar">
+  <div class="tb-inner">
+    <div class="brand"><span class="syn-mark">S</span>SYNAPSE <small>/agent-sys</small></div>
+    <div class="tb-links">
+      <a href="#builder">Builder</a>
+      <a href="#playground">Playground</a>
+      <a href="#calculator">Scale</a>
+      <a href="#plans">Pricing</a>
+      <a href="#integrations">Stack</a>
+      <a href="#how">How it works</a>
+      <a href="#api">API</a>
+    </div>
+    <div class="tb-right">
+      <div class="health"><span class="pulse"></span>99.98% Uptime&nbsp;·&nbsp;11ms</div>
+      <div class="cmd-hint" onclick="openPalette()">Command <kbd>⌘K</kbd></div>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== hero ===== -->
+<header class="hero" id="top">
+  <div class="glow-orb" style="top:-120px;left:50%;transform:translateX(-50%);background:#39c5ff"></div>
+  <div class="wrap">
+    <div class="chip">
+      <span class="dotln"><span class="pulse" style="width:7px;height:7px"></span></span>
+      AGENTIC ORCHESTRATION ENGINE · v3.2.1
+    </div>
+    <h1>Orchestrate<br>autonomous <span class="grad">agent systems</span></h1>
+    <p class="sub">SYNAPSE wires prompts, routers, model engines, and tool calls into one fault-tolerant graph — observable, rate-limited, and ready to scale.</p>
+    <div class="metrics">
+      <div class="metric"><div class="v" style="color:var(--green)">99.98%</div><div class="l">UPTIME</div><div class="live"><span class="pulse sm"></span>OPERATIONAL</div></div>
+      <div class="metric"><div class="v" style="color:var(--cyan)">11ms</div><div class="l">AVG LATENCY</div><div class="live"><span class="pulse sm"></span>P-50</div></div>
+      <div class="metric"><div class="v" style="color:var(--violet)">1.2M</div><div class="l">REQS / DAY</div><div class="live"><span class="pulse sm"></span>STREAMING</div></div>
+      <div class="metric"><div class="v">19</div><div class="l">ACTIVE AGENTS</div><div class="live"><span class="pulse sm"></span>LIVE</div></div>
+    </div>
+    <div class="cta">
+      <button class="btn primary" onclick="runDemo()">▸ Run demo prompt</button>
+      <button class="btn" onclick="openPalette()">Open command palette <kbd style="margin-left:6px">⌘K</kbd></button>
+    </div>
+  </div>
+</header>
+
+<!-- ===== builder ===== -->
+<section class="sec" id="builder">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-tag">/* 01 · pipeline */</div>
+      <h2>Interactive Agent Workflow Builder</h2>
+      <p>Six live nodes connected by glowing SVG paths. Tap a node to route active data through it — drag any node to rewire the graph in real time.</p>
+    </div>
+    <div class="wf">
+      <div class="wf-top">
+        <div class="t">WORKFLOW / production-route.graphql</div>
+        <div class="wf-tools">
+          <div class="tool active" onclick="setFlow('production',this)">production</div>
+          <div class="tool" onclick="setFlow('research',this)">research</div>
+          <div class="tool" onclick="runFlow(this)">▶ simulate</div>
+        </div>
+      </div>
+      <canvas id="wfCanvas"></canvas>
+      <div class="wf-hint">pointer: activate · drag: reposition · toggle mode to swap topology</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== playground ===== -->
+<section class="sec" id="playground">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-tag">/* 02 · sandbox */</div>
+      <h2>Live Terminal Code Playground</h2>
+      <p>Pick a language, press run, and watch a simulated streaming API response render token-by-token across a live console.</p>
+    </div>
+    <div class="card term">
+      <div class="term-head">
+        <div class="tabbtns">
+          <button class="tab act" data-lang="ts" onclick="setLang('ts',this)">TypeScript</button>
+          <button class="tab" data-lang="py" onclick="setLang('py',this)">Python</button>
+          <button class="tab" data-lang="curl" onclick="setLang('curl',this)">cURL</button>
+        </div>
+        <button class="run-pill" onclick="runPrompt()">▸ Run Prompt</button>
+      </div>
+      <div class="term-body">
+        <div class="codebox"><pre id="codeview"></pre></div>
+        <div class="console" id="console"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== calculator ===== -->
+<section class="sec" id="calculator">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-tag">/* 03 · economics */</div>
+      <h2>Token Cost &amp; Scale Calculator</h2>
+      <p>Drag the monthly call volume and watch tradeoffs between a rigid API pattern and SYNAPSE's cached, tool-routed orchestration update in real time.</p>
+    </div>
+    <div class="card calc">
+      <div class="calc-side">
+        <div class="ctl">
+          <div class="c-label">MONTHLY CALLS <b id="callsVal">120,000</b></div>
+          <input type="range" id="callsRange" min="5" max="2000" step="5" value="120" oninput="updateCost()">
+        </div>
+        <div class="ctl" style="margin-top:24px">
+          <div class="c-label">TOKENS / CALL <b id="tokVal">1,200</b></div>
+          <input type="range" id="tokRange" min="100" max="5000" step="100" value="1200" oninput="updateCost()">
+        </div>
+        <div class="std-cost">
+          <div><div class="l">NAIVE API PATTERN</div><div class="v" id="stdCost" style="color:var(--red)">$1,440</div></div>
+          <div style="text-align:right"><div class="l">SYNAPSE ORCHESTRATED</div><div class="v" id="synCost" style="color:var(--green)">$432</div></div>
+        </div>
+        <div class="save-banner" id="saveBanner">NET SAVINGS ▼ 70%</div>
+      </div>
+      <div class="graph-side">
+        <h4>LATENCY × THROUGHPUT · SVG</h4>
+        <svg id="latGraph" viewBox="0 0 300 220" width="100%" style="flex:1"></svg>
+        <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.68rem;color:var(--dim)">
+          <span>P50 11ms</span><span>P95 34ms</span><span>P99 61ms</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== how / cta ===== -->
+<section class="sec" id="how">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-tag">/* 04 · architecture */</div>
+      <h2>Why teams route through SYNAPSE</h2>
+      <p>One contract between your app and every agent, model, and tool in your stack.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="n">01</div><b>Single gateway</b><p>Prompt, route, and policy live behind one stable endpoint.</p></div>
+      <div class="step"><div class="n">02</div><b>Tool routing</b><p>Function calls resolve to the fastest available executor automatically.</p></div>
+      <div class="step"><div class="n">03</div><b>Cached reasoning</b><p>Repeated sub-tasks reuse cached traces, cutting spend up to 70%.</p></div>
+      <div class="step"><div class="n">04</div><b>Observable by default</b><p>Every hop emits a trace — latency, tokens, and cost in one view.</p></div>
+    </div>
+    <div class="card feat" style="margin-top:30px">
+      <div style="padding:30px">
+        <h3>Built for iPad demo velocity</h3>
+        <p>Tap through the full loop — build a graph, run the prompt, and watch cost converge — with nothing but a browser.</p>
+        <div class="feature-list">
+          <div class="fi"><div class="ico">◉</div><div><b>Router health</b><span>Load-balances across model pools by latency band.</span></div></div>
+          <div class="fi"><div class="ico">⎇</div><div><b>Zero-latency toolspool</b><span>120+ connectors hot-wired to the executor graph.</span></div></div>
+          <div class="fi"><div class="ico">⌑</div><div><b>Least-privilege perms</b><span>Every node runs with scoped credentials.</span></div></div>
+        </div>
+      </div>
+      <div class="card" style="border:1px dashed var(--line2);box-shadow:none;margin:20px;display:flex;flex-direction:column;justify-content:center;align-items:center">
+        <div class="big-number" id="savedNum">70%</div>
+        <div class="big-small">AVERAGE SPEND REDUCTION</div>
+        <div style="margin-top:18px"><button class="btn primary" onclick="updateCost()">Recalc</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== capabilities ===== -->
+<section class="sec" id="capabilities">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-tag">/* 05 · capabilities */</div>
+      <h2>Engine room, at a glance</h2>
+      <p>Every subsystem is a live, observable unit — metrics shown are from the shared SYNAPSE demo pool.</p>
+    </div>
+    <div class="status-grid">
+      <div class="status-card" style="--sc:#39c5ff"><div class="sc-head"><div class="sc-badge">RT</div><h3>Adaptive router</h3></div><p class="desc">Steers each prompt to the cheapest model that meets the quality bar, per latency band.</p><div class="stat"><span class="k">EVAL / PROMPT</span><span class="v">2.1 ms</span></div></div>
+      <div class="status-card" style="--sc:#2fe89a"><div class="sc-head"><div class="sc-badge">TC</div><h3>Tool executor</h3></div><p class="desc">120+ connectors resolve function calls to the fastest idle executor with scoped creds.</p><div class="stat"><span class="k">HOT POOL</span><span class="v">120→144</span></div></div>
+      <div class="status-card" style="--sc:#a78bfa"><div class="sc-head"><div class="sc-badge">RA</div><h3>Retrieval store</h3></div><p class="desc">Vector-backed memory and trace cache that powers the 70% reasoning reuse.</p><div class="stat"><span class="k">HIT RATE</span><span class="v">91.4%</span></div></div>
+      <div class="status-card" style="--sc:#fbbf24"><div class="sc-head"><div class="sc-badge">TR</div><h3>Trace pipeline</h3></div><p class="desc">Every hop emits a span — tokens, latency, and cost glued into one request trace.</p><div class="stat"><span class="k">SPANS / MIN</span><span class="v">48.2k</span></div></div>
+      <div class="status-card" style="--sc:#f87171"><div class="sc-head"><div class="sc-badge">RB</div><h3>Rate &amp; quota</h3></div><p class="desc">Per-key budgets, concurrency caps, and circuit breakers keep one tenant safe from another.</p><div class="stat"><span class="k">ACTIVE KEYS</span><span class="v">2,314</span></div></div>
+      <div class="status-card" style="--sc:#39c5ff"><div class="sc-head"><div class="sc-badge">EV</div><h3>Eval harness</h3></div><p class="desc">Automated quality gates score every model candidate before it graduates to production.</p><div class="stat"><span class="k">SUITES</span><span class="v">37</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== plans ===== -->
+<section class="sec" id="plans">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-tag">/* 06 · pricing */</div>
+      <h2>Scale from one agent to a hundred</h2>
+      <p>Transparent per-message pricing. No seat fees, no hidden egress — cancel anytime.</p>
+    </div>
+    <div class="plans">
+      <div class="plan">
+        <div class="pl-tag">STARTER</div>
+        <div class="pl-name">DEV</div>
+        <div class="pl-price">$0<small>/mo</small></div>
+        <p class="pl-desc">For prototypes and local iPads demos.</p>
+        <ul class="pl-feats">
+          <li><span class="ck">✓</span> 10k messages / mo</li>
+          <li><span class="ck">✓</span> 3 active agents</li>
+          <li><span class="ck">✓</span> Sandbox tool pool</li>
+          <li><span class="no">—</span> Custom model routing</li>
+        </ul>
+        <button class="btn" onclick="openPalette()">Start free</button>
+      </div>
+      <div class="plan popular">
+        <div class="pl-tag">MOST POPULAR</div>
+        <div class="pl-name">TEAM</div>
+        <div class="pl-price">$49<small>/mo</small></div>
+        <p class="pl-desc">For production agents that must stay online.</p>
+        <ul class="pl-feats">
+          <li><span class="ck">✓</span> 500k messages / mo</li>
+          <li><span class="ck">✓</span> 25 active agents</li>
+          <li><span class="ck">✓</span> Full tool connectors</li>
+          <li><span class="ck">✓</span> Custom model routing</li>
+        </ul>
+        <button class="btn primary" onclick="openPalette()">Choose Team</button>
+      </div>
+      <div class="plan">
+        <div class="pl-tag">ENTERPRISE</div>
+        <div class="pl-name">SCALE</div>
+        <div class="pl-price">$299<small>/mo</small></div>
+        <p class="pl-desc">For fleets that need governance and the rest.</p>
+        <ul class="pl-feats">
+          <li><span class="ck">✓</span> Unlimited messages</li>
+          <li><span class="ck">✓</span> Unlimited agents</li>
+          <li><span class="ck">✓</span> Private model hosts</li>
+          <li><span class="ck">✓</span> SSO &amp; audit logs</li>
+        </ul>
+        <button class="btn" onclick="openPalette()">Talk to sales</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== integrations ===== -->
+<section class="sec" id="integrations">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-tag">/* 07 · stack */</div>
+      <h2>Drop into any stack</h2>
+      <p>A first-party SDK plus two dozen native connectors, all behind one gateway.</p>
+    </div>
+    <div class="int-grid">
+      <div class="int-card" style="--il:#2fe89a"><div class="int-logo">TS</div><div><b>TypeScript</b><span>SDK v3.2.1</span></div><span class="int-live"><span class="pulse sm"></span>LIVE</span></div>
+      <div class="int-card" style="--il:#39c5ff"><div class="int-logo">PY</div><div><b>Python</b><span>SDK v3.2.0</span></div><span class="int-live"><span class="pulse sm"></span>LIVE</span></div>
+      <div class="int-card" style="--il:#fbbf24"><div class="int-logo">REST</div><div><b>REST API</b><span>v1 /v1/run</span></div><span class="int-live"><span class="pulse sm"></span>LIVE</span></div>
+      <div class="int-card" style="--il:#f87171"><div class="int-logo">GO</div><div><b>Go</b><span>SDK v2.9.4</span></div><span class="int-live"><span class="pulse sm"></span>LIVE</span></div>
+      <div class="int-card" style="--il:#a78bfa"><div class="int-logo">KV</div><div><b>Redis</b><span>trace cache</span></div><span class="int-live"><span class="pulse sm"></span>LIVE</span></div>
+      <div class="int-card" style="--il:#2fe89a"><div class="int-logo">PG</div><div><b>Postgres</b><span>state store</span></div><span class="int-live"><span class="pulse sm"></span>LIVE</span></div>
+      <div class="int-card" style="--il:#39c5ff"><div class="int-logo">OT</div><div><b>OpenTelemetry</b><span>tracing</span></div><span class="int-live"><span class="pulse sm"></span>LIVE</span></div>
+      <div class="int-card" style="--il:#fbbf24"><div class="int-logo">GH</div><div><b>GitHub</b><span>CI deploy</span></div><span class="int-live"><span class="pulse sm"></span>LIVE</span></div>
+      <div class="int-card" style="--il:#2fe89a"><div class="int-logo">SL</div><div><b>Slack</b><span>channel agent</span></div><span class="int-live"><span class="pulse sm"></span>LIVE</span></div>
+      <div class="int-card" style="--il:#a78bfa"><div class="int-logo">SF</div><div><b>Stripe</b><span>billing webhook</span></div><span class="int-live"><span class="pulse sm"></span>LIVE</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== testimonials ===== -->
+<section class="sec" id="customers">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-tag">/* 08 · signals */</div>
+      <h2>Engineers who route through us</h2>
+      <p>Real latency and spend numbers from teams running agents in production.</p>
+    </div>
+    <div class="testi-grid">
+      <div class="testi"><p class="q">We cut <span class="hl">latency 4×</span> overnight. The router just knows which model to hit before the user feels the spinner.</p><div class="who"><div class="avatar" style="--av:#39c5ff">AJ</div><div><b>Ana J.</b><span>Platform · Northwind</span></div><span class="stars">★★★★★</span></div></div>
+      <div class="testi"><p class="q">The trace pipeline sold it. Every failure is a <span class="hl">clickable hop</span>, not a pile of log grep.</p><div class="who"><div class="avatar" style="--av:#2fe89a">MR</div><div><b>Marcus R.</b><span>Infra · Helio</span></div><span class="stars">★★★★★</span></div></div>
+      <div class="testi"><p class="q">Seventy percent off our bill sounds fake. <span class="hl">It is real.</span> The cache reuse alone paid for the year.</p><div class="who"><div class="avatar" style="--av:#a78bfa">PK</div><div><b>Priya K.</b><span>ML · Vantage</span></div><span class="stars">★★★★★</span></div></div>
+      <div class="testi"><p class="q">We ship new tools with a <span class="hl">24-hour</span> SLA and let least-privilege creds do the worrying.</p><div class="who"><div class="avatar" style="--av:#fbbf24">DC</div><div><b>Dana C.</b><span>Security · Corva</span></div><span class="stars">★★★★☆</span></div></div>
+      <div class="testi"><p class="q">The iPad demo is our whole sales deck. Build a graph, stream a prompt, <span class="hl">watch the savings pop.</span></p><div class="who"><div class="avatar" style="--av:#f87171">TW</div><div><b>Terry W.</b><span>GTM · Lithos</span></div><span class="stars">★★★★★</span></div></div>
+      <div class="testi"><p class="q">Best-in-class evals. A candidate model has to <span class="hl">beat 37 suites</span> before it ever touches prod.</p><div class="who"><div class="avatar" style="--av:#39c5ff">EB</div><div><b>Elif B.</b><span>Research · Northwind</span></div><span class="stars">★★★★★</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== api ===== -->
+<section class="sec" id="api">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-tag">/* 09 · reference */</div>
+      <h2>One REST contract, everything</h2>
+      <p>Prompts, traces, keys, and spend all live under a single base URL. Full OpenAPI in the docs.</p>
+    </div>
+    <div class="api">
+      <div class="api-row"><span class="method get">GET</span><span class="path">/v1/agents <span class="p">/:id</span></span><span class="desc">200 · 11ms</span></div>
+      <div class="api-row"><span class="method post">POST</span><span class="path">/v1/run <span class="p">{ prompt, model }</span></span><span class="desc">202 · stream</span></div>
+      <div class="api-row"><span class="method get">GET</span><span class="path">/v1/traces?trace=<span class="p">:id</span></span><span class="desc">200 · hops</span></div>
+      <div class="api-row"><span class="method post">POST</span><span class="path">/v1/keys</span><span class="desc">201 · scoped</span></div>
+      <div class="api-row"><span class="method del">DEL</span><span class="path">/v1/keys/<span class="p">:id</span></span><span class="desc">204 · revoked</span></div>
+      <div class="api-row"><span class="method get">GET</span><span class="path">/v1/billing/usage</span><span class="desc">200 · tokens</span></div>
+    </div>
+    <div class="api-foot"><span>base: <span style="color:var(--text)">api.synapse.dev</span></span><span>auth: Bearer</span><span>p99: 61ms</span><span>docs: <a href="#" style="color:var(--cyan)">/reference</a></span></div>
+  </div>
+</section>
+
+<footer>
+  <div class="glow-orb" style="bottom:-200px;left:50%;transform:translateX(-50%);background:#a78bfa"></div>
+  <div class="wrap">
+    <div class="brand" style="justify-content:center"><span class="syn-mark">S</span>SYNAPSE</div>
+    <div class="foot-links">
+      <a href="#builder">Builder</a><a href="#playground">Playground</a><a href="#calculator">Scale</a><a href="#capabilities">Capabilities</a><a href="#plans">Pricing</a><a href="#integrations">Stack</a><a href="#customers">Customers</a><a href="#api">API</a>
+    </div>
+    <div class="muted">© 2026 SYNAPSE AGENT SYSTEMS · <span style="color:var(--green)">● all systems operational</span></div>
+  </div>
+</footer>
+
+<!-- ===== command palette ===== -->
+<div class="palette-backdrop" id="palette" onclick="if(event.target===this)closePalette()">
+  <div class="palette">
+    <div class="pal-input">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9a9a9a" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="palInput" placeholder="Search workflows, keys, logs…" oninput="filterPal()" onkeydown="palKey(event)">
+    </div>
+    <div class="pal-results" id="palResults"></div>
+    <div class="pal-foot"><span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>↵</kbd> select</span><span><kbd>esc</kbd> close</span></div>
+  </div>
+</div>
+
+<script>
+/* ================= workflow builder ================= */
+const canvas=document.getElementById('wfCanvas'), ctx=canvas.getContext('2d');
+let nodes=[], edges=[], sel=-1, dfs=null, anim=0, flowMode='production';
+
+const templates={
+  production:[
+    {id:0,label:'User Prompt',icon:'u',x:80,y:180},
+    {id:1,label:'Router',icon:'R',x:240,y:120},
+    {id:2,label:'LLM Engine',icon:'L',x:400,y:180},
+    {id:3,label:'Tool Call',icon:'T',x:560,y:110},
+    {id:4,label:'Tool Result',icon:'r',x:560,y:270},
+    {id:5,label:'Final Payload',icon:'✓',x:720,y:180}
+  ],
+  research:[
+    {id:0,label:'Query',icon:'q',x:80,y:180},
+    {id:1,label:'Planner',icon:'P',x:240,y:120},
+    {id:2,label:'Search Agent',icon:'S',x:400,y:110},
+    {id:3,label:'Summarizer',icon:'s',x:400,y:260},
+    {id:4,label:'Critic',icon:'C',x:560,y:180},
+    {id:5,label:'Report',icon:'✓',x:720,y:180}
+  ]
+};
+const edgesProd=[[0,1],[1,2],[2,3],[2,4],[3,5],[4,5]];
+const edgesResearch=[[0,1],[1,2],[1,3],[2,4],[3,4],[4,5]];
+
+function resizeCanvas(){
+  const r=canvas.getBoundingClientRect();
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=r.width*dpr; canvas.height=r.height*dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+function setFlow(mode,el){
+  flowMode=mode;
+  document.querySelectorAll('.tool').forEach(t=>t.classList.remove('active'));
+  if(el)el.classList.add('active');
+  nodes=JSON.parse(JSON.stringify(templates[mode]));
+  edges= mode==='production'? JSON.parse(JSON.stringify(edgesProd)):JSON.parse(JSON.stringify(edgesResearch));
+  sel=-1; dfs=null;
+  resizeCanvas(); draw();
+}
+function runFlow(el){
+  document.querySelectorAll('.tool').forEach(t=>t.classList.remove('active'));
+  if(el)el.classList.add('active');
+  dfs=-1; anim=0;
+}
+function draw(){
+  resizeCanvas();
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  edges.forEach(e=>{
+    const a=nodes[e[0]], b=nodes[e[1]], hot=(e[0]===dfs||e[1]===dfs);
+    ctx.beginPath();
+    const sx=a.x+70, sy=a.y+30, ex=b.x, ey=b.y+30;
+    const mx=(sx+ex)/2;
+    ctx.moveTo(sx,sy); ctx.bezierCurveTo(mx,sy,mx,ey,ex,ey);
+    ctx.strokeStyle= hot? 'rgba(57,197,255,.95)':'rgba(255,255,255,.13)';
+    ctx.lineWidth= hot? 2.5:1.2;
+    ctx.shadowBlur= hot? 14:0;
+    ctx.shadowColor='#39c5ff';
+    ctx.stroke();
+    ctx.shadowBlur=0;
+    if(hot){
+      const t=((anim/100)%1);
+      const px=bez(0,1,t), py0=bez(0,sy,t);
+      /* small moving pulse dot */
+      ctx.beginPath(); ctx.arc(px,py0,4,0,7); ctx.fillStyle='#fff'; ctx.fill();
+    }
+  });
+  nodes.forEach((n,i)=>{
+    const act=(i===sel)||(i===dfs);
+    const w=140, h=60;
+    /* glow */
+    ctx.shadowBlur= act?26:0; ctx.shadowColor= act?'#39c5ff':'transparent';
+    ctx.fillStyle= act? '#1a2028':'#0d0d0d';
+    roundRect(n.x,n.y,w,h,10);
+    ctx.fill();
+    ctx.shadowBlur=0;
+    ctx.strokeStyle= act? 'rgba(57,197,255,.9)':'rgba(255,255,255,.15)';
+    ctx.lineWidth=1;
+    roundRect(n.x,n.y,w,h,10);
+    ctx.stroke();
+    /* icon */
+    ctx.font='600 18px JetBrains Mono,monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillStyle= act?'#39c5ff':'#9a9a9a';
+    ctx.fillText(n.icon,n.x+26,n.y+30);
+    /* label */
+    ctx.font='600 12px Inter,sans-serif'; ctx.fillStyle='#f5f5f5'; ctx.textAlign='left';
+    ctx.fillText(n.label,n.x+44,n.y+24);
+    ctx.font='9px JetBrains Mono,monospace'; ctx.fillStyle= act?'#39c5ff':'#6a6a6a';
+    ctx.fillText('node:'+i,n.x+44,n.y+42);
+    ctx.textAlign='center';
+    /* id chip */
+    drawPort(n,i);
+  });
+}
+function bez(p0,p1,t){return p0+(p1-p0)*t}
+function drawPort(n,i){
+  ctx.beginPath(); ctx.arc(n.x+70,n.y+30,4,0,7);
+  ctx.fillStyle= i===dfs?'#2fe89a':'rgba(255,255,255,.35)'; ctx.fill();
+}
+function roundRect(x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+}
+function hitNode(px,py){
+  for(let i=nodes.length-1;i>=0;i--){const n=nodes[i];if(px>=n.x&&px<=n.x+140&&py>=n.y&&py<=n.y+60)return i;}
+  return -1;
+}
+function canvasPos(ev){
+  const r=canvas.getBoundingClientRect();
+  return {x:ev.clientX-r.left, y:ev.clientY-r.top};
+}
+canvas.addEventListener('pointerdown',e=>{
+  const p=canvasPos(e); const i=hitNode(p.x,p.y);
+  sel=i; dragging=true; dragOff={x:p.x-(i>=0?nodes[i].x:0),y:p.y-(i>=0?nodes[i].y:0)};
+  draw();
+});
+let dragging=false, dragOff={x:0,y:0};
+canvas.addEventListener('pointermove',e=>{
+  const p=canvasPos(e);
+  if(dragging&&sel>=0){nodes[sel].x=p.x-dragOff.x; nodes[sel].y=p.y-dragOff.y; draw();}
+});
+canvas.addEventListener('pointerup',()=>{dragging=false;});
+
+function drawLoop(){ anim+=0.5; if(dfs>=0) draw(); requestAnimationFrame(drawLoop);}
+requestAnimationFrame(function sim(){
+  // simulated active-path walker through the graph
+  if(dfs>=0){
+    // advance along current path
+    const path=flowMode==='production'?[0,1,2,3,5]:[0,1,2,4,5];
+    const next=(dfs+1)%path.length;
+    setTimeout(()=>{ dfs=path[next]; }, 380);
+  }
+  requestAnimationFrame(sim);
+});
+
+/* ================= terminal playground ================= */
+let lang='ts', running=false;
+const code={
+ts:`// synapse - typescript client\nimport { Synapse } from '@synapse/agent';\n\nconst agent = new Synapse({\n  apiKey: process.env.SYNAPSE_KEY,\n  region: 'us-west-2',\n});\n\nconst resp = await agent.run({\n  prompt: 'summarize the q3\n    pipeline report',\n  model: 'orchestrator-lite',\n  maxTokens: 1024,\n});\n\nconsole.log(resp.trace.durationMs);`,
+py:`# synapse - python sdk\nfrom synapse import Agent\n\nagent = Agent(\n    api_key=os.environ["SYNAPSE_KEY"],\n    region="us-west-2",\n)\n\nresp = agent.run(\n    prompt="summarize the q3\n     pipeline report",\n    model="orchestrator-lite",\n    max_tokens=1024,\n)\n\nprint(resp.trace.duration_ms)`,
+curl:`# synapse - rest api\ncurl -X POST https://api.synapse.dev/v1/run \\\n  -H "Authorization: Bearer $SYNAPSE_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "prompt": "summarize the q3\n      pipeline report",\n    "model": "orchestrator-lite",\n    "max_tokens": 1024\n  }'`
+};
+const response=`{ "ok": true, "agent": "orchestrator-lite", "tokens": 812, "tool_calls": 3, "duration_ms": 2048, "trace": [ { "hop": "router", "ms": 11 }, { "hop": "llm", "ms": 1810 }, { "hop": "tool.search", "ms": 214 }, { "hop": "compose", "ms": 13 } ], "content": "Q3 revenue rose 34% QoQ. Tool routing resolved 3 calls in 214ms; cached trace reused 70% of tokens. Recommend region failover west->east." }`;
+const streamBits=[
+  '$ synapse run --prompt "q3 report"','→ POST /v1/run 200 ok',
+  '→ router: resolved pool [orca-lite] p50=11ms','→ llm: streaming 812 tokens @ 1.7k tok/s',
+  '→ tool.search: hit cached trace (70% reuse)','→ tool.search: 3 calls · 214ms',
+  '→ compose: final payload 4.2kb','',
+  response,'','✓ done in 2048ms · 3 tool calls']
+
+function setLang(l,btn){
+  lang=l;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('act'));
+  if(btn)btn.classList.add('act');
+  renderCode(l);
+}
+function renderCode(l){
+  const raw=code[l];
+  document.getElementById('codeview').innerHTML=highlight(raw);
+}
+function highlight(src){
+  return src.replace(/(&)/g,'&amp;').replace(/(<)/g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/(\/\/.*$|\/\*[\s\S]*?\*\/|#.*$)/gm,'<span class="tok-c">$1</span>')
+    .replace(/('[^']*'|"[^"]*")/g,'<span class="tok-s">$1</span>')
+    .replace(/\b(const|import|from|function|return|await|new|async|curl|POST|let|export|type|class)\b/g,'<span class="tok-k">$1</span>');
+}
+function runPrompt(){
+  if(running)return; running=true;
+  const con=document.getElementById('console'); con.innerHTML='<span class="inf">■</span> synapse <span class="dim">session started…</span>\n';
+  let i=0;
+  const tick=()=>{
+    if(i>=streamBits.length){running=false; return;}
+    const line=streamBits[i];
+    const wrap=document.createElement('div');
+    wrap.className='ln';
+    let cls='dim';
+    if(line.includes('200 ok')||line.startsWith('{'))cls='ok';
+    else if(line.includes('→')&&!line.includes('cached'))cls='inf';
+    else if(line.includes('cached'))cls='dim';
+    wrap.innerHTML=(line.startsWith('{')?'':'> ')+line;
+    if(cls!=='dim')wrap.classList.add(cls);
+    con.appendChild(wrap);
+    con.scrollTop=con.scrollHeight;
+    i++;
+    // streaming tail
+    if(line.startsWith('{')){ typeJSON(con, wrap); return; }
+    setTimeout(tick, line?90:260);
+  };
+  tick();
+}
+function typeJSON(con,wrap){
+  const full=streamBits[streamBits.length-1];
+  let j=0; wrap.textContent='';
+  const tj=()=>{
+    if(j<=full.length){ wrap.textContent=full.slice(0,j); con.scrollTop=con.scrollHeight; j+=3; setTimeout(tj,1); }
+    else { wrap.classList.add('ok'); setTimeout(()=>{con.appendChild(document.createElement('div')).innerHTML='<span class="inf">✓ done</span>'; running=false;},200); }
+  };
+  tj();
+}
+renderCode('ts');
+
+/* ================= cost calculator ================= */
+const PRICE_IN=3, PRICE_OUT=15; // $ per 1M tokens
+function fmt(n){return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1000?Math.round(n).toLocaleString():String(Math.round(n));}
+function updateCost(){
+  const calls=+document.getElementById('callsRange').value*1000; // to monthly count
+  const toks=+document.getElementById('tokRange').value;
+  document.getElementById('callsVal').textContent=calls.toLocaleString();
+  document.getElementById('tokVal').textContent=toks.toLocaleString();
+  // naive: every call pays full in+out, no caching
+  const naivePer=(toks*3 + toks*15)/1e6, naive=calls*naivePer;
+  // synapse: 70% input cache reuse, 70% output trim via tool routing
+  const synPer=(toks*0.3*3 + toks*0.3*15)/1e6, syn=calls*synPer;
+  const save=Math.round((1-syn/naive)*100);
+  document.getElementById('stdCost').textContent='$'+Math.round(naive).toLocaleString();
+  document.getElementById('synCost').textContent='$'+Math.round(syn).toLocaleString();
+  document.getElementById('saveBanner').textContent='NET SAVINGS ▼ '+save+'%';
+  if(document.getElementById('savedNum'))document.getElementById('savedNum').textContent=save+'%';
+  drawGraph(calls,toks);
+}
+function drawGraph(calls,toks){
+  const svg=document.getElementById('latGraph'); svg.innerHTML='';
+  const W=300,H=220,pad=22;
+  const ns=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  ns.setAttribute('viewBox','0 0 '+W+' '+H);
+  // naive latency curve grows with load
+  const points=[[],[]];
+  const steps=12;
+  for(let i=0;i<steps;i++){
+    const load=(i/(steps-1))*calls;
+    const naive=10+ (load/2e6)*120 + Math.sin(i)*3;   // rising
+    const syn=8 + (load/2e6)*14 + Math.sin(i)*1.5;    // flat+
+    points[0].push([pad+i*((W-2*pad)/(steps-1)), H-pad-((naive-5)/(95))*160]);
+    points[1].push([pad+i*((W-2*pad)/(steps-1)), H-pad-((syn-5)/(95))*160]);
+  }
+  drawCurve(ns,points[1],'#2fe89a'); // synapse (lower)
+  drawCurve(ns,points[0],'#f87171'); // naive (higher)
+  // labels
+  const txt=(x,y,s,c)=>{const t=document.createElementNS('http://www.w3.org/2000/svg','text');t.setAttribute('x',x);t.setAttribute('y',y);t.setAttribute('fill',c);t.setAttribute('font-family','JetBrains Mono,monospace');t.setAttribute('font-size','9');t.textContent=s;ns.appendChild(t);};
+  txt(12,16,'naive', '#f87171'); txt(12,28,'synapse','#2fe89a');
+  svg.appendChild(ns);
+}
+function drawCurve(ns,pts,col){
+  if(!pts.length)return;
+  let d='M'+pts[0][0]+','+pts[0][1];
+  for(let i=1;i<pts.length;i++){const p=pts[i-1],c=pts[i];d+=' C'+(p[0]+(c[0]-p[0])/2)+','+p[1]+' '+(p[0]+(c[0]-p[0])/2)+','+c[1]+' '+c[0]+','+c[1];}
+  const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+  p.setAttribute('d',d); p.setAttribute('fill','none'); p.setAttribute('stroke',col);
+  p.setAttribute('stroke-width','2'); p.setAttribute('stroke-linecap','round'); ns.appendChild(p);
+  /* glow duplicate */
+  const g=p.cloneNode(); g.setAttribute('stroke-opacity','.25'); g.setAttribute('stroke-width','6');
+  ns.insertBefore(g,ns.firstChild);
+}
+updateCost();
+
+/* ================= command palette ================= */
+const items=[
+  {t:'Run production workflow',s:'workflow / production-route',k:'workflow',ico:'▶',act:'opendrawer'},
+  {t:'Run research workflow',s:'workflow / research-route',k:'workflow',ico:'▶',act:'opendrawer'},
+  {t:'Create API key',s:'settings / keys',k:'key',ico:'·K·',act:'palToast'},
+  {t:'Rotate auth token',s:'settings / keys',k:'key',ico:'⟳',act:'palToast'},
+  {t:'View live logs',s:'observe / stream',k:'log',ico:'≡',act:'palToast'},
+  {t:'Trace failed request',s:'observe / traces',k:'log',ico:'⌕',act:'palToast'},
+  {t:'View spend report',s:'observe / billing',k:'report',ico:'▦',act:'palToast'},
+  {t:'Deploy edge region',s:'ops / regions',k:'ops',ico:'▲',act:'palToast'},
+  {t:'Scale agent pool',s:'ops / autoscale',k:'ops',ico:'↗',act:'palToast'},
+  {t:'Open docs',s:'learn / reference',k:'help',ico:'?',act:'docs'}
+];
+let palIdx=0;
+function openPalette(){
+  document.getElementById('palette').classList.add('open');
+  const inp=document.getElementById('palInput'); inp.value=''; palIdx=0;
+  setTimeout(()=>inp.focus(),20); renderPal(items);
+}
+function closePalette(){document.getElementById('palette').classList.remove('open');}
+function filterPal(){
+  const q=document.getElementById('palInput').value.toLowerCase();
+  renderPal(items.filter(i=>i.t.toLowerCase().includes(q)||i.s.toLowerCase().includes(q)||i.k.includes(q)));
+}
+function renderPal(list){
+  const box=document.getElementById('palResults'); box.innerHTML='';
+  if(!list.length){box.innerHTML='<div class="pal-empty">no results for that query</div>';return;}
+  list.forEach((it,i)=>{
+    const d=document.createElement('div');
+    d.className='pal-item'+(i===palIdx?' sel':'');
+    d.innerHTML='<div class="p-ico">'+it.ico+'</div><div><div class="p-title">'+it.t+'</div><div class="p-sub">'+it.s+'</div></div><div class="p-kind">'+it.k.toUpperCase()+'</div>';
+    d.onclick=()=>choose(it);
+    box.appendChild(d);
+  });
+  palList=list;
+}
+let palList=[];
+function palKey(e){
+  if(e.key==='Escape')closePalette();
+  else if(e.key==='ArrowDown'){e.preventDefault();palIdx=Math.min(palIdx+1,palList.length-1);renderPal(palList);}
+  else if(e.key==='ArrowUp'){e.preventDefault();palIdx=Math.max(palIdx-1,0);renderPal(palList);}
+  else if(e.key==='Enter'){choose(palList[palIdx]);}
+}
+function choose(it){
+  closePalette();
+  if(it.act==='opendrawer')setFlow(flowMode);
+  else if(it.act==='docs')window.open('https://opencode.ai','_blank');
+  else if(it.act==='palToast'){const t=document.createElement('div');t.textContent='✓ '+it.t+' · simulated';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:99;background:#0c0c0c;border:1px solid rgba(47,232,154,.4);color:var(--green);font-family:JetBrains Mono,monospace;font-size:.8rem;padding:10px 18px;border-radius:8px';document.body.appendChild(t);setTimeout(()=>t.remove(),2200);}
+}
+document.addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openPalette();}
+});
+
+/* ================= micro-effects ================= */
+const glow=document.getElementById('radialGlow');
+document.addEventListener('pointermove',e=>{
+  glow.style.left=e.clientX+'px'; glow.style.top=e.clientY+'px';
+});
+function runDemo(){setFlow('production');setLang('ts');document.getElementById('builder').scrollIntoView({behavior:'smooth'});setTimeout(runPrompt,900);}
+
+window.addEventListener('resize',()=>{resizeCanvas();}); 
+resizeCanvas(); setFlow('production');
+</script>
+</body>
+</html>

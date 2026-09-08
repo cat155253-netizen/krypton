@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valérian — Alpine Residence & Booking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/Matterhorn_sunset_2016_%28Unsplash%29.jpg/1600px-Matterhorn_sunset_2016_%28Unsplash%29.jpg">
+<style>
+:root{
+  --alabaster:#F9F9F9;
+  --ink:#111111;
+  --ink2:#5B5954;
+  --muted:#8C8A83;
+  --pine:#1A3622;
+  --pine2:#2A4A33;
+  --sage:#86A793;
+  --sage2:#5F8068;
+  --mint:#E4EFE2;
+  --mint2:#F2F7F0;
+  --gold:#B39A63;
+  --line:rgba(17,17,17,.12);
+  --lineL:rgba(17,17,17,.06);
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'Montserrat',system-ui,sans-serif;
+  --pastel:linear-gradient(135deg,#EEF5EC 0%,#F6F9F2 40%,#EDF4EA 100%);
+  --shadow:0 30px 70px -30px rgba(22,48,30,.35);
+  --r:26px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--alabaster);
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:1.06rem;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+img{display:block;max-width:100%}
+a{color:inherit}
+button{font-family:var(--sans);cursor:pointer}
+.wrap{max-width:1280px;margin:0 auto;padding:0 clamp(22px,5vw,64px)}
+.eyebrow,.kickersmall{font-family:var(--sans);font-weight:600;font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--sage2)}
+h1,h2,h3{font-family:var(--serif);font-weight:300;color:var(--ink);line-height:1}
+/* ---------- header ---------- */
+#nav{position:fixed;top:0;left:0;right:0;z-index:60;transition:.35s}
+#nav .inner{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:20px clamp(22px,5vw,64px);transition:.35s}
+#nav.glass .inner{background:rgba(249,249,249,.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--lineL);padding-top:14px;padding-bottom:14px}
+.logo{font-family:var(--sans);font-weight:600;font-size:.82rem;letter-spacing:.42em;color:var(--alabaster);text-decoration:none;line-height:1}
+.logo em{font-family:var(--serif);font-style:italic;font-weight:500;letter-spacing:.04em}
+#nav.glass .logo{color:var(--ink)}
+.nav-links{display:flex;gap:34px;align-items:center}
+.nav-links a{font-family:var(--sans);font-size:.62rem;font-weight:600;letter-spacing:.26em;text-transform:uppercase;text-decoration:none;color:var(--alabaster);opacity:.85;transition:.25s;position:relative}
+.nav-links a::after{content:"";position:absolute;left:0;bottom:-6px;width:0;height:1px;background:currentColor;transition:.3s}
+.nav-links a:hover::after{width:100%}
+#nav.glass .nav-links a{color:var(--ink)}
+.pill{font-family:var(--sans);font-size:.62rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;border:1px solid rgba(255,255,255,.5);color:var(--alabaster);background:transparent;padding:12px 22px;border-radius:40px;transition:.3s}
+.pill:hover{background:rgba(255,255,255,.14)}
+#nav.glass .pill{color:var(--pine);border-color:rgba(26,54,34,.4)}
+/* ---------- hero ---------- */
+.hero{position:relative;min-height:100svh;display:flex;align-items:flex-end;overflow:hidden;background:#0d130e}
+.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 50%;animation:slowzoom 22s ease-out forwards}
+@keyframes slowzoom{from{transform:scale(1.06)}to{transform:scale(1)}}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(10,16,11,.82) 0%,rgba(10,16,11,.12) 46%,rgba(10,16,11,.34) 100%)}
+.hero-txt{position:relative;z-index:2;color:var(--alabaster);padding:0 0 230px;max-width:860px}
+.eyebrow.wht{color:var(--mint)}
+.hero .eyebrow{display:flex;align-items:center;gap:16px;margin-bottom:26px}
+.hero .eyebrow::before{content:"";width:56px;height:1px;background:var(--mint)}
+.hero h1{font-size:clamp(3rem,7.6vw,6.6rem);font-weight:300;line-height:.98;color:var(--alabaster);margin-bottom:26px}
+.hero h1 em{font-style:italic;font-weight:400;color:#E9F3E7}
+.hero-sub{font-size:clamp(1.15rem,1.7vw,1.45rem);font-weight:400;color:rgba(249,249,249,.82);max-width:52ch;margin-bottom:36px}
+.hero-scroll{font-family:var(--sans);font-size:.6rem;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:rgba(249,249,249,.6);display:flex;align-items:center;gap:14px}
+.hero-scroll::after{content:"";width:1px;height:44px;background:linear-gradient(var(--mint),transparent)}
+/* ---------- glass booking bar ---------- */
+.bookbar-wrap{position:absolute;left:50%;transform:translateX(-50%);bottom:-72px;z-index:10;width:min(1140px,94vw)}
+.bookbar{display:grid;grid-template-columns:1.15fr 1.15fr 1.2fr auto;align-items:stretch;background:rgba(255,255,255,.62);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,.75);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+.bb-field{padding:22px 26px;border-left:1px solid var(--lineL);display:flex;flex-direction:column;justify-content:center;gap:8px;position:relative}
+.bb-field:first-child{border-left:0}
+.bb-field label{font-family:var(--sans);font-size:.58rem;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:var(--sage2)}
+.bb-field input{font-family:var(--serif);font-size:1.14rem;font-weight:500;color:var(--ink);border:0;background:transparent;outline:none;width:100%;padding:2px 0}
+.bb-field .val{font-family:var(--serif);font-size:1.14rem;font-weight:500;color:var(--ink);text-align:left;background:none}
+.bb-unit{font-family:var(--sans);font-size:.72rem;color:var(--ink2)}
+#gbtn{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#gbtn .caret{border-right:1.5px solid var(--pine);border-bottom:1.5px solid var(--pine);width:7px;height:7px;transform:rotate(45deg) translateY(-2px);transition:.3s}
+#gbtn.open .caret{transform:rotate(225deg) translateY(-2px)}
+.btn-avail{align-self:stretch;border:0;background:linear-gradient(135deg,var(--pine) 0%,var(--pine2) 100%);color:#F4F7F3;font-size:.66rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;padding:0 40px;transition:.3s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px}
+.btn-avail:hover{filter:brightness(1.13)}
+.btn-avail small{font-weight:500;font-size:.56rem;letter-spacing:.2em;opacity:.7}
+/* guests popover */
+.gpop{position:absolute;top:calc(100% + 12px);right:16px;left:16px;background:rgba(255,255,255,.96);backdrop-filter:blur(16px);border:1px solid var(--lineL);border-radius:18px;box-shadow:var(--shadow);padding:18px 22px;display:none;z-index:20}
+.gpop.open{display:block;animation:pop .25s ease}
+@keyframes pop{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.grow{display:flex;align-items:center;justify-content:space-between;padding:11px 0}
+.grow + .grow{border-top:1px dashed var(--lineL)}
+.grow .t{font-family:var(--sans);font-size:.6rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--ink)}
+.grow .t small{display:block;font-weight:500;color:var(--muted);letter-spacing:.06em;margin-top:3px}
+.stepper{display:flex;align-items:center;gap:16px}
+.stp{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--pine);font-size:1.05rem;font-weight:500;transition:.2s;display:grid;place-items:center}
+.stp:hover{border-color:var(--pine);background:var(--mint)}
+.stp[disabled]{opacity:.35;pointer-events:none}
+.stval{font-family:var(--serif);font-size:1.3rem;font-weight:500;min-width:22px;text-align:center;color:var(--ink)}
+/* ---------- sections ---------- */
+section{padding:120px 0;position:relative}
+.sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:40px;flex-wrap:wrap;margin-bottom:56px}
+h2{font-size:clamp(2.3rem,4.6vw,3.9rem);letter-spacing:-.01em;line-height:1.02}
+h2 em{font-style:italic;font-weight:400;color:var(--sage2)}
+.quote-intro{padding:200px 0 20px}
+/* residence */
+.res-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(40px,6vw,96px);align-items:center}
+.res-copy p{font-size:clamp(1.2rem,1.9vw,1.6rem);font-weight:400;color:var(--ink);margin-bottom:22px}
+.res-copy p.muted{color:var(--ink2);font-size:1.18rem}
+.res-img{position:relative}
+.res-img img{width:100%;height:520px;object-fit:cover;border-radius:var(--r)}
+.res-img .float{position:absolute;background:rgba(255,255,255,.86);backdrop-filter:blur(12px);border:1px solid var(--lineL);border-radius:16px;padding:16px 22px;box-shadow:var(--shadow)}
+.float b{font-family:var(--serif);font-size:1.7rem;font-weight:500;color:var(--pine)}
+.float span{display:block;font-family:var(--sans);font-size:.56rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+.f1{top:-26px;right:-20px}.f2{bottom:26px;left:-26px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);margin-top:80px;border-top:1px solid var(--line);padding-top:44px;gap:30px}
+.stat .n{font-family:var(--serif);font-size:clamp(2rem,3.6vw,3rem);font-weight:400;color:var(--pine)}
+.stat .n i{color:var(--sage2);font-style:normal}
+.stat .l{font-family:var(--sans);font-size:.58rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+/* rooms */
+#stay,.alt{background:var(--pastel)}
+.filters{display:flex;gap:10px;flex-wrap:wrap}
+.fil{font-family:var(--sans);font-size:.6rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--ink2);background:rgba(255,255,255,.7);border:1px solid var(--lineL);border-radius:40px;padding:12px 22px;transition:.25s}
+.fil:hover{border-color:var(--sage)}
+.fil.on{background:var(--pine);border-color:var(--pine);color:#F4F7F3}
+.room-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px}
+.card{background:rgba(255,255,255,.9);border:1px solid var(--lineL);border-radius:24px;overflow:hidden;transition:.35s;display:flex;flex-direction:column}
+.card:hover{transform:translateY(-6px);box-shadow:var(--shadow)}
+.card.hide{display:none}
+.media{position:relative;height:280px;overflow:hidden;background:#e5eae3}
+.gal{display:flex;height:100%;scroll-snap-type:x mandatory;overflow-x:auto;scrollbar-width:none}
+.gal::-webkit-scrollbar{display:none}
+.gal img{flex:0 0 100%;height:100%;width:100%;object-fit:cover;scroll-snap-align:center}
+.gar{position:absolute;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:50%;border:1px solid var(--lineL);background:rgba(255,255,255,.8);backdrop-filter:blur(8px);color:var(--ink);font-size:1rem;display:grid;place-items:center;opacity:0;transition:.3s}
+.media:hover .gar{opacity:1}
+.gar.l{left:14px}.gar.r{right:14px}
+.gar:hover{background:var(--pine);color:#fff}
+.gad{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:6px}
+.gad i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.55);transition:.25s}
+.gad i.on{background:#fff;transform:scale(1.35)}
+.tag{position:absolute;top:16px;left:16px;font-family:var(--sans);font-size:.55rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;background:rgba(255,255,255,.82);backdrop-filter:blur(8px);color:var(--pine);padding:8px 14px;border-radius:40px;z-index:2}
+.card-body{padding:26px 26px 28px;display:flex;flex-direction:column;flex:1}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:10px}
+.card h3{font-size:1.8rem;font-weight:400;letter-spacing:-.01em}
+.rate{text-align:right;white-space:nowrap}
+.rate b{font-family:var(--serif);font-size:1.45rem;font-weight:500;color:var(--pine)}
+.rate em{display:block;font-family:var(--sans);font-style:normal;font-size:.56rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.card .feat{font-family:var(--sans);font-size:.6rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--sage2);margin-bottom:16px}
+.icons{list-style:none;display:flex;gap:18px;margin-bottom:24px;flex-wrap:wrap}
+.icons li{display:flex;align-items:center;gap:7px;font-family:var(--sans);font-size:.62rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}
+.icons svg{width:15px;height:15px;color:var(--sage2);flex:none}
+.btn{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--pine);border-radius:50px;padding:15px 22px;font-size:.62rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;transition:.3s}
+.btn.solid{background:var(--pine);color:#F4F7F3}
+.btn.solid:hover{background:var(--pine2)}
+.btn.ghost{background:transparent;color:var(--pine)}
+.btn.ghost:hover{background:var(--pine);color:#fff}
+.btn .arr{transition:.3s}
+.btn:hover .arr{transform:translateX(4px)}
+/* experiences */
+.exp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px}
+.exp{border-top:1px solid var(--line);padding-top:30px;transition:.3s}
+.exp:hover{transform:translateY(-6px)}
+.exp .numb{font-family:var(--sans);font-size:.6rem;font-weight:700;letter-spacing:.26em;color:var(--sage2);margin-bottom:22px}
+.exp img{width:100%;height:250px;object-fit:cover;border-radius:18px;margin-bottom:24px}
+.exp h3{font-size:1.7rem;font-weight:400;margin-bottom:10px}
+.exp p{color:var(--ink2);font-size:1.08rem}
+.exp .lnk{display:inline-block;font-family:var(--sans);font-size:.58rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--pine);margin-top:18px;border-bottom:1px solid var(--pine);padding-bottom:4px}
+/* quote band */
+.quote{background:var(--pastel);text-align:center}
+.quote .mark{font-family:var(--serif);font-size:clamp(4rem,8vw,7rem);color:var(--sage);line-height:.4;display:block;margin-bottom:30px}
+blockquote{font-family:var(--serif);font-size:clamp(1.7rem,3.4vw,2.9rem);font-weight:300;line-height:1.25;max-width:24ch;margin:0 auto;font-style:italic}
+blockquote em{color:var(--sage2)}
+.quote cite{display:block;font-family:var(--sans);font-style:normal;font-size:.6rem;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);margin-top:30px}
+/* footer */
+footer{background:#101f14;color:rgba(249,249,249,.85);padding:110px 0 0;position:relative}
+.foot-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:50px;padding-bottom:70px;border-bottom:1px solid rgba(255,255,255,.12)}
+.foot-mark{font-family:var(--serif);font-size:clamp(2.6rem,6vw,4.6rem);font-weight:300;color:#F4F7F3;line-height:1}
+.foot-mark em{color:var(--sage);font-style:italic}
+.foot-mark small{display:block;font-family:var(--sans);font-size:.6rem;font-weight:500;letter-spacing:.3em;text-transform:uppercase;color:rgba(249,249,249,.5);margin-top:14px;line-height:1.8}
+.foot-h{font-family:var(--sans);font-size:.6rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--sage);margin-bottom:22px}
+.foot-col a{display:block;font-family:var(--serif);font-size:1.2rem;color:rgba(249,249,249,.82);text-decoration:none;padding:5px 0;transition:.25s;width:fit-content}
+.foot-col a:hover{color:#fff;padding-left:6px}
+.foot-bot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center;padding:26px 0 34px;font-family:var(--sans);font-size:.6rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:rgba(249,249,249,.45)}
+/* ---------- drawer ---------- */
+#backdrop{position:fixed;inset:0;background:rgba(16,31,20,.45);backdrop-filter:blur(4px);z-index:90;opacity:0;pointer-events:none;transition:.4s}
+#backdrop.on{opacity:1;pointer-events:auto}
+#drawer{position:fixed;top:0;right:0;bottom:0;width:min(540px,100vw);background:#FBFCF9;z-index:100;transform:translateX(105%);transition:transform .45s cubic-bezier(.22,.8,.3,1);display:flex;flex-direction:column;box-shadow:-30px 0 80px -30px rgba(16,31,20,.5)}
+#drawer.on{transform:none}
+.dr-head{border-bottom:1px solid var(--lineL);padding:28px clamp(26px,4vw,40px);position:relative}
+.dr-head .eyebrow{margin-bottom:12px}
+.dr-head h3{font-size:2rem;font-weight:400}
+.dr-head .rate{font-family:var(--sans);font-size:.62rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--sage2);margin-top:6px}
+#drClose{position:absolute;top:22px;right:22px;width:42px;height:42px;border-radius:50%;border:1px solid var(--lineL);background:transparent;font-size:1.3rem;line-height:1;color:var(--ink);transition:.25s}
+#drClose:hover{background:var(--pine);color:#fff;border-color:var(--pine)}
+.dr-progress{padding:20px clamp(26px,4vw,40px) 0}
+.pset{display:flex;gap:0;align-items:flex-start}
+.pstep{flex:1;position:relative;text-align:center}
+.pstep::before{content:"";position:absolute;top:8px;height:2px;background:var(--lineL);left:calc(50% + 9px);right:calc(-50% + 9px)}
+.pstep:first-child::before{display:none}
+.pstep .dot{width:18px;height:18px;margin:0 auto 8px;border-radius:50%;border:2px solid var(--lineL);background:#FBFCF9;position:relative;z-index:1;transition:.3s;display:grid;place-items:center}
+.pstep.on .dot{border-color:var(--pine);background:var(--pine)}
+.pstep.on .dot::after{content:"";width:5px;height:5px;border-radius:50%;background:#fff}
+.pstep.done .dot{border-color:var(--pine);background:var(--pine)}
+.pstep.done .dot::after{content:"\2713";font-family:var(--sans);font-size:.55rem;font-weight:700;color:#fff}
+.pstep .lb{font-family:var(--sans);font-size:.52rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.pstep.on .lb,.pstep.done .lb{color:var(--pine)}
+.dr-body{flex:1;overflow-y:auto;padding:26px clamp(26px,4vw,40px) 26px}
+.step{display:none}
+.step.on{display:block;animation:fadeUp .35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.fl{position:relative;padding-top:20px}
+.fl input{width:100%;border:0;border-bottom:1.5px solid var(--line);background:transparent;padding:12px 2px 10px;font-family:var(--serif);font-size:1.12rem;font-weight:500;color:var(--ink);outline:none;border-radius:0;-webkit-appearance:none}
+.fl input:focus{border-color:var(--pine2)}
+.fl label{position:absolute;left:2px;top:calc(20px + 14px);font-family:var(--sans);font-size:.6rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);pointer-events:none;transition:.22s}
+.fl input:focus ~ label,.fl input:not(:placeholder-shown) ~ label{top:0;font-size:.54rem;color:var(--sage2)}
+.fl .err{font-family:var(--sans);font-size:.58rem;letter-spacing:.06em;color:#B3513C;margin-top:8px;display:none}
+.fl.bad input{border-color:#B3513C}
+.fl.bad .err{display:block}
+.step-meta{font-family:var(--sans);font-size:.58rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-bottom:24px}
+#err1{font-family:var(--sans);font-size:.6rem;letter-spacing:.06em;color:#B3513C;margin:14px 0 0;display:flex;gap:8px;align-items:center;opacity:0;transition:.3s;transform:translateY(-4px)}
+#err1.show{opacity:1;transform:none}
+.en-row{display:flex;gap:16px;align-items:flex-start;padding:18px 0;border-top:1px solid var(--lineL);cursor:pointer}
+.en-row:last-child{border-bottom:1px solid var(--lineL)}
+.en-row input{position:absolute;opacity:0;pointer-events:none}
+.chk{flex:none;width:22px;height:22px;border-radius:7px;border:1.5px solid var(--line);margin-top:3px;transition:.25s;position:relative;background:transparent}
+.en-row input:checked ~ .chk{background:var(--pine);border-color:var(--pine)}
+.en-row input:checked ~ .chk::after{content:"";position:absolute;left:6.5px;top:3px;width:5.5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.en-row:hover .chk{border-color:var(--sage2)}
+.en-row input:focus-visible ~ .chk{outline:2px solid var(--sage);outline-offset:2px}
+.en-row input:active ~ .chk{border-color:var(--pine)}
+.en-row .em{flex:1}
+.en-row .em b{font-family:var(--serif);font-size:1.3rem;font-weight:500;color:var(--ink);display:block;line-height:1.2}
+.en-row .em small{font-family:var(--sans);font-size:.58rem;font-weight:500;letter-spacing:.04em;color:var(--muted)}
+.en-row .pr{font-family:var(--serif);font-size:1.3rem;font-weight:500;color:var(--pine);white-space:nowrap}
+.dr-foot{border-top:1px solid var(--lineL);padding:22px clamp(26px,4vw,40px) 30px;background:#FBFCF9}
+.bill{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:16px}
+.bill .l{font-family:var(--sans);font-size:.58rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+.bill .l small{display:block;font-weight:500;letter-spacing:.06em;color:var(--ink2);margin-top:6px;text-transform:none}
+.bill b{font-family:var(--serif);font-size:2.1rem;font-weight:500;color:var(--pine)}
+.bill b i{font-style:normal;font-size:1rem;color:var(--muted);margin-right:4px}
+.bfoot{display:flex;gap:12px}
+.bfoot .btn{flex:1;justify-content:center}
+#backBtn,.bghost{background:transparent;border-color:var(--line);color:var(--ink2)}
+#backBtn:hover{color:var(--ink);border-color:var(--ink)}
+/* done */
+#done{display:none;text-align:center;padding:20px 0 30px}
+#done.on{display:block;animation:fadeUp .4s ease}
+.dcheck{width:74px;height:74px;margin:0 auto 26px;border-radius:50%;background:var(--mint);display:grid;place-items:center;font-size:1.8rem;color:var(--pine)}
+#done h3{font-size:2.2rem;font-weight:400;margin-bottom:10px}
+#done p{color:var(--ink2);max-width:34ch;margin:0 auto 26px}
+.dsum{background:#F1F6EF;border:1px dashed var(--sage);border-radius:18px;padding:20px;text-align:left;font-family:var(--serif);font-size:1.15rem;margin-bottom:26px}
+.dsum .r{display:flex;justify-content:space-between;padding:7px 0;color:var(--ink)}
+.dsum .r span{color:var(--ink2)}
+.dsum .r.total{border-top:1px dashed var(--sage);margin-top:8px;padding-top:12px;color:var(--pine);font-weight:500}
+.dsum .r.total b{color:var(--pine);font-weight:600}
+#doneClose{width:100%;justify-content:center}
+.rv{opacity:0;transform:translateY(34px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.3,1)}
+.rv.on{opacity:1;transform:none}
+@media(max-width:1120px){
+  .room-grid{grid-template-columns:repeat(2,1fr)}
+  .exp-grid{grid-template-columns:repeat(2,1fr)}
+  .bookbar{grid-template-columns:1fr 1fr 1fr;grid-auto-rows:auto}
+  .bb-field:nth-child(3){border-left:0}
+  .btn-avail{grid-column:1/-1;padding:20px}
+  .foot-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:900px){
+  .nav-links{display:none}
+  .res-grid{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:680px){
+  section{padding:90px 0}
+  .room-grid,.exp-grid{grid-template-columns:1fr}
+  .bookbar-wrap{position:relative;left:0;transform:none;bottom:auto}
+  .hero-txt{padding:180px 0 70px}
+  .bookbar{grid-template-columns:1fr}
+  .bb-field{border-left:0;border-top:1px solid var(--lineL)}
+  .bb-field:first-child{border-top:0}
+  .f2{grid-template-columns:1fr}
+  .hero-txt{padding-bottom:40px}
+  .quote-intro{padding:120px 0 90px}
+}
+/* transit ways + cruise + timeline */
+.way-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px}
+.way{background:rgba(255,255,255,.9);border:1px solid var(--lineL);border-radius:24px;padding-bottom:30px;overflow:hidden;transition:.35s;display:flex;flex-direction:column}
+.way:hover{transform:translateY(-6px);box-shadow:var(--shadow)}
+.way .w-img{position:relative;height:230px;overflow:hidden}
+.way .w-img img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s cubic-bezier(.2,.7,.3,1)}
+.way:hover .w-img img{transform:scale(1.06)}
+.way .badge{position:absolute;top:16px;left:16px;font-family:var(--sans);font-size:.55rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;background:rgba(255,255,255,.88);color:var(--pine);padding:7px 13px;border-radius:40px}
+.way-body{padding:26px 26px 0;display:flex;flex-direction:column;flex:1}
+.way h3{font-size:1.7rem;font-weight:400;margin-bottom:4px}
+.way .w-tag{font-family:var(--sans);font-size:.56rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--sage2);margin-bottom:12px}
+.route{list-style:none;margin:4px 0 18px;border-top:1px dashed var(--lineL)}
+.route li{display:flex;justify-content:space-between;gap:14px;align-items:baseline;padding:11px 0;border-bottom:1px dashed var(--lineL);font-family:var(--serif);font-size:1.06rem}
+.route li b{font-weight:500;color:var(--ink)}
+.route li span{font-family:var(--sans);font-size:.56rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.route li em{font-family:var(--serif);font-weight:500;color:var(--pine);font-style:normal}
+.way .w-foot{font-family:var(--sans);font-size:.55rem;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:auto;padding-top:14px;border-top:1px solid var(--lineL)}
+.lead-line{font-size:clamp(1.15rem,1.8vw,1.4rem);color:var(--ink2);max-width:58ch;margin:-8px 0 56px}
+.lead-line em{color:var(--sage2)}
+#cruise{background:var(--pastel)}
+.cruise-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(40px,6vw,90px);align-items:center}
+.cruise-img{position:relative}
+.cruise-img img{width:100%;height:560px;object-fit:cover;border-radius:24px}
+.cruise-img .tag-float{position:absolute;top:22px;left:22px;background:var(--pine);color:#F4F7F3;font-family:var(--sans);font-size:.55rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;padding:10px 16px;border-radius:40px}
+.cruise-copy p{font-size:1.22rem;color:var(--ink2);margin:8px 0 22px;max-width:52ch}
+.cruise-copy p b{color:var(--pine);font-weight:500}
+.cru-list{list-style:none;border-top:1px solid var(--line);margin-bottom:30px}
+.cru-list li{display:flex;gap:16px;align-items:baseline;padding:13px 0;border-bottom:1px dashed var(--lineL);font-family:var(--serif);font-size:1.12rem}
+.cru-list li i{font-style:normal;font-family:var(--sans);font-size:.55rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--sage2);min-width:130px}
+.cru-list li small{font-family:var(--sans);font-size:.55rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap;margin-left:auto}
+.tl{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;border-top:1px solid var(--line);padding-top:56px}
+.tl .yr{font-family:var(--serif);font-size:clamp(2.6rem,5vw,4.2rem);font-weight:300;color:var(--pine);line-height:1}
+.tl h4{font-family:var(--serif);font-size:1.4rem;font-weight:500;margin:14px 0 8px}
+.tl p{color:var(--ink2);font-size:1.08rem;max-width:38ch}
+.tl .act{font-family:var(--sans);font-size:.55rem;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;display:flex;align-items:center;gap:12px}
+.tl .act::before{content:"";width:10px;height:1px;background:var(--gold)}
+.card .cdetail{font-family:var(--serif);font-size:1.02rem;font-style:italic;color:var(--ink2);border-top:1px solid var(--lineL);padding-top:14px;margin:0 0 20px}
+.enh-group{font-family:var(--sans);font-size:.56rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--sage2);margin:26px 0 4px;display:flex;align-items:center;gap:14px}
+.enh-group::after{content:"";flex:1;height:1px;background:var(--lineL)}
+.enh-group:first-child{margin-top:0}
+@media(max-width:1120px){.way-grid{grid-template-columns:repeat(2,1fr)}.cruise-grid{grid-template-columns:1fr}.tl{grid-template-columns:1fr}}
+@media(max-width:680px){.way-grid{grid-template-columns:1fr}.cruise-img img{height:380px}}
+
+
+/* worldwide search + filters */
+.bb-field select{font-family:var(--serif);font-size:1.12rem;font-weight:500;color:var(--ink);border:0;background:transparent;outline:none;width:100%;padding:2px 2px;appearance:none;-webkit-appearance:none;cursor:pointer}
+.bookbar{grid-template-columns:1fr 1fr 1.1fr auto}
+@media(min-width:681px) and (max-width:1120px){
+  .bookbar{grid-template-columns:1fr 1fr}
+  .bb-field{border-left:0;border-top:1px solid var(--lineL)}
+  .bb-field:nth-child(1),.bb-field:nth-child(2){border-top:0}
+  .btn-avail{grid-column:1/-1;padding:20px}
+}
+.loc-filters{display:flex;align-items:flex-end;justify-content:space-between;gap:26px;flex-wrap:wrap;margin:0 0 40px;padding-bottom:26px;border-bottom:1px solid var(--lineL)}
+.lf-label{font-family:var(--sans);font-size:.56rem;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.region-pills{display:flex;gap:10px;flex-wrap:wrap}
+.rp{font-family:var(--sans);font-size:.58rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink2);background:rgba(255,255,255,.7);border:1px solid var(--lineL);border-radius:40px;padding:10px 18px;transition:.25s}
+.rp:hover{border-color:var(--sage)}
+.rp.on{background:var(--pine);border-color:var(--pine);color:#F4F7F3}
+.lf-right{display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap}
+.sel{position:relative;display:inline-block}
+.sel::after{content:"";position:absolute;right:16px;top:50%;border-right:1.5px solid var(--pine);border-bottom:1.5px solid var(--pine);width:7px;height:7px;transform:translateY(-60%) rotate(45deg);pointer-events:none}
+#cntSel,#bdest{font-family:var(--sans);font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink);background:#fff;border:1px solid var(--lineL);border-radius:40px;padding:12px 40px 12px 20px;appearance:none;-webkit-appearance:none;cursor:pointer}
+.count-badge{font-family:var(--serif);font-size:1.2rem;font-style:italic;color:var(--sage2);border-top:1px solid var(--lineL);padding-top:8px;white-space:nowrap}
+.card .loc{font-family:var(--sans);font-size:.56rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.locline{font-family:var(--sans);font-size:.56rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);margin-top:10px}
+.empty{grid-column:1/-1;text-align:center;padding:70px 20px;font-family:var(--serif);font-size:1.6rem;color:var(--ink2);border:1px dashed var(--line);border-radius:24px}
+.empty small{font-family:var(--sans);font-size:.58rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+
+</style>
+</head>
+<body>
+<header id="nav">
+  <div class="inner">
+    <a class="logo" href="#top">VALÉ<span style="color:var(--sage)">R</span>IAN<em>.</em></a>
+    <nav class="nav-links">
+      <a href="#residence">Residence</a>
+      <a href="#stay">Stay</a>
+      <a href="#experiences">Experiences</a>
+      <a href="#arrive">Arrive</a>
+      <a href="#cruise">Cruise</a>
+      <a href="#history">History</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <button class="pill" id="navBook">Book Now</button>
+  </div>
+</header>
+
+<section class="hero" id="top">
+  <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/Matterhorn_sunset_2016_%28Unsplash%29.jpg/1600px-Matterhorn_sunset_2016_%28Unsplash%29.jpg" alt="The Matterhorn at sunset" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='https://picsum.photos/seed/valerian-hero/1600/1000'}">
+  <div class="hero-txt wrap">
+    <p class="eyebrow wht">46.0192° N · 7.7451° E &nbsp;—&nbsp; Valais, Switzerland</p>
+    <h1>Where the Alps<br><em>slow down</em>.</h1>
+    <p class="hero-sub">Two thousand metres above the valley, Valérian opens its doors to fifty seasons — ski out of bed in winter, sleep under open sky in summer.</p>
+    <span class="hero-scroll">Scroll to descend</span>
+  </div>
+  <div class="bookbar-wrap" style="display:none">
+    <div class="bookbar">
+      <div class="bb-field" style="display:none">
+        <label for="bci">Check-in</label>
+        <input type="date" id="bci" value="">
+      </div>
+      <div class="bb-field" style="display:none">
+        <label for="bco">Check-out</label>
+        <input type="date" id="bco" value="">
+      </div>
+      <div class="bb-field" style="display:none">
+        <label>Guests</label>
+        <button id="gbtn" type="button" aria-haspopup="true">
+          <span class="val" id="gblabel">2 Adults</span>
+          <span class="caret"></span>
+        </button>
+        <div class="gpop" id="gpop">
+          <div class="grow">
+            <span class="t">Adults<small>18 and above</small></span>
+            <div class="stepper">
+              <button class="stp" data-t="adults" data-d="-1" type="button">&#8722;</button>
+              <span class="stval" id="svA">2</span>
+              <button class="stp" data-t="adults" data-d="1" type="button">+</button>
+            </div>
+          </div>
+          <div class="grow">
+            <span class="t">Children<small>2 to 17</small></span>
+            <div class="stepper">
+              <button class="stp" data-t="children" data-d="-1" type="button">&#8722;</button>
+              <span class="stval" id="svC">0</span>
+              <button class="stp" data-t="children" data-d="1" type="button">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="btn-avail" id="avail" type="button">
+        Check Availability
+        <small>best rate, guaranteed</small>
+      </button>
+    </div>
+  </div>
+</section>
+
+<section class="quote-intro" id="residence">
+  <div class="wrap">
+    <div class="res-grid"> 
+      <div class="res-copy rv">
+        <p class="eyebrow" style="margin-bottom:20px">The Residence</p>
+        <p>Forty-eight keys carved into a pine forest above the timber line, each one facing a summit that has never, in recorded memory, been climbed twice the same way.</p>
+        <p class="muted">Here, the rituals are quietly Alpine — hairdryers are left in the drawer, pine resin is burned instead of candles, and the only clock that matters is the snow report printed each morning on heavy cream paper.</p>
+      </div>
+      <div class="res-img rv">
+        <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4f/Matterhorn_Riffelsee_2005-06-11.jpg/1280px-Matterhorn_Riffelsee_2005-06-11.jpg" alt="Matterhorn reflecting in Riffelsee" loading="lazy">
+        <div class="float f1"><b>2,034<span style="font-size:1rem">m</span></b><span>Above sea level</span></div>
+        <div class="float f2"><b>48</b><span>Keys, one valley</span></div>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat rv"><div class="n">1894</div><div class="l">Founded — century of service</div></div>
+      <div class="stat rv"><div class="n">864<i> m</i></div><div class="l">Ski-in ski-out vertical drop</div></div>
+      <div class="stat rv"><div class="n">100<i>%</i></div><div class="l">Renewable alpine power</div></div>
+      <div class="stat rv"><div class="n">7<i>/</i>5</div><div class="l">Valley gondolas in winter</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="stay" class="alt">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow" style="margin-bottom:16px">Worldwide &middot; 19 residences &middot; 10 countries</p>
+        <h2>Rooms that <em>hold the weather</em></h2>
+      </div>
+      <div class="filters" id="filters">
+        <button class="fil on" data-f="all" type="button">All</button>
+        <button class="fil" data-f="suite" type="button">Suites</button>
+        <button class="fil" data-f="chalet" type="button">Chalets</button>
+        <button class="fil" data-f="villa" type="button">Villas</button>
+        <button class="fil" data-f="lodge" type="button">Lodges</button>
+        <button class="fil" data-f="cabins" type="button">Cabins</button>
+        <button class="fil" data-f="water" type="button">Water stays</button>
+      </div>
+    </div>
+    <div class="loc-filters">
+      <div class="lf-left">
+        <p class="lf-label">Terrain</p>
+        <div class="region-pills" id="rgre"></div>
+      </div>
+      <div class="lf-right">
+        <p class="lf-label">Country</p>
+        <span class="sel">
+          <select id="cntSel"><option value="all">All countries</option></select>
+        </span>
+        <span class="count-badge" id="stayCount">19 residences</span>
+      </div>
+    </div>
+    <div class="room-grid" id="roomGrid"></div>
+  </div>
+</section>
+
+<section id="experiences">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow" style="margin-bottom:16px">Beyond the room</p>
+        <h2>Days that <em>run in furlongs</em></h2>
+      </div>
+    </div>
+    <div class="exp-grid">
+      <div class="exp rv">
+        <span class="numb">Nº 01 — WINTER</span>
+        <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/1/19/Zermatt_in_Winter_%282%29.jpg/960px-Zermatt_in_Winter_%282%29.jpg" alt="Zermatt in winter" loading="lazy">
+        <h3>First tracks</h3>
+        <p>A private guide and a chairlift that runs before sunrise. Forty kilometres of untouched pistes, one thermos of hot mulled wine.</p>
+        <span class="lnk">Reserve the morning &mdash; from $240</span>
+      </div>
+      <div class="exp rv">
+        <span class="numb">Nº 02 — SPA</span>
+        <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ef/Sauna_of_the_spa_at_Amantaka_luxury_Resort_%26_Hotel_in_Luang_Prabang_Laos.jpg/960px-Sauna_of_the_spa_at_Amantaka_luxury_Resort_%26_Hotel_in_Luang_Prabang_Laos.jpg" alt="Wooden sauna interior" loading="lazy">
+        <h3>The pine room</h3>
+        <p>A wood-burning sauna filled with spruce essential oil, a plunge pool fed by the glacier, and absolute silence between treatments.</p>
+        <span class="lnk">Book the ritual &mdash; from $300</span>
+      </div>
+      <div class="exp rv">
+        <span class="numb">Nº 03 — NIGHT</span>
+        <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/2/23/018_Human_looking_at_the_stars_during_Perseids_with_the_Milky_Way_in_the_background_Photo_by_Giles_Laurent.jpg/960px-018_Human_looking_at_the_stars_during_Perseids_with_the_Milky_Way_in_the_background_Photo_by_Giles_Laurent.jpg" alt="Milky way over the mountains" loading="lazy">
+        <h3>Zero light</h3>
+        <p>One hour above the valley, every resort light switched off, an astro-guide and celestial charts laid out on a picnic blanket.</p>
+        <span class="lnk">View the calendar — free for guests</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="arrive">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow" style="margin-bottom:16px">The Journey</p>
+        <h2>Arrive by <em>air, rail or lake</em></h2>
+      </div>
+    </div>
+    <p class="lead-line">Every approach to Val&eacute;rian is a prelude. Choose your element &mdash; we meet each one at the valley gate, door-to-door, from the moment you land.</p>
+    <div class="way-grid">
+      <article class="way rv">
+        <div class="w-img"><img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ae/SOFIA_Boeing_747SP_1998AC0014.jpg/1280px-SOFIA_Boeing_747SP_1998AC0014.jpg" alt="A commercial airliner in flight" loading="lazy"><span class="badge">Air</span></div>
+        <div class="way-body">
+          <h3>By air</h3>
+          <p class="w-tag">1 hr 35 min &middot; Zurich or Geneva</p>
+          <ul class="route">
+            <li><b>Commercial flight</b> <span>90 min</span> <em>from $90</em></li>
+            <li><b>Private jet to Sion</b> <span>45 min</span> <em>from $4,900</em></li>
+            <li><b>Helicopter chute</b> <span>40 min</span> <em>from $450</em></li>
+          </ul>
+          <p class="w-foot">Airport &rarr; suite in under 2 h, luggage met at the steps</p>
+        </div>
+      </article>
+      <article class="way rv">
+        <div class="w-img"><img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e7/Berninabahn_zwischen_Lagalb_und_Ospizio_Bernina_im_Winter.jpg/1280px-Berninabahn_zwischen_Lagalb_und_Ospizio_Bernina_im_Winter.jpg" alt="A red Swiss train crossing snow" loading="lazy"><span class="badge" style="color:var(--pine2)">Land</span></div>
+        <div class="way-body">
+          <h3>By rail &amp; road</h3>
+          <p class="w-tag">3 hr 45 min &middot; aboard the Glacier Express</p>
+          <ul class="route">
+            <li><b>Glacier Express</b> <span>5 hr 15</span> <em>from $145</em></li>
+            <li><b>Private cab</b> <span>3 hr</span> <em>from $260</em></li>
+            <li><b>Self-drive, L&ouml;tschberg</b> <span>2 hr 50</span> <em>from $0</em></li>
+          </ul>
+          <p class="w-foot">Red carriages door-to-door &mdash; first-class berths booked for you</p>
+        </div>
+      </article>
+      <article class="way rv">
+        <div class="w-img"><img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/8/82/Lake_Geneva_steamer_in_Montreux.jpg/1280px-Lake_Geneva_steamer_in_Montreux.jpg" alt="A Belle Epoque steamer on Lake Geneva" loading="lazy"><span class="badge" style="color:#3d6172">Water</span></div>
+        <div class="way-body">
+          <h3>By lake</h3>
+          <p class="w-tag">5 hr &middot; Belle &Eacute;poque steamer</p>
+          <ul class="route">
+            <li><b>Geneva lake steamer</b> <span>5 hr</span> <em>from $54</em></li>
+            <li><b>Paddle-wheel salon</b> <span>5 hr</span> <em>from $120</em></li>
+            <li><b>Lakeside tender pick-up</b> <span>&mdash;</span> <em>from $96</em></li>
+          </ul>
+          <p class="w-foot">Or go further &mdash; spend a week at sea first. See below.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="cruise">
+  <div class="wrap">
+    <div class="cruise-grid">
+      <div class="cruise-img rv">
+        <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Astoria_%28IMO_5383304%29_stern_view.jpg/1280px-Astoria_%28IMO_5383304%29_stern_view.jpg" alt="The MV Astoria ocean liner at anchor" loading="lazy">
+        <span class="tag-float">New for 2026 &middot; MV Val&eacute;rian at Sea</span>
+      </div>
+      <div class="cruise-copy rv">
+        <p class="eyebrow" style="margin-bottom:18px">The Water Way</p>
+        <h2 style="margin-bottom:20px">Sleep on the water first, <em>then on the summit</em></h2>
+        <p>Our annual <b>Savoy Voyage</b> boards the <b>MV Val&eacute;rian at Sea</b> in Marseille &mdash; twelve suites carried with us from the mountain, same linen, same cedar bath oil. The ship cruises the glittering Mediterranean through spring, then turns inland and steams <b>up the Rh&ocirc;ne</b> to Geneva, where a helicopter or private coach carries you the final hour to the residence. One booking, two altitudes.</p>
+        <ul class="cru-list">
+          <li><i>Mar &ndash; May</i> The Mediterranean &amp; the isles <small>7 nights &middot; from $3,400</small></li>
+          <li><i>May &ndash; Jun</i> The Rh&ocirc;ne ascent <small>4 nights &middot; from $2,100</small></li>
+          <li><i>Year-round</i> Lake steamers &amp; barge itineraries <small>1 day &middot; from $96</small></li>
+        </ul>
+        <button class="btn solid" id="berthBtn" type="button">Reserve a berth <span class="arr">&rarr;</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="history">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow" style="margin-bottom:16px">Backstory</p>
+        <h2>A century in <em>three acts</em></h2>
+      </div>
+    </div>
+    <div class="tl">
+      <div class="rv">
+        <span class="act">Act I</span>
+        <div class="yr">1894</div>
+        <h4>The keeper's lodge</h4>
+        <p>A gamekeeper's stone hut and three guest rooms above the timber line. Writing paper, sealing wax, and one rule: &ldquo;silence after dark.&rdquo;</p>
+      </div>
+      <div class="rv">
+        <span class="act">Act II</span>
+        <div class="yr">1962</div>
+        <h4>Concrete &amp; cable</h4>
+        <p>The first gondola arrives; the lodge becomes a residence of forty-eight keys, its concrete brushed with local pine and its tariffs printed in francs only.</p>
+      </div>
+      <div class="rv">
+        <span class="act">Act III</span>
+        <div class="yr">2026</div>
+        <h4>Glass &amp; gravity</h4>
+        <p>Today the facade is glass and the roofs hold snow. We still print the snow report by hand at 5 a.m., in heavy cream ink, exactly as 1894 intended.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="quote">
+  <div class="wrap">
+    <span class="mark">&#8220;</span>
+    <blockquote>We do not sell rooms.<br>We lend you <em>a mountain</em>.</blockquote>
+    <cite>— The Valérian House Rules, est. 1894</cite>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <p class="foot-mark">Valérian<em>.</em><small>Alpine Residence &amp; Booking<br>Valais · Switzerland</small></p>
+      </div>
+      <div class="foot-col">
+        <p class="foot-h">Stay</p>
+        <a href="#stay">Suites</a>
+        <a href="#stay">Chalets</a>
+        <a href="#stay">Seasonal offers</a>
+      </div>
+      <div class="foot-col">
+        <p class="foot-h">Experiences</p>
+        <a href="#experiences">First tracks</a>
+        <a href="#experiences">The pine room</a>
+        <a href="#experiences">Zero light</a>
+      </div>
+      <div class="foot-col">
+        <p class="foot-h">Contact</p>
+        <a href="mailto:reserve@valerian.example">reserve@valerian.example</a>
+        <a href="tel:+41000000000">+41 00 000 00 00</a>
+        <a href="#top">Back to the summit</a>
+      </div>
+    </div>
+    <div class="foot-bot">
+      <span>&copy; 2026 Valérian — an interactive front-end demo</span>
+      <span>Photography via Wikimedia Commons · CC license</span>
+    </div>
+  </div>
+</footer>
+
+<div id="backdrop"></div>
+<aside id="drawer" aria-hidden="true" aria-label="Reservation">
+  <div class="dr-head">
+    <div>
+      <p class="eyebrow">You are one step from the mountains</p>
+      <h3 id="drRoom">&nbsp;</h3>
+      <p class="locline" id="drLoc"></p>
+      <p class="rate" id="drRate">&nbsp;</p>
+    </div>
+    <button id="drClose" type="button" aria-label="Close booking">&times;</button>
+  </div>
+
+  <div class="dr-progress">
+    <div class="pset" id="pprog">
+      <div class="pstep on" id="pm1"><div class="dot"></div><span class="lb">Dates</span></div>
+      <div class="pstep" id="pm2"><div class="dot"></div><span class="lb">Extras</span></div>
+      <div class="pstep" id="pm3"><div class="dot"></div><span class="lb">Details</span></div>
+    </div>
+  </div>
+
+  <div class="dr-body">
+    <section class="step on" id="st1">
+      <p class="step-meta">Step 1 · Pick your nights</p>
+      <div class="f2">
+        <div class="fl">
+          <input type="date" id="dci" placeholder=" ">
+          <label for="dci">Check-in</label>
+        </div>
+        <div class="fl">
+          <input type="date" id="dco" placeholder=" ">
+          <label for="dco">Check-out</label>
+        </div>
+      </div>
+      <p id="err1"><span>&#9888;</span></p>
+    </section>
+
+    <section class="step" id="st2">
+      <p class="step-meta">Step 2 · Add the extras that matter</p>
+      <div id="enhList"></div>
+    </section>
+
+    <section class="step" id="st3">
+      <p class="step-meta">Step 3 · Who will be arriving</p>
+      <div class="fl">
+        <input type="text" id="gName" placeholder=" " autocomplete="name">
+        <label for="gName">Full name</label>
+        <span class="err">Please tell us your name.</span>
+      </div>
+      <div class="fl">
+        <input type="email" id="gEmail" placeholder=" " autocomplete="email">
+        <label for="gEmail">Email address</label>
+        <span class="err">We need a valid email to confirm the reservation.</span>
+      </div>
+      <div class="fl">
+        <input type="tel" id="gPhone" placeholder=" " autocomplete="tel">
+        <label for="gPhone">Phone (optional)</label>
+      </div>
+      <div class="fl">
+        <input type="text" id="gNote" placeholder=" ">
+        <label for="gNote">Anything we should know? (optional)</label>
+      </div>
+    </section>
+
+    <section id="done">
+      <div class="dcheck">&#10003;</div>
+      <h3>Reservation received</h3>
+      <p>Our concierge will confirm within two hours during Alpine time. Full payment is settled on arrival.</p>
+      <div class="dsum" id="dsum"></div>
+      <button class="btn solid" id="doneClose" type="button">Back to the summit &rarr;</button>
+    </section>
+  </div>
+
+  <div class="dr-foot" id="drfoot">
+    <div class="bill">
+      <div class="l"><span id="drNights">2 nights</span><small id="drDetail">Alpine Suite</small></div>
+      <div class="l" style="text-align:right"><span id="drPerNight"></span><small id="drBreakdown">incl. no extras</small></div>
+      <div><b><i>$</i><span id="drTotal">0</span></b></div>
+    </div>
+    <div class="bfoot">
+      <button class="btn bghost" id="backBtn" type="button">Return</button>
+      <button class="btn solid" id="goBtn" type="button">Continue <span class="arr">&rarr;</span></button>
+    </div>
+  </div>
+</aside>
+<script>
+(function(){
+"use strict";
+
+/* ---------- data ---------- */
+const W="https://thumb.wikimedia.org/wikipedia/commons/thumb/";
+const RIFLE=W+"4/4f/Matterhorn_Riffelsee_2005-06-11.jpg/1280px-Matterhorn_Riffelsee_2005-06-11.jpg";
+const MAR=W+"2/21/Matterhorn%2C_March_2019_%2801%29.jpg/1280px-Matterhorn%2C_March_2019_%2801%29.jpg";
+const SUN=W+"2/21/Matterhorn_sunset_2016_%28Unsplash%29.jpg/1280px-Matterhorn_sunset_2016_%28Unsplash%29.jpg";
+const EIG=W+"e/ee/Eiger_north_face_%2815095103518%29.jpg/1280px-Eiger_north_face_%2815095103518%29.jpg";
+const ZW2=W+"1/19/Zermatt_in_Winter_%282%29.jpg/1280px-Zermatt_in_Winter_%282%29.jpg";
+const ZW3=W+"7/72/Zermatt_in_Winter_%283%29.jpg/1280px-Zermatt_in_Winter_%283%29.jpg";
+const CHH=W+"9/91/Chalet_suisse.jpg/1280px-Chalet_suisse.jpg";
+const SIM=W+"d/d7/Simmental_switzerland.JPG/1280px-Simmental_switzerland.JPG";
+const ZEI="https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/Chalet_suisse.jpg/1280px-Chalet_suisse.jpg";
+const CRU="https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Astoria_%28IMO_5383304%29_stern_view.jpg/1280px-Astoria_%28IMO_5383304%29_stern_view.jpg";
+const JET="https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ae/SOFIA_Boeing_747SP_1998AC0014.jpg/1280px-SOFIA_Boeing_747SP_1998AC0014.jpg";
+const BERN="https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e7/Berninabahn_zwischen_Lagalb_und_Ospizio_Bernina_im_Winter.jpg/1280px-Berninabahn_zwischen_Lagalb_und_Ospizio_Bernina_im_Winter.jpg";
+const STMR="https://thumb.wikimedia.org/wikipedia/commons/thumb/8/82/Lake_Geneva_steamer_in_Montreux.jpg/1280px-Lake_Geneva_steamer_in_Montreux.jpg";
+const LIMO="https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4f/Cadillac_Stretch_Limousine_in_Washington%2C_D.C.%2C_January_1989.jpg/1280px-Cadillac_Stretch_Limousine_in_Washington%2C_D.C.%2C_January_1989.jpg";
+const HELI="https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4d/Sea_King_Helicopter_Red_Bull_Air_Race_London_2008_%282%29.jpg/1280px-Sea_King_Helicopter_Red_Bull_Air_Race_London_2008_%282%29.jpg";
+const FAL="https://picsum.photos/seed/valerian/1000/700";
+const AMAL="https://thumb.wikimedia.org/wikipedia/commons/thumb/8/84/Amalfi_vista_dal_mare_2_Campania.jpg/1280px-Amalfi_vista_dal_mare_2_Campania.jpg";
+const POSA="https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4d/Positano_%28Italy%29_02.jpg/1280px-Positano_%28Italy%29_02.jpg";
+const RIV1="https://thumb.wikimedia.org/wikipedia/commons/thumb/d/da/La_Roque-Gageac_-_Chemin_des_Choucas_-_1.jpg/1280px-La_Roque-Gageac_-_Chemin_des_Choucas_-_1.jpg";
+const RIV2="https://thumb.wikimedia.org/wikipedia/commons/thumb/0/00/La_Roque_Gageac_1.jpg/1280px-La_Roque_Gageac_1.jpg";
+const SER1="https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0b/Serengeti-Landscape-2012.JPG/1280px-Serengeti-Landscape-2012.JPG";
+const SER2="https://upload.wikimedia.org/wikipedia/commons/b/b9/Zebras_grazing_among_acacia_trees%2C_Serengeti_National_Park.jpg";
+const DUN1="https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fc/Erg_Chebbi_Sand_Dunes_%284804573224%29.jpg/1280px-Erg_Chebbi_Sand_Dunes_%284804573224%29.jpg";
+const DUN2="https://thumb.wikimedia.org/wikipedia/commons/thumb/0/04/Erg_Chebbi_sunset.jpg/1280px-Erg_Chebbi_sunset.jpg";
+const BLD1="https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4a/Bled_Island_%26_Bled_Castle_%281%29.jpg/1280px-Bled_Island_%26_Bled_Castle_%281%29.jpg";
+const BLD2="https://thumb.wikimedia.org/wikipedia/commons/thumb/d/dc/Bled_Island_05.jpg/1280px-Bled_Island_05.jpg";
+const CAP1="https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7e/Hot_air_balloon_at_sunrise_over_Cappadocia%2C_Turkey.JPG/1280px-Hot_air_balloon_at_sunrise_over_Cappadocia%2C_Turkey.JPG";
+const CAP2="https://thumb.wikimedia.org/wikipedia/commons/thumb/3/38/Hot_air_balloon_ride_at_sunrise_in_Cappadocia_4.JPG/1280px-Hot_air_balloon_ride_at_sunrise_in_Cappadocia_4.JPG";
+const FJ1="https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6c/Geirangerfjord_LC0188.jpg/1280px-Geirangerfjord_LC0188.jpg";
+const FJ2="https://thumb.wikimedia.org/wikipedia/commons/thumb/5/51/Geiranger_-_Norway.jpg/1280px-Geiranger_-_Norway.jpg";
+const HB1="https://thumb.wikimedia.org/wikipedia/commons/thumb/8/80/Kerala_backwaters%2C_Houseboat%2C_India.jpg/1280px-Kerala_backwaters%2C_Houseboat%2C_India.jpg";
+const HB2="https://thumb.wikimedia.org/wikipedia/commons/thumb/3/33/Kerala_backwater_scene.jpg/1280px-Kerala_backwater_scene.jpg";
+const GC1="https://thumb.wikimedia.org/wikipedia/commons/thumb/4/47/Glen_Coe%2C_Scottish_Hightlands.jpg/1280px-Glen_Coe%2C_Scottish_Hightlands.jpg";
+const GC2="https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f1/Pass_of_Glen_Coe%2C_Scottish_Highlands.jpg/1280px-Pass_of_Glen_Coe%2C_Scottish_Highlands.jpg";
+const COM1="https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f2/Lago_de_Como%2C_Italia%2C_2016-06-25%2C_DD_02-06_PAN.jpg/1280px-Lago_de_Como%2C_Italia%2C_2016-06-25%2C_DD_02-06_PAN.jpg";
+const COM2="https://thumb.wikimedia.org/wikipedia/commons/thumb/9/93/Lake_Como_from_Como_%2813%29.jpg/1280px-Lake_Como_from_Como_%2813%29.jpg";
+
+const ROOMS=[
+ {name:"The Alpine Suite",cat:"suite",rate:850,sleeps:2,area:46,imgs:[MAR,RIFLE],tag:"Signature Suite",details:"King bed \u00b7 Rainfall shower \u00b7 Forest balcony",loc:"Zermatt",cnt:"Switzerland",region:"mountains"},
+ {name:"The Glacier Suite",cat:"suite",rate:1250,sleeps:3,area:62,imgs:[SUN,RIFLE],tag:"Panoramic Suite",details:"Super-king bed \u00b7 Deep-soak tub \u00b7 Corner panorama",loc:"Zermatt",cnt:"Switzerland",region:"mountains"},
+ {name:"The Spire Suite",cat:"suite",rate:980,sleeps:2,area:54,imgs:[EIG,MAR],tag:"North-Face Suite",details:"King bed \u00b7 Rain shower & sauna alcove \u00b7 North-facing bay",loc:"Eiger",cnt:"Switzerland",region:"mountains"},
+ {name:"The Cloud Penthouse",cat:"suite",rate:1700,sleeps:4,area:110,imgs:[SUN,RIFLE,MAR],tag:"Penthouse",details:"Two king suites \u00b7 Steam bath \u00b7 Wrap terrace",loc:"Zermatt",cnt:"Switzerland",region:"mountains"},
+ {name:"The Summit Suite",cat:"suite",rate:1350,sleeps:3,area:76,imgs:[MAR,EIG],tag:"Corner Suite",details:"Super-king \u00b7 Soaking tub \u00b7 Skylight slumber",loc:"Saas-Fee",cnt:"Switzerland",region:"mountains"},
+ {name:"The Glass Chalet",cat:"chalet",rate:1400,sleeps:4,area:88,imgs:[ZW2,CHH],tag:"Family Chalet",details:"2 bedrooms \u00b7 2 baths \u00b7 Full-glass living wall",loc:"Zermatt",cnt:"Switzerland",region:"mountains"},
+ {name:"The Timber Chalet",cat:"chalet",rate:720,sleeps:3,area:70,imgs:[CHH,SIM],tag:"Classic Chalet",details:"2 bedrooms \u00b7 1 bath \u00b7 Veranda & wood stove",loc:"Kandersteg",cnt:"Switzerland",region:"mountains"},
+ {name:"The Snowline Chalet",cat:"chalet",rate:960,sleeps:5,area:96,imgs:[ZW3,MAR],tag:"Premium Chalet",details:"3 bedrooms \u00b7 3 baths \u00b7 Rooftop hot tub",loc:"Zermatt",cnt:"Switzerland",region:"mountains"},
+ {name:"The Larch Chalet",cat:"chalet",rate:1100,sleeps:6,area:120,imgs:[CHH,ZW3,SIM],tag:"Crew Chalet",details:"4 bedrooms \u00b7 3 baths \u00b7 Sauna & fire pit",loc:"Alpstein",cnt:"Switzerland",region:"mountains"},
+ {name:"The Clifftop Residence",cat:"villa",rate:980,sleeps:4,area:98,imgs:[AMAL,POSA],tag:"Clifftop Villa",details:"2 en-suite bedrooms \u00b7 Infinity pool \u00b7 Sea terrace",loc:"Amalfi",cnt:"Italy",region:"seashore"},
+ {name:"The River House",cat:"villa",rate:640,sleeps:3,area:72,imgs:[RIV1,RIV2],tag:"Dordogne Villa",details:"2 bedrooms \u00b7 Canoe slip \u00b7 Riverside terrace",loc:"La Roque-Gageac",cnt:"France",region:"river"},
+ {name:"The Savanna Lodge",cat:"lodge",rate:1150,sleeps:4,area:110,imgs:[SER1,SER2],tag:"Plain Lodge",details:"Two tents-on-stilts \u00b7 Open sky deck \u00b7 Night ranger",loc:"Serengeti",cnt:"Tanzania",region:"plains"},
+ {name:"The Dune Camp",cat:"lodge",rate:720,sleeps:2,area:56,imgs:[DUN1,DUN2],tag:"Desert Camp",details:"Berber pavilion \u00b7 Star bed on the dune \u00b7 Camel guide",loc:"Erg Chebbi",cnt:"Morocco",region:"desert"},
+ {name:"The Lake Como Villa",cat:"villa",rate:1180,sleeps:5,area:120,imgs:[COM1,COM2],tag:"Lakeside Villa",details:"3 bedrooms \u00b7 Private mooring \u00b7 Terraced gardens",loc:"Como",cnt:"Italy",region:"lakeshore"},
+ {name:"The Bled Pavilion",cat:"suite",rate:890,sleeps:2,area:58,imgs:[BLD1,BLD2],tag:"Lake Pavilion",details:"King bed \u00b7 Cantilevered bath \u00b7 Lake & castle view",loc:"Bled",cnt:"Slovenia",region:"lakeshore"},
+ {name:"The Goreme Pavilion",cat:"suite",rate:940,sleeps:3,area:84,imgs:[CAP1,CAP2],tag:"Plateau Pavilion",details:"Cave suite \u00b7 Chimney terrace \u00b7 Hot-air balloon dawns",loc:"Goreme",cnt:"T\u00fcrkiye",region:"plateau"},
+ {name:"The Fjord Cabins",cat:"cabins",rate:1200,sleeps:4,area:90,imgs:[FJ1,FJ2],tag:"Fjord Cabins",details:"2 timber cabins \u00b7 Waterline sauna \u00b7 Zodiac mooring",loc:"Geiranger",cnt:"Norway",region:"seashore"},
+ {name:"The Delta Houseboat",cat:"water",rate:540,sleeps:4,area:80,imgs:[HB1,HB2],tag:"River Houseboat",details:"2 air decks \u00b7 Kettle crew \u00b7 Sunset kayaks",loc:"Alleppey",cnt:"India",region:"river"},
+ {name:"The Glen Coe Crofts",cat:"cabins",rate:520,sleeps:3,area:66,imgs:[GC1,GC2],tag:"Highland Crofts",details:"2 restored cottages \u00b7 Peat fire \u00b7 Munro steps at the door",loc:"Glen Coe",cnt:"Scotland",region:"plateau"}
+];
+const ENH=[
+ {id:"train", name:"First-class Rail", desc:"Glacier Express berths, private coupe", price:60, unit:"person", g:"Arriving in style"},
+ {id:"cab", name:"Private Cab", desc:"Dedicated black limousine with driver, up to 3 guests", price:95, unit:"stay", g:"Arriving in style"},
+ {id:"heli", name:"Helicopter Arrival", desc:"40-minute flight straight to our summit pad", price:450, unit:"stay", g:"Arriving in style"},
+ {id:"ah", name:"Airport Transfer", desc:"Private chauffeur, Zurich or Geneva", price:150, unit:"stay", g:"In the valley"},
+ {id:"spa", name:"Spa Ritual", desc:"60-minute pine &amp; crystal therapy for two", price:300, unit:"stay", g:"In the valley"},
+ {id:"bf",  name:"Breakfast in the Clouds", desc:"Daily Alpine breakfast on your terrace", price:90, unit:"night", g:"In the valley"},
+ {id:"ski", name:"Ski Concierge", desc:"Fitted gear delivered and stored slope-side", price:120, unit:"night", g:"In the valley"},
+ {id:"champ",name:"Arrival Champagne", desc:"A bottle of champagne on crushed ice", price:180, unit:"stay", g:"In the valley"},
+ {id:"late",name:"Late Check-out", desc:"Keep the room until 4&nbsp;pm departure", price:80, unit:"stay", g:"In the valley"}
+];
+
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const $$=(s,c)=>Array.from((c||document).querySelectorAll(s));
+const fmt=n=>"$"+n.toLocaleString("en-US");
+function iso(d){const z=x=>String(x).padStart(2,"0");return d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate());}
+function addDays(d,n){const c=new Date(d);c.setDate(c.getDate()+n);return c;}
+const TODAY=new Date();
+const TOMORROW=addDays(TODAY,1);
+
+const st={cat:"all",idx:null,step:1,adults:2,children:0,nights:2,pick:{},region:"all",country:"all"};
+const REGIONS=[
+ {k:"all",l:"All regions"},{k:"mountains",l:"Mountains"},{k:"plains",l:"Plains"},
+ {k:"seashore",l:"Seashore"},{k:"lakeshore",l:"Lake shore"},{k:"river",l:"River bank"},
+ {k:"plateau",l:"Plateau"},{k:"desert",l:"Desert"}
+];
+function REGION_L(k){const m=REGIONS.find(r=>r.k===k);return m?m.l:k;}
+
+/* ---------- booking bar dates ---------- */
+function initBar(){
+  const ci=$( "#bci"), co=$("#bco");
+  ci.min=iso(TODAY); ci.value=iso(addDays(TODAY,3));
+  co.min=iso(TOMORROW); co.value=iso(addDays(TODAY,5));
+  [ci,co].forEach(i=>i.addEventListener("change",function(){
+    if(ci.value && co.value && co.value<=ci.value){co.value=iso(addDays(new Date(ci.value),1));}
+    co.min=ci.value?iso(addDays(new Date(ci.value),1)):iso(TOMORROW);
+  }));
+}
+
+/* guests popover */
+function guestsLabel(){const a=st.adults,c=st.children;
+  $("#gblabel").textContent=a+" Adult"+(a>1?"s":"")+(c?(", "+c+" Child"+(c>1?"ren":"ren")):"");}
+function initGuests(){
+  const pop=$("#gpop"),btn=$("#gbtn");
+  btn.addEventListener("click",e=>{e.stopPropagation();pop.classList.toggle("open");btn.classList.toggle("open");});
+  document.addEventListener("click",e=>{if(!pop.contains(e.target)&&!btn.contains(e.target)){pop.classList.remove("open");btn.classList.remove("open");}});
+  $$(".stp").forEach(b=>b.addEventListener("click",()=>{
+    const t=b.dataset.t,d=+b.dataset.d;
+    if(t==="adults"){st.adults=Math.min(8,Math.max(1,st.adults+d));}
+    else{st.children=Math.min(6,Math.max(0,st.children+d));}
+    $("#svA").textContent=st.adults;$("#svC").textContent=st.children;
+    $$(".stp[data-t=adults][data-d=-1]")[0].disabled=st.adults<=1;
+    $$(".stp[data-t=children][data-d=-1]")[0].disabled=st.children<=0;
+    guestsLabel();
+  }));
+}
+
+/* ---------- rooms render ---------- */
+function cardHTML(r,i){
+  return `
+  <article class="card rv" data-cat="${r.cat}" data-idx="${i}">
+    <div class="media">
+      <span class="tag">${REGION_L(r.region)}</span>
+      <div class="gal">${r.imgs.map(s=>'<img src="'+s+'" alt="'+r.name+'" loading="lazy" onerror="if(!this.dataset.f){this.dataset.f=1;this.src=\''+FAL+'\'}">').join("")}</div>
+      <button class="gar l" type="button" aria-label="previous photo">&#8592;</button>
+      <button class="gar r" type="button" aria-label="next photo">&#8594;</button>
+      <span class="gad">${r.imgs.map((_,k)=>'<i class="'+(k?"":"on")+'"></i>').join("")}</span>
+    </div>
+    <div class="card-body">
+      <div class="card-top">
+        <h3>${r.name}</h3>
+        <span class="rate"><b>$${r.rate}</b><em>per night</em></span>
+      </div>
+      <p class="loc">${r.loc} &middot; ${r.cnt}</p>
+      <p class="feat">Sleeps ${r.sleeps} &nbsp;·&nbsp; ${r.area} m&sup2;</p>
+      <p class="cdetail">${r.details}</p>
+      <ul class="icons">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 12.5A10.5 10.5 0 0 1 19 12.5M8 15.5A6 6 0 0 1 16 15.5M11 18.5a1.6 1.6 0 0 1 2 0"/></svg> Wi-Fi 6E</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 20h18M5 20l3-8 3 3 4-7 4 12M15 8l1-2M16 6l1-2"/></svg> Mountain view</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3s7 5.5 7 11a7 7 0 0 1-14 0c0-5.5 7-11 7-11z"/></svg> Fireplace</li>
+      </ul>
+      <button class="btn solid book" type="button" data-idx="${i}" style="margin-top:auto">Book this room <span class="arr">&rarr;</span></button>
+    </div>
+  </article>`;
+}
+function wireGallery(card){
+  const gal=card.querySelector(".gal"),dots=card.querySelectorAll(".gad i");
+  card.querySelector(".gar.l").addEventListener("click",()=>gal.scrollBy({left:-gal.clientWidth,behavior:"smooth"}));
+  card.querySelector(".gar.r").addEventListener("click",()=>gal.scrollBy({left:gal.clientWidth,behavior:"smooth"}));
+  gal.addEventListener("scroll",()=>{const k=Math.round(gal.scrollLeft/gal.clientWidth);dots.forEach((d,j)=>d.classList.toggle("on",j===k));});
+}
+function roomMatches(r){
+  const t=st.cat==="all"||r.cat===st.cat;
+  const rg=st.region==="all"||r.region===st.region;
+  const cy=st.country==="all"||r.cnt===st.country;
+  return t&&rg&&cy;
+}
+function renderRooms(){
+  const grid=$("#roomGrid");
+  grid.innerHTML="";
+  const list=ROOMS.filter(roomMatches);
+  if(!list.length){
+    grid.innerHTML='<div class="empty rv on">No residences in this corner of the atlas.<br><small>Clear a filter &mdash; the whole world fits in the drawer.</small></div>';
+  }else{
+    list.forEach(r=>grid.insertAdjacentHTML("beforeend",cardHTML(r,ROOMS.indexOf(r))));
+    grid.querySelectorAll(".card").forEach(card=>{
+      wireGallery(card);
+      card.querySelector(".book").addEventListener("click",e=>openDrawer(+e.currentTarget.dataset.idx));
+      if(window.__rvIO){window.__rvIO.observe(card);}
+    });
+  }
+  const hint=$("#stayCount");
+  if(hint){hint.textContent=list.length+" of "+ROOMS.length+" residences";}
+}
+function initFilters(){
+  $$(".fil[data-f]").forEach(f=>f.addEventListener("click",()=>{
+    $$(".fil[data-f]").forEach(x=>x.classList.remove("on"));f.classList.add("on");
+    st.cat=f.dataset.f;renderRooms();
+  }));
+}
+function buildRegionPills(){
+  const host=$("#rgre");host.innerHTML="";
+  REGIONS.forEach(r=>{
+    const b=document.createElement("button");
+    b.className="rp"+(r.k==="all"?" on":"");
+    b.dataset.region=r.k;b.type="button";b.textContent=r.l;
+    b.addEventListener("click",function(){
+      st.region=r.k;
+      $$("#rgre .rp").forEach(x=>x.classList.toggle("on",x===b));
+      renderRooms();
+    });
+    host.appendChild(b);
+  });
+}
+function buildSelects(){
+  const cntSel=$("#cntSel");
+  cntSel.innerHTML='<option value="all">All countries</option>';
+  [...new Set(ROOMS.map(r=>r.cnt))].sort().forEach(c=>{
+    const o=document.createElement("option");o.value=c;o.textContent=c;cntSel.appendChild(o);
+  });
+  cntSel.addEventListener("change",function(){st.country=cntSel.value;renderRooms();});
+}
+
+/* ---------- drawer ---------- */
+function nightsFromDates(ci,co){
+  if(!ci||!co)return st.nights;
+  const n=Math.round((new Date(co)-new Date(ci))/86400000);
+  return n>0?n:1;
+}
+function calcTotals(){
+  const n=nightsFromDates(st.pick.ci,st.pick.co);
+  const r=ROOMS[st.idx];
+  let extra=0,names=[];
+  const guests=(st.adults+st.children)||1;
+  $$("#enhList input:checked").forEach(b=>{const e=ENH[b.value];
+    const c=e.unit==="night"?e.price*n:(e.unit==="person"?e.price*guests:e.price);
+    extra+=c;names.push(e.name.replace(/&amp;/g,"&").replace(/&nbsp;/g," "));});
+  const total=r.rate*n+extra;
+  $("#drNights").textContent=n+(n>1?" nights":" night");
+  $("#drDetail").textContent=r.name;
+  $("#drPerNight").textContent=fmt(r.rate)+" / night";
+  $("#drBreakdown").textContent=names.length?names.join(" · ")+" incl.":"No extras selected";
+  $("#drTotal").textContent=fmt(total);
+  $("#drRate").textContent="From "+fmt(r.rate)+" per night · Sleeps "+r.sleeps;
+  st.nights=n;
+  return {n,extra,total};
+}
+function unitLabel(u){return u==="night"?"per night":u==="person"?"per person":"per stay";}
+function renderEnh(){
+  const host=$("#enhList");host.innerHTML="";
+  let lastG="";
+  ENH.forEach((e,i)=>{
+    if(e.g&&e.g!==lastG){lastG=e.g;const h=document.createElement("div");h.className="enh-group";h.textContent=e.g;host.appendChild(h);}
+    const row=document.createElement("label");
+    row.className="en-row";
+    row.innerHTML='<input type="checkbox" value="'+i+'">'+
+      '<span class="chk" aria-hidden="true"></span>'+
+      '<span class="em"><b>'+e.name+'</b><small>'+e.desc+' &mdash; '+fmt(e.price)+' '+unitLabel(e.unit)+'</small></span>'+
+      '<span class="pr">'+fmt(e.price)+'</span>';
+    row.querySelector("input").addEventListener("change",calcTotals);
+    host.appendChild(row);
+  });
+}
+function setStep(n){
+  st.step=n;
+  $$(".step").forEach(s=>s.classList.toggle("on",s.id==="st"+n));
+  [1,2,3].forEach(k=>{const el=$("#pm"+k);el.classList.toggle("on",k===n);el.classList.toggle("done",k<n);});
+  const back=$("#backBtn");
+  if(n===1){back.style.display="none";}
+  else{back.style.display="";back.textContent=(n===2?"← Dates":"← Extras");}
+  $("#goBtn").innerHTML=(n<3?"Continue ":"Confirm reservation ")+'<span class="arr">&rarr;</span>';
+  $("#drawer .dr-body").scrollTop=0;
+}
+function validateStep1(){
+  const ci=$("#dci"),co=$("#dco"),err=$("#err1");
+  const bad=!ci.value||!co.value||new Date(co.value)<=new Date(ci.value);
+  err.classList.toggle("show",bad);
+  ci.closest(".fl").classList.toggle("bad",!ci.value||(ci.value&&co.value&&co.value<=ci.value));
+  co.closest(".fl").classList.toggle("bad",!co.value||(ci.value&&co.value&&co.value<=co.value));
+  if(bad){err.textContent="\u26A0  Please choose a check-out date at least one night after check-in.";}
+  else{err.textContent="\u26A0";ci.closest(".fl").classList.remove("bad");co.closest(".fl").classList.remove("bad");}
+  return !bad;
+}
+function validateStep3(){
+  let ok=true;
+  const name=$("#gName"),email=$("#gEmail");
+  [name,email].forEach(f=>{const bad=!f.value.trim()||(f===email&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.value));
+    f.closest(".fl").classList.toggle("bad",bad);ok=ok&&!bad;});
+  return ok;
+}
+function openDrawer(idx,opts){
+  st.idx=idx;
+  st.pick.ci="";st.pick.co="";
+  const r=ROOMS[idx];
+  $("#drRoom").textContent=r.name;
+  $("#drLoc").textContent=r.loc+" · "+r.cnt;
+  const ci=$("#dci"),co=$("#dco");
+  ci.min=iso(TODAY);ci.value=opts&&opts.ci?opts.ci:iso(addDays(TODAY,7));
+  co.min=iso(TOMORROW);co.value=opts&&opts.co?opts.co:iso(addDays(TODAY,9));
+  st.pick={ci:ci.value,co:co.value};
+  renderEnh();
+  $("#done").classList.remove("on");
+  $("#drfoot").style.display="";
+  setStep(1);calcTotals();
+  $("#drawer").classList.add("on");
+  $("#backdrop").classList.add("on");
+  document.body.style.overflow="hidden";
+  $("#drawer").setAttribute("aria-hidden","false");
+}
+function closeDrawer(){
+  $("#drawer").classList.remove("on");
+  $("#backdrop").classList.remove("on");
+  document.body.style.overflow="";
+  $("#drawer").setAttribute("aria-hidden","true");
+}
+function initDrawer(){
+  renderEnh();
+  $("#drClose").addEventListener("click",closeDrawer);
+  $("#backdrop").addEventListener("click",closeDrawer);
+  document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer();});
+  const ci=$("#dci"),co=$("#dco");
+  [ci,co].forEach(i=>i.addEventListener("change",()=>{
+    if(ci.value&&co.value&&co.value<=ci.value){co.value=iso(addDays(new Date(ci.value),1));}
+    if(ci.value){st.pick.ci=ci.value;}
+    if(co.value){st.pick.co=co.value;}
+    if(st.pick.ci&&st.pick.co){calcTotals();}
+  }));
+  $("#backBtn").addEventListener("click",()=>{if(st.step>1){setStep(st.step-1);}});
+  $("#goBtn").addEventListener("click",()=>{
+    if(st.step===1){
+      st.pick.ci=$("#dci").value;st.pick.co=$("#dco").value;
+      if(!validateStep1())return;
+      setStep(2);calcTotals();
+    }else if(st.step===2){setStep(3);calcTotals();}
+    else{
+      if(!validateStep3())return;
+      /* confirm */
+      const n=st.nights,r=ROOMS[st.idx];
+      const extras=$$("#enhList input:checked").map(b=>ENH[+b.value].name.replace(/&amp;/g,"&").replace(/&nbsp;/g," "));
+      const total=calcTotals();
+      $$(".step").forEach(x=>x.classList.remove("on"));
+      $("#done").classList.add("on");
+      $("#drfoot").style.display="none";
+      const ci=new Date(st.pick.ci),co=new Date(st.pick.co);
+      const f=d=>d.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+      const G=(st.adults+(st.children?(" + "+st.children+" child"+(st.children>1?"ren":"")):""));
+      $("#dsum").innerHTML=
+        '<div class="r"><span>Room</span><b>'+r.name+'</b></div>'+
+        '<div class="r"><span>Dates</span><b>'+f(ci)+' &rarr; '+f(co)+'</b></div>'+
+        '<div class="r"><span>Guests</span><b>'+G+' · '+n+' night'+(n>1?"s":"")+'</b></div>'+
+        (extras.length?'<div class="r"><span>Extras</span><b>'+extras.join(", ")+'</b></div>':"")+
+        '<div class="r total"><span>Total (due on arrival)</span><b>'+fmt(total.total)+'</b></div>';
+      $("#drawer .dr-body").scrollTop=0;
+    }
+  });
+  $("#doneClose").addEventListener("click",closeDrawer);
+  $("#navBook").addEventListener("click",()=>openDrawer(0));
+  $("#avail").addEventListener("click",function(){
+    openDrawer(0,{ci:$("#bci").value,co:$("#bco").value});
+  });
+}
+
+/* ---------- nav + reveal ---------- */
+function initNav(){
+  const nav=$("#nav");
+  const on=()=>nav.classList.toggle("glass",window.scrollY>40);
+  window.addEventListener("scroll",on,{passive:true});on();
+}
+function initReveal(){
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("on");io.unobserve(e.target);}}),{threshold:.15});
+  window.__rvIO=io;
+  $$(".rv").forEach(el=>io.observe(el));
+}
+
+initBar();initGuests();buildRegionPills();buildSelects();renderRooms();initFilters();initDrawer();initNav();initReveal();
+if($("#berthBtn")){$("#berthBtn").addEventListener("click",function(){openDrawer(1);});}
+})();
+</script>
+</body>
+</html>

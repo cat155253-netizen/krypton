@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridian &middot; Private Wealth &amp; Analytics Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0B132B;--bg2:#111A36;--bg3:#162040;--card:#FFFFFF;--card2:#F8FAFC;
+  --text:#FFFFFF;--text2:#CBD5E1;--text3:#94A3B8;
+  --blue:#2563EB;--blue2:#3B82F6;--blue3:#60A5FA;--blueG:rgba(37,99,235,.12);
+  --green:#10B981;--green2:#34D399;--greenG:rgba(16,185,129,.12);
+  --red:#EF4444;--redG:rgba(239,68,68,.1);
+  --line:rgba(255,255,255,.06);--line2:rgba(255,255,255,.1);
+  --serif:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
+  --r:16px;--r2:12px;
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:var(--serif);background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:0;background:0;color:inherit}
+input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;cursor:pointer;width:100%}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:var(--line2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--blue);border:3px solid var(--bg);box-shadow:0 0 0 2px var(--blue);margin-top:-7px;transition:.15s}
+input[type=range]::-webkit-slider-thumb:hover{box-shadow:0 0 0 4px rgba(37,99,235,.3)}
+input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:var(--line2);border:0}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--blue);border:3px solid var(--bg);box-shadow:0 0 0 2px var(--blue)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 clamp(20px,4vw,40px)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+
+/* ─── NAV ─── */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:20px 0;transition:.3s}
+.nav.scrolled{background:rgba(11,19,43,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:1.1rem;font-weight:800;letter-spacing:.04em}
+.logo em{font-style:normal;color:var(--blue)}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-links a{font-size:.78rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);transition:.2s}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:10px 24px;border:1px solid var(--blue);border-radius:8px;color:var(--blue);transition:.25s}
+.nav-cta:hover{background:var(--blue);color:#fff}
+@media(max-width:768px){.nav-links a:not(.nav-cta){display:none}}
+
+/* ─── HERO ─── */
+.hero{min-height:100vh;display:flex;align-items:center;padding:120px 0 80px;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;top:-200px;right:-200px;width:800px;height:800px;background:radial-gradient(circle,rgba(37,99,235,.08) 0%,transparent 70%);pointer-events:none}
+.hero .wrap{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.hero-txt{position:relative;z-index:2}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;font-size:.65rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--blue3);background:var(--blueG);border:1px solid rgba(37,99,235,.2);border-radius:40px;padding:8px 18px;margin-bottom:28px}
+.hero-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--blue);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-size:clamp(2.4rem,5vw,4.2rem);font-weight:800;line-height:1.1;letter-spacing:-.03em;margin-bottom:24px}
+.hero h1 span{display:block;color:var(--text2);font-weight:500}
+.hero-sub{font-size:1.05rem;color:var(--text2);line-height:1.7;max-width:480px;margin-bottom:36px}
+.hero-btns{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.btn-primary{display:inline-flex;align-items:center;gap:10px;font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:16px 32px;background:var(--blue);border-radius:10px;color:#fff;transition:.25s;box-shadow:0 4px 24px rgba(37,99,235,.3)}
+.btn-primary:hover{background:#1D4ED8;transform:translateY(-1px);box-shadow:0 8px 32px rgba(37,99,235,.4)}
+.btn-primary svg{width:16px;height:16px;transition:.2s}
+.btn-primary:hover svg{transform:translateX(3px)}
+.btn-ghost{display:inline-flex;align-items:center;gap:8px;font-size:.78rem;font-weight:600;color:var(--text2);transition:.2s}
+.btn-ghost:hover{color:var(--text)}
+.hero-stats{display:flex;gap:40px;margin-top:48px;padding-top:32px;border-top:1px solid var(--line)}
+.hero-stat .val{font-family:var(--mono);font-size:1.6rem;font-weight:700;color:var(--text)}
+.hero-stat .lbl{font-size:.65rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);margin-top:4px}
+
+/* Hero chart */
+.hero-chart{position:relative;display:flex;align-items:center;justify-content:center}
+.chart-frame{position:relative;width:100%;aspect-ratio:4/3;background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r);overflow:hidden;padding:32px 24px 24px}
+.chart-frame::before{content:"PORTFOLIO PERFORMANCE";position:absolute;top:14px;left:24px;font-size:.55rem;font-weight:700;letter-spacing:.2em;color:var(--text3)}
+.chart-frame .chart-val{position:absolute;top:14px;right:24px;font-family:var(--mono);font-size:.85rem;font-weight:700;color:var(--green)}
+.chart-svg{width:100%;height:100%}
+@media(max-width:900px){.hero .wrap{grid-template-columns:1fr}.hero-chart{order:-1}}
+
+/* ─── SECTION COMMON ─── */
+section{padding:100px 0}
+.section-label{font-size:.6rem;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--blue3);margin-bottom:12px}
+.section-title{font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:800;letter-spacing:-.02em;line-height:1.15;margin-bottom:16px}
+.section-sub{font-size:1rem;color:var(--text2);max-width:560px;line-height:1.7}
+
+/* ─── CALCULATOR ─── */
+.calc{position:relative}
+.calc::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:1px;height:100%;background:linear-gradient(transparent,var(--line2) 20%,var(--line2) 80%,transparent);pointer-events:none}
+.calc .wrap{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+.calc-head{margin-bottom:40px}
+.calc-grid{display:grid;gap:28px}
+.slider-group{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r2);padding:24px}
+.slider-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px}
+.slider-label{font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text2)}
+.slider-val{font-family:var(--mono);font-size:1.3rem;font-weight:700;color:var(--text)}
+.slider-track{position:relative}
+.slider-range{width:100%}
+.slider-marks{display:flex;justify-content:space-between;margin-top:8px;font-size:.6rem;color:var(--text3);font-family:var(--mono)}
+
+/* Result card */
+.calc-result{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:40px;text-align:center;position:sticky;top:100px}
+.result-label{font-size:.6rem;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.result-amount{font-family:var(--mono);font-size:clamp(2.2rem,5vw,3.6rem);font-weight:700;color:var(--green);line-height:1.1;margin-bottom:4px;transition:.3s}
+.result-sub{font-size:.85rem;color:var(--text2);margin-bottom:28px}
+.result-breakdown{display:grid;grid-template-columns:1fr 1fr;gap:16px;text-align:left}
+.rbd-item{background:rgba(255,255,255,.03);border-radius:10px;padding:16px}
+.rbd-item .rbl{font-size:.58rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.rbd-item .rbv{font-family:var(--mono);font-size:1.1rem;font-weight:700;color:var(--text)}
+.rbd-item .rbv.blue{color:var(--blue3)}
+.rbd-item .rbv.green{color:var(--green2)}
+@media(max-width:900px){.calc .wrap{grid-template-columns:1fr}.calc-result{position:static}}
+
+/* ─── DASHBOARD ─── */
+.dash{background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.dash .wrap{display:grid;gap:24px}
+.bento{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.bento-card{background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:28px}
+.bento-card h3{font-size:.82rem;font-weight:700;letter-spacing:.08em;margin-bottom:24px}
+@media(max-width:768px){.bento{grid-template-columns:1fr}}
+
+/* Ring chart */
+.ring-wrap{display:flex;align-items:center;gap:32px}
+.ring-svg{width:160px;height:160px;flex:none}
+.ring-legend{display:flex;flex-direction:column;gap:12px}
+.ring-item{display:flex;align-items:center;gap:10px}
+.ring-dot{width:10px;height:10px;border-radius:3px;flex:none}
+.ring-item .rl{font-size:.75rem;color:var(--text2)}
+.ring-item .rv{font-family:var(--mono);font-size:.85rem;font-weight:700;margin-left:auto}
+
+/* Table */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th{text-align:left;font-size:.58rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);padding:0 16px 14px;border-bottom:1px solid var(--line2)}
+td{padding:14px 16px;border-bottom:1px solid var(--line);color:var(--text2)}
+tr:last-child td{border-bottom:0}
+tr:hover td{background:rgba(255,255,255,.02)}
+td.mono{font-family:var(--mono);font-weight:600}
+td.pos{color:var(--green)}
+td.neg{color:var(--red)}
+td .badge{display:inline-block;font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:40px}
+.badge-buy{background:var(--greenG);color:var(--green)}
+.badge-sell{background:var(--redG);color:var(--red)}
+.badge-div{background:var(--blueG);color:var(--blue3)}
+.tbl-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.tbl-head h3{margin-bottom:0}
+.tbl-sort{display:flex;gap:8px}
+.tbl-sort button{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 14px;border:1px solid var(--line);border-radius:6px;color:var(--text3);transition:.2s}
+.tbl-sort button.on{border-color:var(--blue);color:var(--blue);background:var(--blueG)}
+
+/* ─── FOOTER ─── */
+footer{padding:60px 0 40px;border-top:1px solid var(--line)}
+.footer .wrap{display:flex;justify-content:space-between;align-items:start;flex-wrap:wrap;gap:32px}
+.footer-left .logo{margin-bottom:12px}
+.footer-left p{font-size:.78rem;color:var(--text3);max-width:320px;line-height:1.7}
+.footer-links{display:flex;gap:48px}
+.footer-col h4{font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:16px}
+.footer-col a{display:block;font-size:.82rem;color:var(--text2);margin-bottom:10px;transition:.2s}
+.footer-col a:hover{color:var(--text)}
+.footer-bottom{margin-top:40px;padding-top:24px;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-size:.7rem;color:var(--text3)}
+
+/* ─── REVEAL ─── */
+.rv{opacity:0;transform:translateY(30px);transition:opacity .7s,transform .7s}
+.rv.on{opacity:1;transform:none}
+
+/* ─── TRUST BAR ─── */
+.trust{padding:60px 0;border-bottom:1px solid var(--line)}
+.trust .wrap{text-align:center}
+.trust-label{font-size:.58rem;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--text3);margin-bottom:32px}
+.trust-logos{display:flex;justify-content:center;align-items:center;gap:48px;flex-wrap:wrap;opacity:.45}
+.trust-logo{font-size:1rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);white-space:nowrap}
+.trust-logo span{color:var(--blue3);font-weight:400}
+
+/* ─── SERVICES ─── */
+.services{position:relative}
+.services-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:48px}
+.svc-card{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:32px 28px;transition:.3s;position:relative;overflow:hidden}
+.svc-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--blue);transform:scaleX(0);transform-origin:left;transition:.4s}
+.svc-card:hover{border-color:var(--line2);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.3)}
+.svc-card:hover::before{transform:scaleX(1)}
+.svc-icon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;margin-bottom:20px;font-size:1.3rem}
+.svc-icon.blue{background:var(--blueG);color:var(--blue3)}
+.svc-icon.green{background:var(--greenG);color:var(--green2)}
+.svc-icon.amber{background:rgba(245,158,11,.1);color:#F59E0B}
+.svc-icon.purple{background:rgba(139,92,246,.1);color:#A78BFA}
+.svc-card h3{font-size:.92rem;font-weight:700;margin-bottom:10px}
+.svc-card p{font-size:.82rem;color:var(--text2);line-height:1.7}
+.svc-card .svc-link{display:inline-flex;align-items:center;gap:6px;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue3);margin-top:18px;transition:.2s}
+.svc-card:hover .svc-link{gap:10px}
+@media(max-width:900px){.services-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.services-grid{grid-template-columns:1fr}}
+
+/* ─── PERFORMANCE ─── */
+.perf{background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.perf-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:48px}
+.perf-kpi{background:var(--bg);border:1px solid var(--line);border-radius:var(--r2);padding:28px 24px}
+.perf-kpi .pk-label{font-size:.56rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.perf-kpi .pk-val{font-family:var(--mono);font-size:1.8rem;font-weight:700;margin-bottom:4px}
+.perf-kpi .pk-sub{font-size:.72rem;color:var(--text2)}
+.perf-kpi .pk-spark{margin-top:16px;height:40px}
+@media(max-width:768px){.perf-grid{grid-template-columns:repeat(2,1fr)}}
+.perf-chart-wrap{margin-top:32px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:32px}
+.perf-chart-wrap h3{font-size:.82rem;font-weight:700;margin-bottom:24px}
+.perf-chart-tabs{display:flex;gap:8px;margin-bottom:24px}
+.perf-tab{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:8px 16px;border:1px solid var(--line);border-radius:6px;color:var(--text3);transition:.2s}
+.perf-tab.on{border-color:var(--blue);color:var(--blue);background:var(--blueG)}
+.perf-tab:hover{border-color:var(--line2);color:var(--text2)}
+.perf-canvas{width:100%;height:280px}
+
+/* ─── STRATEGIES ─── */
+.strat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px}
+.strat-card{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:32px;transition:.3s}
+.strat-card:hover{border-color:var(--line2);transform:translateY(-3px)}
+.strat-tag{display:inline-block;font-size:.55rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:5px 12px;border-radius:40px;margin-bottom:16px}
+.strat-tag.eq{background:var(--blueG);color:var(--blue3)}
+.strat-tag.fi{background:var(--greenG);color:var(--green2)}
+.strat-tag.alt{background:rgba(245,158,11,.1);color:#F59E0B}
+.strat-tag.re{background:rgba(139,92,246,.1);color:#A78BFA}
+.strat-tag.pc{background:rgba(236,72,153,.1);color:#F472B6}
+.strat-tag.mc{background:rgba(20,184,166,.1);color:#2DD4BF}
+.strat-card h3{font-size:1.05rem;font-weight:700;margin-bottom:10px}
+.strat-card>p{font-size:.82rem;color:var(--text2);line-height:1.7;margin-bottom:20px}
+.strat-metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.strat-metric{background:rgba(255,255,255,.03);border-radius:8px;padding:12px}
+.strat-metric .sm-l{font-size:.52rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--text3)}
+.strat-metric .sm-v{font-family:var(--mono);font-size:.92rem;font-weight:700;color:var(--text);margin-top:2px}
+@media(max-width:900px){.strat-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:580px){.strat-grid{grid-template-columns:1fr}}
+
+/* ─── RESEARCH ─── */
+.research{background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.res-grid{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:20px;margin-top:48px}
+.res-card{background:var(--bg);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;transition:.3s}
+.res-card:hover{border-color:var(--line2);transform:translateY(-3px)}
+.res-card.featured{grid-row:span 2}
+.res-img{width:100%;aspect-ratio:16/9;object-fit:cover;border-bottom:1px solid var(--line)}
+.res-card.featured .res-img{aspect-ratio:auto;height:50%}
+.res-body{padding:24px}
+.res-cat{font-size:.55rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--blue3);margin-bottom:8px}
+.res-body h3{font-size:1.05rem;font-weight:700;line-height:1.35;margin-bottom:10px}
+.res-body p{font-size:.82rem;color:var(--text2);line-height:1.7}
+.res-meta{display:flex;justify-content:space-between;align-items:center;margin-top:16px;font-size:.68rem;color:var(--text3)}
+.res-meta .read{font-weight:700;color:var(--blue3)}
+@media(max-width:768px){.res-grid{grid-template-columns:1fr}.res-card.featured{grid-row:auto}}
+
+/* ─── PROCESS ─── */
+.process-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:48px;position:relative}
+.process-steps::before{content:"";position:absolute;top:36px;left:calc(12.5% + 10px);right:calc(12.5% + 10px);height:2px;background:var(--line2)}
+.proc-step{text-align:center;position:relative;z-index:2}
+.proc-num{width:56px;height:56px;border-radius:50%;background:var(--bg2);border:2px solid var(--line2);display:inline-grid;place-items:center;font-family:var(--mono);font-size:1.1rem;font-weight:700;color:var(--blue3);margin-bottom:20px;transition:.3s}
+.proc-step:hover .proc-num{background:var(--blue);border-color:var(--blue);color:#fff}
+.proc-step h3{font-size:.92rem;font-weight:700;margin-bottom:8px}
+.proc-step p{font-size:.78rem;color:var(--text2);line-height:1.6;max-width:240px;margin:0 auto}
+@media(max-width:768px){.process-steps{grid-template-columns:1fr 1fr}.process-steps::before{display:none}}
+@media(max-width:480px){.process-steps{grid-template-columns:1fr}}
+
+/* ─── LEADERSHIP ─── */
+.team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:48px}
+.team-card{text-align:center}
+.team-avatar{width:100%;aspect-ratio:1;border-radius:var(--r);object-fit:cover;margin-bottom:16px;border:1px solid var(--line)}
+.team-card h3{font-size:.92rem;font-weight:700;margin-bottom:4px}
+.team-card .tc-role{font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--blue3);margin-bottom:8px}
+.team-card p{font-size:.78rem;color:var(--text2);line-height:1.6}
+.team-socials{display:flex;justify-content:center;gap:12px;margin-top:12px}
+.team-socials a{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);display:grid;place-items:center;font-size:.72rem;color:var(--text3);transition:.2s}
+.team-socials a:hover{border-color:var(--blue);color:var(--blue)}
+@media(max-width:768px){.team-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.team-grid{grid-template-columns:1fr}}
+
+/* ─── TESTIMONIALS ─── */
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px}
+.testi-card{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:32px;display:flex;flex-direction:column}
+.testi-stars{font-size:.85rem;color:#F59E0B;margin-bottom:16px;letter-spacing:2px}
+.testi-card blockquote{font-size:.92rem;color:var(--text2);line-height:1.75;flex:1;font-style:italic;margin-bottom:20px}
+.testi-author{display:flex;align-items:center;gap:12px;border-top:1px solid var(--line);padding-top:16px}
+.testi-avatar{width:44px;height:44px;border-radius:50%;object-fit:cover}
+.testi-info .ti-name{font-size:.82rem;font-weight:700}
+.testi-info .ti-title{font-size:.68rem;color:var(--text3)}
+@media(max-width:768px){.testi-grid{grid-template-columns:1fr}}
+
+/* ─── FAQ ─── */
+.faq-list{max-width:800px;margin:48px auto 0}
+.faq-item{border-bottom:1px solid var(--line)}
+.faq-q{width:100%;text-align:left;padding:24px 0;font-size:1rem;font-weight:600;color:var(--text);display:flex;justify-content:space-between;align-items:center;gap:16px;transition:.2s}
+.faq-q:hover{color:var(--blue3)}
+.faq-q .faq-icon{font-size:1.4rem;color:var(--text3);transition:.3s;flex:none;line-height:1}
+.faq-item.open .faq-icon{transform:rotate(45deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .4s ease,padding .3s;padding:0 0}
+.faq-item.open .faq-a{max-height:500px;padding:0 0 24px}
+.faq-a p{font-size:.88rem;color:var(--text2);line-height:1.8}
+
+/* ─── CTA FINAL ─── */
+.cta-final{position:relative;overflow:hidden}
+.cta-final::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(37,99,235,.06) 0%,transparent 70%);pointer-events:none}
+.cta-box{background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1px solid var(--line2);border-radius:var(--r);padding:80px 60px;text-align:center;position:relative}
+.cta-box h2{font-size:clamp(2rem,4vw,3rem);font-weight:800;letter-spacing:-.02em;margin-bottom:16px}
+.cta-box p{font-size:1.05rem;color:var(--text2);max-width:520px;margin:0 auto 36px;line-height:1.7}
+.cta-form{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;max-width:520px;margin:0 auto}
+.cta-input{flex:1;min-width:240px;padding:16px 20px;background:var(--bg);border:1px solid var(--line2);border-radius:10px;color:var(--text);font-family:var(--serif);font-size:.92rem;outline:none;transition:.2s}
+.cta-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+.cta-input::placeholder{color:var(--text3)}
+.cta-submit{padding:16px 32px;background:var(--blue);border-radius:10px;font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fff;transition:.25s;white-space:nowrap}
+.cta-submit:hover{background:#1D4ED8;transform:translateY(-1px)}
+.cta-disclaimer{margin-top:20px;font-size:.68rem;color:var(--text3);max-width:600px;margin-left:auto;margin-right:auto}
+@media(max-width:580px){.cta-box{padding:48px 24px}}
+
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <div class="wrap">
+    <a href="#" class="logo">MERICIAN<em>&middot;</em></a>
+    <div class="nav-links">
+      <a href="#calc">Calculator</a>
+      <a href="#dashboard">Dashboard</a>
+      <a href="#">Research</a>
+      <a href="#" class="nav-cta">Request Access</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="wrap">
+    <div class="hero-txt">
+      <div class="hero-badge"><span class="dot"></span> Now Accepting Select Clients</div>
+      <h1>Capital Architecture<br>for the Modern Epoch.<span>Institutional strategies, private access.</span></h1>
+      <p class="hero-sub">We build custom portfolios using rigorous analysis across global asset classes.</p>
+      <div class="hero-btns">
+        <a href="#calc" class="btn-primary">Explore Projections <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
+        <a href="#dashboard" class="btn-ghost">View Dashboard &darr;</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="val">$__B</div><div class="lbl">Assets Under Advisement</div></div>
+        <div class="hero-stat"><div class="val">__._%</div><div class="lbl">Net IRR (5Y)</div></div>
+        <div class="hero-stat"><div class="val">___+</div><div class="lbl">Family Offices</div></div>
+      </div>
+    </div>
+    <div class="hero-chart">
+      <div class="chart-frame">
+        <span class="chart-val">+127.4%</span>
+        <svg class="chart-svg" id="heroChart" viewBox="0 0 400 260" preserveAspectRatio="none"></svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CALCULATOR -->
+<section class="calc" id="calc">
+  <div class="wrap">
+    <div>
+      <div class="calc-head rv">
+        <p class="section-label">Growth Projection</p>
+        <h2 class="section-title">Model Your Wealth Trajectory</h2>
+        <p class="section-sub">Adjust the parameters below to project compound growth across your investment horizon. All calculations reflect net-of-fee estimates.</p>
+      </div>
+      <div class="calc-grid">
+        <div class="slider-group rv">
+          <div class="slider-top">
+            <span class="slider-label">Initial Investment</span>
+            <span class="slider-val" id="vInit">$100,000</span>
+          </div>
+          <div class="slider-track">
+            <input type="range" id="sInit" class="slider-range" min="10000" max="1000000" step="5000" value="100000">
+            <div class="slider-marks"><span>$10k</span><span>$250k</span><span>$500k</span><span>$750k</span><span>$1M</span></div>
+          </div>
+        </div>
+        <div class="slider-group rv">
+          <div class="slider-top">
+            <span class="slider-label">Monthly Contribution</span>
+            <span class="slider-val" id="vMonth">$1,000</span>
+          </div>
+          <div class="slider-track">
+            <input type="range" id="sMonth" class="slider-range" min="0" max="10000" step="100" value="1000">
+            <div class="slider-marks"><span>$0</span><span>$2.5k</span><span>$5k</span><span>$7.5k</span><span>$10k</span></div>
+          </div>
+        </div>
+        <div class="slider-group rv">
+          <div class="slider-top">
+            <span class="slider-label">Time Horizon</span>
+            <span class="slider-val" id="vYears">10 Years</span>
+          </div>
+          <div class="slider-track">
+            <input type="range" id="sYears" class="slider-range" min="1" max="30" step="1" value="10">
+            <div class="slider-marks"><span>1yr</span><span>10</span><span>20</span><span>30</span></div>
+          </div>
+        </div>
+        <div class="slider-group rv">
+          <div class="slider-top">
+            <span class="slider-label">Assumed Annual Return</span>
+            <span class="slider-val" id="vRate">8.0%</span>
+          </div>
+          <div class="slider-track">
+            <input type="range" id="sRate" class="slider-range" min="2" max="20" step="0.5" value="8">
+            <div class="slider-marks"><span>2%</span><span>7%</span><span>12%</span><span>16%</span><span>20%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="calc-result rv" id="calcResult">
+      <p class="result-label">Projected Portfolio Value</p>
+      <div class="result-amount" id="rTotal">$0</div>
+      <p class="result-sub" id="rGrowth">+159.5% total growth over 10 years</p>
+      <div class="result-breakdown">
+        <div class="rbd-item"><div class="rbl">Principal Invested</div><div class="rbv blue" id="rPrincipal">$220,000</div></div>
+        <div class="rbd-item"><div class="rbl">Interest Earned</div><div class="rbv green" id="rInterest">$39,474</div></div>
+        <div class="rbd-item"><div class="rbl">Monthly Equiv.</div><div class="rbv" id="rMonthly">$2,162</div></div>
+        <div class="rbd-item"><div class="rbl">Annual Growth</div><div class="rbv" id="rAnnual">15.9%</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DASHBOARD -->
+<section class="dash" id="dashboard">
+  <div class="wrap">
+    <div class="rv" style="margin-bottom:40px">
+      <p class="section-label">Client Portal</p>
+      <h2 class="section-title">Portfolio Overview</h2>
+      <p class="section-sub">Real-time snapshot of your consolidated holdings and recent activity across all managed accounts.</p>
+    </div>
+    <div class="bento">
+      <!-- Ring chart -->
+      <div class="bento-card rv">
+        <h3>Asset Allocation</h3>
+        <div class="ring-wrap">
+          <svg class="ring-svg" id="ringChart" viewBox="0 0 160 160"></svg>
+          <div class="ring-legend" id="ringLegend"></div>
+        </div>
+      </div>
+      <!-- Transactions -->
+      <div class="bento-card rv">
+        <div class="tbl-head">
+          <h3>Recent Transactions</h3>
+          <div class="tbl-sort" id="tblSort">
+            <button class="on" data-s="date">Date</button>
+            <button data-s="amount">Amount</button>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Type</th><th>Details</th><th>Date</th><th style="text-align:right">Amount</th></tr></thead>
+            <tbody id="txBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+
+
+<!-- TRUST BAR -->
+<section class="trust rv">
+  <div class="wrap">
+    <p class="trust-label">Trusted by leading institutions</p>
+    <div class="trust-logos">
+      <div class="trust-logo">Global<span>Advisors</span></div>
+      <div class="trust-logo">Pinnacle<span>Wealth</span></div>
+      <div class="trust-logo">Ascent<span>Capital</span></div>
+      <div class="trust-logo">Meridian<span>Partners</span></div>
+      <div class="trust-logo">Apex<span>Holdings</span></div>
+      <div class="trust-logo">Sterling<span>Asset Mgmt</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="services" id="services">
+  <div class="wrap">
+    <div class="rv">
+      <p class="section-label">What We Do</p>
+      <h2 class="section-title">Comprehensive Wealth Architecture</h2>
+      <p class="section-sub">From quantitative portfolio construction to multi-generational estate planning, Meridian provides the full spectrum of private wealth services.</p>
+    </div>
+    <div class="services-grid">
+      <div class="svc-card rv">
+        <div class="svc-icon blue">&#9878;</div>
+        <h3>Portfolio Management</h3>
+        <p>Systematic, factor-driven portfolio construction across global asset classes with periodic rebalancing and risk management.</p>
+        <span class="svc-link">Learn more &rarr;</span>
+      </div>
+      <div class="svc-card rv">
+        <div class="svc-icon green">&#9733;</div>
+        <h3>Tax Optimization</h3>
+        <p>Tax-loss harvesting, asset location strategy, and Roth conversion modeling designed to minimize lifetime tax drag and improve after-tax returns.</p>
+        <span class="svc-link">Learn more &rarr;</span>
+      </div>
+      <div class="svc-card rv">
+        <div class="svc-icon amber">&#9879;</div>
+        <h3>Estate Structuring</h3>
+        <p>Trust design, generation-skipping transfers, and philanthropic vehicles coordinated with your legal counsel to preserve dynastic wealth.</p>
+        <span class="svc-link">Learn more &rarr;</span>
+      </div>
+      <div class="svc-card rv">
+        <div class="svc-icon purple">&#9881;</div>
+        <h3>Risk Management</h3>
+        <p>Tail-risk hedging via options overlays, volatility budgeting, and scenario stress-testing across multiple macroeconomic risk factors.</p>
+        <span class="svc-link">Learn more &rarr;</span>
+      </div>
+      <div class="svc-card rv">
+        <div class="svc-icon green">&#9830;</div>
+        <h3>Private Markets</h3>
+        <p>Curated access to private market opportunities typically reserved for institutional allocators.</p>
+        <span class="svc-link">Learn more &rarr;</span>
+      </div>
+      <div class="svc-card rv">
+        <div class="svc-icon blue">&#9827;</div>
+        <h3>Fixed Income</h3>
+        <p>Bond ladders, tax-aware fixed income, and duration management calibrated to your cash flow needs.</p>
+        <span class="svc-link">Learn more &rarr;</span>
+      </div>
+      <div class="svc-card rv">
+        <div class="svc-icon amber">&#9764;</div>
+        <h3>Real Assets</h3>
+        <p>Real asset allocations for inflation protection and non-correlated return streams.</p>
+        <span class="svc-link">Learn more &rarr;</span>
+      </div>
+      <div class="svc-card rv">
+        <div class="svc-icon purple">&#9823;</div>
+        <h3>Family Office Services</h3>
+        <p>Consolidated reporting, cash management, and family financial education programs.</p>
+        <span class="svc-link">Learn more &rarr;</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PERFORMANCE -->
+<section class="perf" id="performance">
+  <div class="wrap">
+    <div class="rv">
+      <p class="section-label">Track Record</p>
+      <h2 class="section-title">Performance That Compounds Trust</h2>
+      <p class="section-sub">Net-of-fee returns across our flagship mandates, reviewed by an independent third-party administrator.</p>
+    </div>
+    <div class="perf-grid">
+      <div class="perf-kpi rv">
+        <div class="pk-label">Flagship Balanced</div>
+        <div class="pk-val" style="color:var(--green)">+__._%</div>
+        <div class="pk-sub">5Y Net IRR</div>
+        <div class="pk-spark"><canvas id="spark1" width="200" height="40"></canvas></div>
+      </div>
+      <div class="perf-kpi rv">
+        <div class="pk-label">Global Equity</div>
+        <div class="pk-val" style="color:var(--green)">+__._%</div>
+        <div class="pk-sub">5Y Net IRR</div>
+        <div class="pk-spark"><canvas id="spark2" width="200" height="40"></canvas></div>
+      </div>
+      <div class="perf-kpi rv">
+        <div class="pk-label">Absolute Return</div>
+        <div class="pk-val" style="color:var(--green)">+__._%</div>
+        <div class="pk-sub">5Y Net IRR</div>
+        <div class="pk-spark"><canvas id="spark3" width="200" height="40"></canvas></div>
+      </div>
+      <div class="perf-kpi rv">
+        <div class="pk-label">Client Retention</div>
+        <div class="pk-val">__._%</div>
+        <div class="pk-sub">Rolling 3-year average</div>
+        <div class="pk-spark"><canvas id="spark4" width="200" height="40"></canvas></div>
+      </div>
+    </div>
+    <div class="perf-chart-wrap rv">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px">
+        <h3>Cumulative Growth of $1M &middot; Since Inception</h3>
+        <div class="perf-chart-tabs" id="perfTabs">
+          <button class="perf-tab" data-p="1y">1Y</button>
+          <button class="perf-tab on" data-p="3y">3Y</button>
+          <button class="perf-tab" data-p="5y">5Y</button>
+          <button class="perf-tab" data-p="all">Since Inception</button>
+        </div>
+      </div>
+      <canvas class="perf-canvas" id="perfCanvas"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- STRATEGIES -->
+<section class="strategies" id="strategies">
+  <div class="wrap">
+    <div class="rv">
+      <p class="section-label">Investment Strategies</p>
+      <h2 class="section-title">Precision-Engineered Mandates</h2>
+      <p class="section-sub">Multiple strategies with distinct factor profiles, designed to be combined into a custom allocation tailored to your objectives.</p>
+    </div>
+    <div class="strat-grid">
+      <div class="strat-card rv">
+        <span class="strat-tag eq">Equities</span>
+        <h3>Global Alpha</h3>
+        <p>Stock selection across developed and emerging markets with quality, momentum, and value factor tilts.</p>
+        <div class="strat-metrics">
+          <div class="strat-metric"><div class="sm-l">3Y Return</div><div class="sm-v" style="color:var(--green)">+__._%</div></div>
+          <div class="strat-metric"><div class="sm-l">Volatility</div><div class="sm-v">__._%</div></div>
+          <div class="strat-metric"><div class="sm-l">Sharpe</div><div class="sm-v">_.__</div></div>
+          <div class="strat-metric"><div class="sm-l">Max DD</div><div class="sm-v" style="color:var(--red)">-__._%</div></div>
+        </div>
+      </div>
+      <div class="strat-card rv">
+        <span class="strat-tag fi">Fixed Income</span>
+        <h3>Yield Architecture</h3>
+        <p>Investment-grade core with opportunistic credit exposure and duration management.</p>
+        <div class="strat-metrics">
+          <div class="strat-metric"><div class="sm-l">3Y Return</div><div class="sm-v" style="color:var(--green)">+__._%</div></div>
+          <div class="strat-metric"><div class="sm-l">Volatility</div><div class="sm-v">_._%</div></div>
+          <div class="strat-metric"><div class="sm-l">Sharpe</div><div class="sm-v">_.__</div></div>
+          <div class="strat-metric"><div class="sm-l">Max DD</div><div class="sm-v" style="color:var(--red)">-_._%</div></div>
+        </div>
+      </div>
+      <div class="strat-card rv">
+        <span class="strat-tag alt">Alternatives</span>
+        <h3>Meridian Event</h3>
+        <p>Multi-strategy event-driven: merger arbitrage, distressed debt, special situations.</p>
+        <div class="strat-metrics">
+          <div class="strat-metric"><div class="sm-l">3Y Return</div><div class="sm-v" style="color:var(--green)">+__._%</div></div>
+          <div class="strat-metric"><div class="sm-l">Volatility</div><div class="sm-v">_._%</div></div>
+          <div class="strat-metric"><div class="sm-l">Sharpe</div><div class="sm-v">_.__</div></div>
+          <div class="strat-metric"><div class="sm-l">Max DD</div><div class="sm-v" style="color:var(--red)">-_._%</div></div>
+        </div>
+      </div>
+      <div class="strat-card rv">
+        <span class="strat-tag re">Real Assets</span>
+        <h3>Tangible Yield</h3>
+        <p>Direct real estate equity and debt, infrastructure, and natural resources with inflation-linked cash flows.</p>
+        <div class="strat-metrics">
+          <div class="strat-metric"><div class="sm-l">3Y Return</div><div class="sm-v" style="color:var(--green)">+__._%</div></div>
+          <div class="strat-metric"><div class="sm-l">Volatility</div><div class="sm-v">_._%</div></div>
+          <div class="strat-metric"><div class="sm-l">Sharpe</div><div class="sm-v">_.__</div></div>
+          <div class="strat-metric"><div class="sm-l">Max DD</div><div class="sm-v" style="color:var(--red)">-_._%</div></div>
+        </div>
+      </div>
+      <div class="strat-card rv">
+        <span class="strat-tag pc">Private Credit</span>
+        <h3>Direct Lending</h3>
+        <p>Senior-secured lending to middle-market enterprises with floating-rate structures.</p>
+        <div class="strat-metrics">
+          <div class="strat-metric"><div class="sm-l">3Y Return</div><div class="sm-v" style="color:var(--green)">+__._%</div></div>
+          <div class="strat-metric"><div class="sm-l">Volatility</div><div class="sm-v">_._%</div></div>
+          <div class="strat-metric"><div class="sm-l">Sharpe</div><div class="sm-v">_.__</div></div>
+          <div class="strat-metric"><div class="sm-l">Max DD</div><div class="sm-v" style="color:var(--red)">-_._%</div></div>
+        </div>
+      </div>
+      <div class="strat-card rv">
+        <span class="strat-tag mc">Macro &amp; Currencies</span>
+        <h3>Global Macro</h3>
+        <p>Systematic and discretionary macro overlay across rates, currencies, and commodities.</p>
+        <div class="strat-metrics">
+          <div class="strat-metric"><div class="sm-l">3Y Return</div><div class="sm-v" style="color:var(--green)">+__._%</div></div>
+          <div class="strat-metric"><div class="sm-l">Volatility</div><div class="sm-v">_._%</div></div>
+          <div class="strat-metric"><div class="sm-l">Sharpe</div><div class="sm-v">_.__</div></div>
+          <div class="strat-metric"><div class="sm-l">Max DD</div><div class="sm-v" style="color:var(--red)">-_._%</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESEARCH -->
+<section class="research" id="research">
+  <div class="wrap">
+    <div class="rv">
+      <p class="section-label">Market Intelligence</p>
+      <h2 class="section-title">Insights &amp; Research</h2>
+      <p class="section-sub">Proprietary analysis from our investment team, published weekly for institutional clients and select family offices.</p>
+    </div>
+    <div class="res-grid">
+      <div class="res-card featured rv">
+        <img class="res-img" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&h=600&fit=crop" alt="Market outlook" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&h=600&fit=crop'}">
+        <div class="res-body">
+          <div class="res-cat">Quarterly Outlook</div>
+          <h3>Navigating the Rate Inflection: Q3 2026 Market Outlook</h3>
+          <p>Add your market commentary and analysis here. Discuss current conditions and their implications for portfolios.</p>
+          <div class="res-meta"><span>Date &middot; Read time</span><span class="read">Read Report &rarr;</span></div>
+        </div>
+      </div>
+      <div class="res-card rv">
+        <img class="res-img" src="https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=600&h=400&fit=crop" alt="AI investing" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=600&h=400&fit=crop'}">
+        <div class="res-body">
+          <div class="res-cat">Thematic Research</div>
+          <h3>AI Infrastructure: Separating Signal from Noise</h3>
+          <p>Add your thematic research content here. Present your analysis and investment thesis.</p>
+          <div class="res-meta"><span>Date &middot; Read time</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </div>
+      <div class="res-card rv">
+        <img class="res-img" src="https://images.unsplash.com/photo-1553729459-afe8f2e2e23d?w=600&h=400&fit=crop" alt="Fixed income" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?w=600&h=400&fit=crop'}">
+        <div class="res-body">
+          <div class="res-cat">Fixed Income</div>
+          <h3>Private Credit in a Lower-Rate World</h3>
+          <p>Add your fixed income research here. Present your outlook and positioning recommendations.</p>
+          <div class="res-meta"><span>Date &middot; Read time</span><span class="read">Read &rarr;</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section class="process" id="process">
+  <div class="wrap">
+    <div class="rv" style="text-align:center">
+      <p class="section-label">How It Works</p>
+      <h2 class="section-title">Four Steps to Institutional Access</h2>
+      <p class="section-sub" style="margin:0 auto">From initial consultation to portfolio deployment, our onboarding process is designed to be thorough and deliberate.</p>
+    </div>
+    <div class="process-steps">
+      <div class="proc-step rv">
+        <div class="proc-num">01</div>
+        <h3>Discovery</h3>
+        <p>An initial consultation to understand your financial landscape, objectives, constraints, and liquidity needs.</p>
+      </div>
+      <div class="proc-step rv">
+        <div class="proc-num">02</div>
+        <h3>Architecture</h3>
+        <p>Our investment committee designs a bespoke asset allocation with tax overlay, estate integration, and risk parameters.</p>
+      </div>
+      <div class="proc-step rv">
+        <div class="proc-num">03</div>
+        <h3>Deployment</h3>
+        <p>Phased implementation with institutional execution, minimizing market impact and tax realization.</p>
+      </div>
+      <div class="proc-step rv">
+        <div class="proc-num">04</div>
+        <h3>Stewardship</h3>
+        <p>Ongoing monitoring with quarterly reviews, annual re-optimization, and 24/7 access to your dedicated relationship manager.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq" id="faq">
+  <div class="wrap">
+    <div class="rv" style="text-align:center">
+      <p class="section-label">Frequently Asked</p>
+      <h2 class="section-title">Common Questions</h2>
+    </div>
+    <div class="faq-list rv">
+      <div class="faq-item">
+        <button class="faq-q" type="button">What is the minimum investment to open an account?<span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>Minimum investment requirements vary by service tier. Contact our advisory team for specific details and to discuss your situation.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" type="button">How are your fees structured?<span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>Our fee structure is transparent and disclosed during the consultation process. There are no hidden charges or revenue-sharing arrangements.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" type="button">What custodian do you use?<span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>All client assets are held at a qualified third-party custodian, ensuring segregation and protection independent of our firm.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" type="button">Can I transfer existing positions in-kind?<span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>Yes. We routinely accept in-kind transfers of securities from other custodians. Our operations team manages the entire transfer process and conducts a tax-aware transition analysis before any position is moved.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" type="button">How often will I meet with my advisor?<span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>All clients receive regular portfolio reviews and have access to their dedicated advisor. Annual reviews include a comprehensive financial plan update.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" type="button">Are you a fiduciary?<span class="faq-icon">+</span></button>
+        <div class="faq-a"><p>Absolutely. We operate under the fiduciary standard at all times, legally obligated to act in your best interest and disclose all material conflicts.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-final rv">
+  <div class="wrap">
+    <div class="cta-box">
+      <h2>Begin Your Meridian Journey</h2>
+      <p>Schedule a confidential consultation with our advisory team. No obligation, no pressure &mdash; just a conversation about your financial future.</p>
+      <form class="cta-form" onsubmit="return false">
+        <input class="cta-input" type="email" placeholder="Enter your email address" aria-label="Email address">
+        <button class="cta-submit" type="submit">Request Access</button>
+      </form>
+      <p class="cta-disclaimer">By submitting, you agree to receive follow-up communication. We never share your information with third parties. See our <a href="#">Privacy Policy</a>.</p>
+    </div>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-left">
+      <div class="logo">MERIDIAN<em>&middot;</em></div>
+      <p>Your firm description goes here. Add your value proposition and service overview.</p>
+    </div>
+    <div class="footer-links">
+      <div class="footer-col"><h4>Platform</h4><a href="#">Portfolio</a><a href="#">Analytics</a><a href="#">Research</a><a href="#">API Access</a></div>
+      <div class="footer-col"><h4>Company</h4><a href="#">About</a><a href="#">Careers</a><a href="#">Press</a><a href="#">Contact</a></div>
+      <div class="footer-col"><h4>Legal</h4><a href="#">Privacy Policy</a><a href="#">Terms of Service</a><a href="#">Disclosures</a><a href="#">ADV Part 2</a></div>
+    </div>
+  </div>
+  <div class="wrap footer-bottom">
+    <span>&copy; ____ Your Company Name. All rights reserved.</span>
+    <span>Add your regulatory disclaimers and registrations here</span>
+  </div>
+</footer>
+
+</body>
+</html>
+<script>
+const $=s=>document.querySelector(s);
+const $$=s=>document.querySelectorAll(s);
+
+function fmt(n){
+  if(n>=1e6)return"$"+(n/1e6).toFixed(2)+"M";
+  if(n>=1e3)return"$"+Math.round(n).toLocaleString("en-US");
+  return"$"+n.toFixed(0);
+}
+function fmtFull(n){return"$"+Math.round(n).toLocaleString("en-US")}
+
+/* ─── CALCULATOR ─── */
+const sInit=$("#sInit"),sMonth=$("#sMonth"),sYears=$("#sYears"),sRate=$("#sRate");
+const vInit=$("#vInit"),vMonth=$("#vMonth"),vYears=$("#vYears"),vRate=$("#vRate");
+
+function compound(P,M,r,yrs){
+  const n=yrs*12,monthly=r/12/100;
+  if(monthly===0)return P+M*n;
+  return P*Math.pow(1+monthly,n)+M*((Math.pow(1+monthly,n)-1)/monthly);
+}
+
+function recalc(){
+  const P=+sInit.value,M=+sMonth.value,yrs=+sYears.value,r=+sRate.value;
+  const total=compound(P,M,r,yrs);
+  const principal=P+M*yrs*12;
+  const interest=total-principal;
+  const growthPct=((total-principal)/principal*100);
+  const annualGrowth=(Math.pow(total/principal,1/yrs)-1)*100;
+
+  vInit.textContent=fmtFull(P);
+  vMonth.textContent=fmtFull(M);
+  vYears.textContent=yrs+" Year"+(yrs>1?"s":"");
+  vRate.textContent=r.toFixed(1)+"%";
+
+  $("#rTotal").textContent=fmt(total);
+  $("#rGrowth").textContent="+"+growthPct.toFixed(1)+"% total growth over "+yrs+" year"+(yrs>1?"s":"");
+  $("#rPrincipal").textContent=fmtFull(principal);
+  $("#rInterest").textContent=fmtFull(interest);
+  $("#rMonthly").textContent=fmtFull(total/(yrs*12));
+  $("#rAnnual").textContent=annualGrowth.toFixed(1)+"%";
+
+  drawCalcChart(P,M,r,yrs);
+}
+
+[sInit,sMonth,sYears,sRate].forEach(s=>s.addEventListener("input",recalc));
+
+/* mini growth chart inside result card */
+function drawCalcChart(P,M,r,yrs){
+  const el=document.getElementById("calcResult");
+  let canvas=el.querySelector(".mini-chart");
+  if(!canvas){
+    canvas=document.createElement("canvas");
+    canvas.className="mini-chart";
+    canvas.style.cssText="width:100%;height:80px;margin-top:20px;border-radius:8px;opacity:.7";
+    el.appendChild(canvas);
+  }
+  const ctx=canvas.getContext("2d");
+  const W=canvas.width=canvas.offsetWidth*2;
+  const H=canvas.height=160;
+  ctx.clearRect(0,0,W,H);
+
+  const pts=[];
+  for(let m=0;m<=yrs*12;m++){
+    const monthly=r/12/100;
+    const val=monthly===0?P+M*m:P*Math.pow(1+monthly,m)+M*((Math.pow(1+monthly,m)-1)/monthly);
+    pts.push(val);
+  }
+  const max=Math.max(...pts),min=Math.min(...pts);
+  const pad=8;
+
+  ctx.beginPath();
+  pts.forEach((v,i)=>{
+    const x=pad+i/(pts.length-1)*(W-pad*2);
+    const y=H-pad-(v-min)/(max-min||1)*(H-pad*2);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle="#10B981";ctx.lineWidth=2;ctx.stroke();
+
+  const grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,"rgba(16,185,129,.2)");grad.addColorStop(1,"rgba(16,185,129,0)");
+  ctx.lineTo(W-pad,H-pad);ctx.lineTo(pad,H-pad);ctx.closePath();
+  ctx.fillStyle=grad;ctx.fill();
+}
+
+recalc();
+
+/* ─── HERO CHART ─── */
+function initHeroChart(){
+  const svg=$("#heroChart");
+  const W=400,H=260,pad=20;
+  const pts=36;
+  const data=[];
+  let v=100;
+  for(let i=0;i<pts;i++){
+    v+=Math.random()*8-2.5;
+    v=Math.max(60,Math.min(160,v));
+    data.push(v);
+  }
+  data[data.length-1]=155;
+
+  const toX=i=>pad+i/(pts-1)*(W-pad*2);
+  const toY=v=>H-pad-(v-40)/130*(H-pad*2);
+
+  let d="M"+data.map((v,i)=>toX(i)+","+toY(v)).join(" L");
+
+  const bg=document.createElementNS("http://www.w3.org/2000/svg","path");
+  bg.setAttribute("d",d+" L"+toX(pts-1)+","+H-pad+" L"+pad+","+H-pad+" Z");
+  bg.setAttribute("fill","url(#heroGrad)");bg.setAttribute("opacity","0");
+  svg.appendChild(bg);
+
+  const grad=document.createElementNS("http://www.w3.org/2000/svg","linearGradient");
+  grad.setAttribute("id","heroGrad");grad.setAttribute("x1","0");grad.setAttribute("y1","0");grad.setAttribute("x2","0");grad.setAttribute("y2","1");
+  const s1=document.createElementNS("http://www.w3.org/2000/svg","stop");
+  s1.setAttribute("offset","0%");s1.setAttribute("stop-color","#2563EB");s1.setAttribute("stop-opacity","0.25");
+  const s2=document.createElementNS("http://www.w3.org/2000/svg","stop");
+  s2.setAttribute("offset","100%");s2.setAttribute("stop-color","#2563EB");s2.setAttribute("stop-opacity","0");
+  grad.appendChild(s1);grad.appendChild(s2);
+  svg.appendChild(grad);
+
+  const line=document.createElementNS("http://www.w3.org/2000/svg","path");
+  line.setAttribute("d",d);
+  line.setAttribute("fill","none");line.setAttribute("stroke","#3B82F6");line.setAttribute("stroke-width","2.5");
+  line.setAttribute("stroke-linecap","round");
+  const len=line.getTotalLength?1500:1500;
+  line.style.strokeDasharray=len;line.style.strokeDashoffset=len;line.style.transition="stroke-dashoffset 2s ease";
+  svg.appendChild(line);
+
+  data.forEach((v,i)=>{
+    if(i%(Math.floor(pts/5))!==0&&i!==pts-1)return;
+    const c=document.createElementNS("http://www.w3.org/2000/svg","circle");
+    c.setAttribute("cx",toX(i));c.setAttribute("cy",toY(v));c.setAttribute("r","3.5");
+    c.setAttribute("fill","#0B132B");c.setAttribute("stroke","#60A5FA");c.setAttribute("stroke-width","2");
+    c.setAttribute("opacity","0");c.style.transition="opacity .4s "+(0.8+i*0.05)+"s";
+    svg.appendChild(c);
+  });
+
+  requestAnimationFrame(()=>{requestAnimationFrame(()=>{
+    line.style.strokeDashoffset="0";
+    bg.setAttribute("opacity","1");bg.style.transition="opacity 1s .5s";
+    svg.querySelectorAll("circle").forEach(c=>c.setAttribute("opacity","1"));
+  })});
+}
+
+/* ─── RING CHART ─── */
+function initRing(){
+  const data=[
+    {label:"Equities",pct:60,color:"#2563EB"},
+    {label:"Fixed Income",pct:30,color:"#10B981"},
+    {label:"Alternatives",pct:10,color:"#F59E0B"}
+  ];
+  const svg=$("#ringChart");
+  const cx=80,cy=80,r=56,w=14;
+  let cum=-90;
+  data.forEach(d=>{
+    const arc=d.pct/100*360;
+    const start=cum*Math.PI/180;
+    const end=(cum+arc)*Math.PI/180;
+    const large=arc>180?1:0;
+    const x1=cx+r*Math.cos(start),y1=cy+r*Math.sin(start);
+    const x2=cx+r*Math.cos(end),y2=cy+r*Math.sin(end);
+    const ri=r-w,x1i=cx+ri*Math.cos(start),y1i=cy+ri*Math.sin(start);
+    const x2i=cx+ri*Math.cos(end),y2i=cy+ri*Math.sin(end);
+    const path=document.createElementNS("http://www.w3.org/2000/svg","path");
+    path.setAttribute("d",`M${x1},${y1} A${r},${r},0,${large},1,${x2},${y2} L${x2i},${y2i} A${ri},${ri},0,${large},0,${x1i},${y1i} Z`);
+    path.setAttribute("fill",d.color);path.setAttribute("opacity","0");
+    path.style.transition="opacity .6s "+(0.2+cum/360)+"s";
+    svg.appendChild(path);
+    cum+=arc;
+  });
+  const center=document.createElementNS("http://www.w3.org/2000/svg","text");
+  center.setAttribute("x",cx);center.setAttribute("y",cy-6);center.setAttribute("text-anchor","middle");
+  center.setAttribute("fill","#fff");center.setAttribute("font-family","JetBrains Mono,monospace");
+  center.setAttribute("font-size","18");center.setAttribute("font-weight","700");center.textContent="$__B";
+  svg.appendChild(center);
+  const sub=document.createElementNS("http://www.w3.org/2000/svg","text");
+  sub.setAttribute("x",cx);sub.setAttribute("y",cy+14);sub.setAttribute("text-anchor","middle");
+  sub.setAttribute("fill","#94A3B8");sub.setAttribute("font-family","Inter,sans-serif");
+  sub.setAttribute("font-size","8");sub.setAttribute("letter-spacing","1.5");sub.textContent="TOTAL AUM";
+  svg.appendChild(sub);
+
+  const legend=$("#ringLegend");
+  data.forEach(d=>{
+    legend.innerHTML+=`<div class="ring-item"><span class="ring-dot" style="background:${d.color}"></span><span class="rl">${d.label}</span><span class="rv">${d.pct}%</span></div>`;
+  });
+
+  setTimeout(()=>svg.querySelectorAll("path").forEach(p=>p.setAttribute("opacity","1")),400);
+}
+
+/* ─── TRANSACTIONS TABLE ─── */
+const TX=[
+  {type:"buy",icon:"Bought",detail:"14 AAPL @ $198.42",date:"2026-08-29",amount:2777.88},
+  {type:"div",icon:"Dividend",detail:"MSFT quarterly dividend",date:"2026-08-28",amount:142.50},
+  {type:"buy",icon:"Bought",detail:"85 VTI @ $272.10",date:"2026-08-27",amount:23128.50},
+  {type:"sell",icon:"Sold",detail:"200 META @ $562.30",date:"2026-08-26",amount:112460.00},
+  {type:"buy",icon:"Bought",detail:"42 NVDA @ $138.75",date:"2026-08-25",amount:5827.50},
+  {type:"div",icon:"Dividend",detail:"VTI total market dividend",date:"2026-08-22",amount:89.30},
+  {type:"sell",icon:"Sold",detail:"50 TSLA @ $342.80",date:"2026-08-21",amount:17140.00},
+  {type:"buy",icon:"Bought",detail:"200 SCHD @ $82.15",date:"2026-08-20",amount:16430.00}
+];
+
+let sortKey="date",sortDir=-1;
+
+function renderTx(){
+  const sorted=[...TX].sort((a,b)=>{
+    if(sortKey==="date")return sortDir*(a.date>b.date?1:-1);
+    return sortDir*(a.amount-b.amount);
+  });
+  const body=$("#txBody");
+  body.innerHTML=sorted.map(t=>{
+    const cls=t.type==="buy"?"badge-buy":t.type==="sell"?"badge-sell":"badge-div";
+    const amtCls=t.type==="sell"?"neg":"pos";
+    const prefix=t.type==="sell"?"-":"+";
+    const d=new Date(t.date+"T00:00:00");
+    const dateStr=d.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+    return `<tr><td><span class="badge ${cls}">${t.icon}</span></td><td>${t.detail}</td><td class="mono">${dateStr}</td><td style="text-align:right" class="mono ${amtCls}">${prefix}${fmtFull(t.amount)}</td></tr>`;
+  }).join("");
+}
+
+$$(".tbl-sort button").forEach(b=>b.addEventListener("click",function(){
+  $$(".tbl-sort button").forEach(x=>x.classList.remove("on"));
+  this.classList.add("on");
+  if(sortKey===this.dataset.s){sortDir*=-1}else{sortKey=this.dataset.s;sortDir=-1}
+  renderTx();
+}));
+
+renderTx();
+
+/* ─── REVEAL ─── */
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add("on");obs.unobserve(e.target)}});
+},{threshold:0.1});
+$$(".rv").forEach(el=>obs.observe(el));
+
+/* ─── NAV SCROLL ─── */
+let ticking=false;
+window.addEventListener("scroll",()=>{
+  if(!ticking){requestAnimationFrame(()=>{$("#nav").classList.toggle("scrolled",window.scrollY>60);ticking=false});ticking=true}
+});
+
+/* ─── INIT ─── */
+setTimeout(initHeroChart,300);
+initRing();
+
+
+/* ─── FAQ ACCORDION ─── */
+$$(".faq-q").forEach(q=>q.addEventListener("click",function(){
+  const item=this.parentElement;
+  const wasOpen=item.classList.contains("open");
+  $$(".faq-item").forEach(x=>x.classList.remove("open"));
+  if(!wasOpen)item.classList.add("open");
+}));
+
+/* ─── SPARKLINES ─── */
+function drawSpark(id,data,color){
+  const c=document.getElementById(id);if(!c)return;
+  const ctx=c.getContext("2d");
+  const W=c.width=c.offsetWidth*2;const H=c.height=80;
+  ctx.clearRect(0,0,W,H);
+  const max=Math.max(...data),min=Math.min(...data);
+  const pad=4;
+  ctx.beginPath();
+  data.forEach((v,i)=>{
+    const x=pad+i/(data.length-1)*(W-pad*2);
+    const y=H-pad-(v-min)/(max-min||1)*(H-pad*2);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle=color;ctx.lineWidth=2;ctx.stroke();
+  const grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,color.replace(")",",0.2)").replace("rgb","rgba"));
+  grad.addColorStop(1,color.replace(")",",0)").replace("rgb","rgba"));
+  ctx.lineTo(W-pad,H-pad);ctx.lineTo(pad,H-pad);ctx.closePath();
+  ctx.fillStyle=grad;ctx.fill();
+}
+
+function genSpark(base,pts){
+  const d=[];let v=base;
+  for(let i=0;i<pts;i++){v+=Math.random()*6-2.5;v=Math.max(v*0.7,Math.min(v*1.3,v));d.push(v)}
+  return d;
+}
+setTimeout(()=>{
+  drawSpark("spark1",genSpark(100,30),"rgb(16,185,129)");
+  drawSpark("spark2",genSpark(100,30),"rgb(37,99,235)");
+  drawSpark("spark3",genSpark(50,30),"rgb(16,185,129)");
+  drawSpark("spark4",genSpark(95,30),"rgb(37,99,235)");
+},500);
+
+/* ─── PERFORMANCE CHART ─── */
+function drawPerfChart(period){
+  const c=document.getElementById("perfCanvas");if(!c)return;
+  const ctx=c.getContext("2d");
+  const W=c.width=c.offsetWidth*2;const H=c.height=560;
+  ctx.clearRect(0,0,W,H);
+  const pad={t:40,r:20,b:50,l:80};
+  const cw=W-pad.l-pad.r;const ch=H-pad.t-pad.b;
+
+  let pts;
+  const months=period==="1y"?12:period==="3y"?36:period==="5y"?60:120;
+  const labels=[];const now=new Date();
+  for(let i=0;i<months;i++){
+    const d=new Date(now);
+    d.setMonth(d.getMonth()-months+i);
+    labels.push(d.toLocaleDateString("en-US",{month:"short",year:"2-digit"}));
+  }
+
+  let v=1000000;
+  pts=[v];
+  for(let i=1;i<months;i++){
+    const drift=period==="1y"?0.018:period==="3y"?0.015:0.013;
+    v*=1+drift+Math.random()*0.04-0.015;
+    v=Math.max(v*0.8,v);
+    pts.push(v);
+  }
+
+  const max=Math.max(...pts)*1.05;
+  const min=Math.min(...pts)*0.95;
+
+  /* grid lines */
+  ctx.strokeStyle="rgba(255,255,255,0.04)";ctx.lineWidth=1;
+  for(let i=0;i<=5;i++){
+    const y=pad.t+ch*i/5;
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();
+    const val=max-(max-min)*i/5;
+    ctx.fillStyle="#94A3B8";ctx.font="20px JetBrains Mono,monospace";ctx.textAlign="right";
+    ctx.fillText("$"+Math.round(val/1000)+"k",pad.l-12,y+6);
+  }
+
+  /* x-axis labels */
+  const step=Math.max(1,Math.floor(months/8));
+  ctx.fillStyle="#94A3B8";ctx.font="18px JetBrains Mono,monospace";ctx.textAlign="center";
+  for(let i=0;i<months;i+=step){
+    const x=pad.l+i/(months-1)*cw;
+    ctx.fillText(labels[i],x,H-10);
+  }
+
+  /* line */
+  ctx.beginPath();
+  pts.forEach((v,i)=>{
+    const x=pad.l+i/(months-1)*cw;
+    const y=pad.t+(max-v)/(max-min)*ch;
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle="#3B82F6";ctx.lineWidth=2.5;ctx.stroke();
+
+  /* fill */
+  const grad=ctx.createLinearGradient(0,pad.t,0,H);
+  grad.addColorStop(0,"rgba(37,99,235,0.15)");grad.addColorStop(1,"rgba(37,99,235,0)");
+  ctx.lineTo(pad.l+cw,pad.t+ch);ctx.lineTo(pad.l,pad.t+ch);ctx.closePath();
+  ctx.fillStyle=grad;ctx.fill();
+
+  /* benchmark line */
+  ctx.beginPath();
+  let bv=1000000;
+  const bPts=[bv];
+  for(let i=1;i<months;i++){bv*=1+0.01+Math.random()*0.025-0.012;bPts.push(bv)}
+  bPts.forEach((v,i)=>{
+    const x=pad.l+i/(months-1)*cw;
+    const y=pad.t+(max-v)/(max-min)*ch;
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle="rgba(148,163,184,0.4)";ctx.lineWidth=1.5;ctx.setLineDash([6,4]);ctx.stroke();ctx.setLineDash([]);
+
+  /* legend */
+  ctx.font="20px Inter,sans-serif";
+  ctx.fillStyle="#3B82F6";ctx.fillRect(pad.l+20,pad.t-28,16,3);
+  ctx.fillText("Meridian Balanced",pad.l+44,pad.t-22);
+  ctx.fillStyle="#94A3B8";ctx.fillRect(pad.l+240,pad.t-28,16,3);
+  ctx.fillText("S&P 500 TR",pad.l+264,pad.t-22);
+}
+
+$$(".perf-tab").forEach(t=>t.addEventListener("click",function(){
+  $$(".perf-tab").forEach(x=>x.classList.remove("on"));
+  this.classList.add("on");
+  drawPerfChart(this.dataset.p);
+}));
+
+setTimeout(()=>drawPerfChart("3y"),600);
+
+</script>

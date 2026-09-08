@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INK &amp; PIXELS — a zine about the pen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FAF5EC;
+  --paper2:#F3EBDD;
+  --card:#FFFCF5;
+  --ink:#251B3E;
+  --ink2:#463A6C;
+  --sub:#6F638F;
+  --lilac:#8B5CF6;
+  --lilac2:#A78BFA;
+  --lsoft:#E9DEFC;
+  --peach:#EFA9CC;
+  --rule:rgba(37,27,62,.14);
+  --grad:linear-gradient(100deg,#7C3AED,#A78BFA 50%,#EFA9CC);
+  --lines:repeating-linear-gradient(180deg,transparent 0,transparent 28px,rgba(139,92,246,.07) 28px,rgba(139,92,246,.07) 29px);
+  --fold:repeating-linear-gradient(45deg,transparent 0 10px,rgba(37,27,62,.03) 10px 14px);
+  --shadow:0 24px 60px -28px rgba(124,58,237,.4);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Archivo',sans-serif;background:var(--paper);color:var(--ink);line-height:1.65;overflow-x:hidden}
+h1,h2,h3{font-family:'Archivo Black',sans-serif;text-transform:uppercase;font-weight:900;line-height:.98;letter-spacing:-.015em}
+svg{display:block}
+img{display:block;max-width:100%}
+.mono{font-family:'Fira Code',monospace;font-size:.62rem;letter-spacing:.22em;text-transform:uppercase}
+.hand{font-family:'Caveat',cursive;font-weight:500}
+.accent{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+.wrap{max-width:1280px;margin:0 auto;padding:0 34px}
+
+/* progress "ink line" at very top */
+.progress{position:fixed;top:0;left:0;height:4px;width:0;background:var(--grad);z-index:120;box-shadow:0 0 12px rgba(139,92,246,.5)}
+
+/* nav */
+.nav{position:fixed;inset:0 0 auto;z-index:100;padding:18px 0;transition:.3s;border-bottom:1px solid transparent}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:24px}
+.brand{font-family:'Archivo Black',sans-serif;text-transform:uppercase;font-size:1rem;letter-spacing:.02em;color:var(--ink);text-decoration:none;display:flex;align-items:center;gap:10px}
+.brand svg{width:22px;height:22px;color:var(--lilac)}
+.nav-links{display:flex;gap:26px;list-style:none}
+.nav-link{color:var(--ink2);text-decoration:none;font-size:.68rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase;position:relative;padding:4px 0}
+.nav-link::after{content:"";position:absolute;left:0;bottom:-2px;width:0;height:2px;background:var(--grad);transition:.3s}
+.nav-link:hover::after{width:100%}
+.nav.on{border-bottom-color:var(--rule);background:rgba(250,245,236,.9);backdrop-filter:blur(12px);padding:12px 0}
+.burger{display:none;flex-direction:column;gap:5px;background:none;border:0;cursor:pointer}
+.burger span{width:26px;height:2px;background:var(--ink);transition:.3s}
+.burger.active span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.burger.active span:nth-child(2){opacity:0}
+.burger.active span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+/* hero — editorial spread */
+.hero{position:relative;display:grid;grid-template-columns:1.05fr .95fr;gap:0;min-height:100vh;padding-top:76px;background:var(--paper);overflow:hidden}
+.hero-txt{padding:12vh 0 8vh 34px;max-width:640px;align-self:center;position:relative}
+.hero-eyebrow{display:flex;align-items:center;gap:14px;font-family:'Fira Code',monospace;font-size:.66rem;letter-spacing:.3em;color:var(--lilac);margin-bottom:30px}
+.hero-eyebrow::before{content:"";width:52px;height:2px;background:var(--grad)}
+.hero h1{font-size:clamp(3.2rem,8.5vw,7.2rem);line-height:.9;color:var(--ink)}
+.hero h1 .outline{color:transparent;-webkit-text-stroke:2px var(--ink)}
+.hero-sub{margin:30px 0 26px;color:var(--ink2);font-size:1.02rem;max-width:44ch;font-weight:300}
+.hero-note{position:absolute;bottom:7vh;left:34px;display:flex;align-items:center;gap:12px;font-family:'Fira Code',monospace;font-size:.62rem;letter-spacing:.24em;color:var(--sub);text-transform:uppercase}
+.hero-note .lid{width:13px;height:13px;border-right:2px solid var(--lilac);border-bottom:2px solid var(--lilac);transform:rotate(45deg);animation:sink 1.8s ease-in-out infinite}
+@keyframes sink{0%,100%{transform:rotate(45deg) translate(0,0)}50%{transform:rotate(45deg) translate(5px,5px)}}
+.hero-photo{position:relative;height:100%;min-height:560px}
+.hero-photo img{width:100%;height:100%;object-fit:cover;filter:saturate(1.05)}
+.hero-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--paper) 0%,transparent 18%),linear-gradient(0deg,rgba(37,27,62,.28) 0%,transparent 40%)}
+.hero-stamp{position:absolute;z-index:3;bottom:52px;right:-60px;width:250px;height:250px;display:grid;place-items:center;text-align:center}
+.hero-stamp::before{content:"";position:absolute;inset:0;border-radius:50%;border:1.5px dashed var(--lilac2);animation:spin 22s linear infinite}
+.hero-stamp svg{width:150px;height:150px;color:rgba(255,255,255,.9);mix-blend-mode:overlay}
+@keyframes spin{to{transform:rotate(360deg)}}
+.wmark{position:absolute;top:-30px;right:-10px;font-family:'Archivo Black',sans-serif;font-size:clamp(9rem,24vw,22rem);line-height:1;color:rgba(139,92,246,.08);pointer-events:none;font-weight:900}
+
+/* marquee */
+.marquee{background:var(--ink);color:var(--paper);overflow:hidden;padding:20px 0;border-top:6px solid var(--lilac);border-bottom:6px solid var(--lilac)}
+.marquee .m{display:flex;width:max-content;animation:slide 30s linear infinite;font-family:'Archivo Black',sans-serif;font-size:1.7rem;text-transform:uppercase;white-space:nowrap;letter-spacing:.02em}
+.marquee .m span{margin:0 26px;display:inline-flex;align-items:center;gap:26px}
+.marquee .m i{color:var(--peach);font-style:normal}
+@keyframes slide{to{transform:translateX(-50%)}}
+
+/* chapter headers — left-aligned poster type */
+.chap{display:grid;grid-template-columns:130px 1fr;grid-template-rows:auto auto;gap:0 26px;align-items:end;margin:0 0 56px}
+.chap-no{grid-row:1/3;font-family:'Fira Code',monospace;font-size:.68rem;letter-spacing:.28em;color:var(--lilac);padding-bottom:16px;border-bottom:3px solid var(--ink);height:min-content;align-self:stretch}
+.chap h2{font-size:clamp(2.8rem,7vw,6rem);line-height:.85;color:var(--ink);letter-spacing:-.02em}
+.chap h2 b{color:transparent;-webkit-text-stroke:2px var(--ink)}
+.chap-k{grid-column:2;display:flex;align-items:center;gap:16px;font-family:'Fira Code',monospace;font-size:.62rem;letter-spacing:.24em;color:var(--sub);text-transform:uppercase;margin-top:14px;padding-top:14px;border-top:1px solid var(--rule)}
+.chap-k::before{content:"";width:34px;height:2px;background:var(--peach)}
+section{padding:96px 0;position:relative}
+.paper{background:var(--lines)}
+
+/* Chapter 01 — the ledger */
+.ledger{border-top:3px solid var(--ink)}
+.era{position:relative;display:grid;grid-template-columns:110px 190px 1fr;column-gap:30px;align-items:center;padding:34px 0;border-bottom:1px solid var(--rule);transition:.3s}
+.era::before{content:"";position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,var(--lsoft),transparent);transition:.35s;z-index:0}
+.era:hover::before{width:100%}
+.era>*{position:relative;z-index:1}
+.era-no{font-family:'Fira Code',monospace;font-size:.66rem;letter-spacing:.2em;color:var(--lilac)}
+.era-year{font-family:'Archivo Black',sans-serif;font-size:clamp(1.6rem,3.4vw,2.6rem);color:transparent;-webkit-text-stroke:1.5px var(--sub)}
+.era:hover .era-year{-webkit-text-stroke-color:var(--lilac)}
+.era-grid{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:center}
+.era-name{font-size:clamp(1.7rem,4vw,3rem);line-height:1;color:var(--ink);margin-bottom:2px}
+.era p{color:var(--sub);font-size:.94rem;max-width:46ch;font-weight:300}
+.era-dot{position:absolute;left:-6px;top:50%;width:11px;height:11px;border-radius:50%;background:var(--ink);transform:translateY(-50%);transition:.3s}
+.era:hover .era-dot{background:var(--lilac);box-shadow:0 0 0 6px rgba(139,92,246,.15)}
+.ledger .hand-note{grid-column:1/-1;margin-top:26px;font-family:'Caveat',cursive;font-size:1.4rem;color:var(--lilac)}
+
+/* posters (photo spreads) */
+.spread{display:grid;grid-template-columns:1.15fr .85fr;gap:0;min-height:80vh;background:var(--paper2)}
+.spread.photo-left .img{order:1}
+.spread.photo-left .body{order:2}
+.spread .img{position:relative;overflow:hidden}
+.spread .img img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s ease}
+.spread .img:hover img{transform:scale(1.04)}
+.spread .cap{position:absolute;left:22px;bottom:20px;z-index:3;background:rgba(37,27,62,.78);color:#F3EAFB;padding:10px 16px;font-family:'Fira Code',monospace;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;border-left:4px solid var(--peach)}
+.spread .body{padding:90px 60px;display:flex;flex-direction:column;justify-content:center;position:relative;align-self:stretch}
+.spread .body::before{content:"";position:absolute;inset:0;background:var(--lines);opacity:.5;pointer-events:none}
+.spread .body>*{position:relative}
+.spread .body h2{font-size:clamp(2.4rem,5vw,4.2rem);color:var(--ink)}
+.spread .body p{color:var(--ink2);font-weight:300;margin:22px 0}
+.spread .stat-line{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+.chip{border:1px solid var(--rule);background:var(--card);padding:12px 18px;font-family:'Archivo',sans-serif}
+.chip b{font-size:1.4rem;display:block;text-transform:none;letter-spacing:0}
+.chip span{font-family:'Fira Code',monospace;font-size:.58rem;letter-spacing:.18em;color:var(--sub);text-transform:uppercase}
+.giant{position:absolute;font-family:'Archivo Black',sans-serif;color:rgba(139,92,246,.12);font-size:clamp(6rem,16vw,15rem);line-height:1;z-index:0}
+.spread ul{list-style:none;margin:14px 0 20px}
+.spread ul li{padding:10px 0 10px 30px;border-bottom:1px dashed var(--rule);color:var(--ink2);font-size:.95rem;font-weight:300;position:relative}
+.spread ul li::before{content:"//";position:absolute;left:0;top:10px;color:var(--peach);font-family:'Fira Code',monospace;font-size:.9rem}
+
+/* sticky-note lab */
+.lab{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;perspective:900px}
+.note{background:var(--card);border:1px solid var(--rule);padding:26px 26px 30px;box-shadow:var(--shadow);position:relative;transform:rotate(-1.2deg);transition:.35s}
+.note:nth-child(even){transform:rotate(1.4deg)}
+.note:nth-child(3n){transform:rotate(-.6deg)}
+.note:hover{transform:rotate(0) translateY(-6px);box-shadow:0 30px 70px -30px rgba(124,58,237,.5)}
+.note::before{content:"";position:absolute;top:-14px;left:50%;transform:translateX(-50%) rotate(-3deg);width:110px;height:26px;background:rgba(239,169,204,.45);box-shadow:0 2px 4px rgba(37,27,62,.12)}
+.note h3{font-size:1.5rem;margin-bottom:10px;color:var(--ink)}
+.note p{color:var(--sub);font-size:.92rem;font-weight:300}
+.note .ink-bar{height:10px;margin-top:18px;border-radius:6px;background:var(--lsoft);overflow:hidden}
+.note .ink-bar i{display:block;height:100%;width:var(--w);background:var(--grad)}
+.note svg{width:26px;height:26px;color:var(--lilac);margin-bottom:12px}
+
+/* numbers ledger */
+.ledger-nums .row{display:grid;grid-template-columns:110px 1fr 220px;gap:26px;align-items:center;padding:30px 0;border-bottom:1px solid var(--rule)}
+.ledger-nums .row .num{font-family:'Archivo Black',sans-serif;font-size:clamp(2.8rem,7vw,5.5rem);line-height:1;color:transparent;-webkit-text-stroke:1.5px var(--sub)}
+.ledger-nums .row:hover .num{-webkit-text-stroke-color:var(--lilac)}
+.ledger-nums .row .lbl{font-size:clamp(1.1rem,2.4vw,1.7rem);text-transform:uppercase;letter-spacing:.01em}
+.ledger-nums .row .note{color:var(--sub);font-family:'Caveat',cursive;font-size:1.5rem;text-align:right;transform:none;box-shadow:none;background:none;border:0;padding:0}
+.track{height:12px;border-radius:8px;background:var(--lsoft)}
+.fill{display:block;height:100%;width:0;border-radius:8px;background:var(--grad);transition:width 1.4s cubic-bezier(.2,.7,.2,1)}
+.share-row{display:grid;grid-template-columns:180px 1fr 70px;gap:24px;align-items:center;padding:22px 0;border-bottom:1px dashed var(--rule)}
+.share-row .nm{font-family:'Archivo Black',sans-serif;text-transform:uppercase;font-size:1rem}
+.share-row .pc{font-family:'Fira Code',monospace;font-size:.8rem;color:var(--sub)}
+
+/* spec compare — sheet rows */
+.sheet{border-top:3px solid var(--ink)}
+.specrow{display:grid;grid-template-columns:200px 1fr 110px;column-gap:26px;align-items:center;padding:26px 16px;border-bottom:1px solid var(--rule);transition:.25s}
+.specrow:hover{background:var(--lsoft);padding-left:28px}
+.specrow .cat{font-family:'Archivo Black',sans-serif;font-size:1.5rem;text-transform:uppercase}
+.specrow .meta{display:flex;gap:24px;flex-wrap:wrap;font-family:'Fira Code',monospace;font-size:.66rem;letter-spacing:.14em;color:var(--sub);text-transform:uppercase}
+.specrow .meta b{color:var(--lilac);font-weight:500}
+.specrow.hot .cat{color:var(--lilac)}
+.specrow.hot{background:linear-gradient(90deg,var(--lsoft),transparent)}
+.specrow .star{font-family:'Caveat',cursive;font-size:1.4rem;color:var(--peach);text-align:right}
+.bigfigs{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:3px solid var(--ink);border-bottom:3px solid var(--ink);margin-top:44px}
+.bigfig{padding:34px 28px;border-right:1px solid var(--rule)}
+.bigfig:last-child{border-right:0}
+.bigfig .n{font-family:'Archivo Black',sans-serif;font-size:clamp(2.2rem,4.6vw,3.6rem);line-height:1;color:var(--ink)}
+.bigfig .n em{color:var(--lilac);font-style:normal}
+.bigfig .l{font-family:'Fira Code',monospace;font-size:.6rem;letter-spacing:.2em;color:var(--sub);text-transform:uppercase;margin-top:8px}
+
+/* gallery strip */
+.strip{display:flex;gap:0;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:10px}
+.gf{position:relative;flex:0 0 min(46vw,560px);scroll-snap-align:start;margin-right:6px}
+.gf img{width:100%;height:380px;object-fit:cover}
+.gf figcaption{padding:12px 4px;font-family:'Fira Code',monospace;font-size:.6rem;letter-spacing:.18em;color:var(--sub);text-transform:uppercase;display:flex;justify-content:space-between}
+.gf figcaption em{font-style:normal;color:var(--lilac)}
+.strip-hint{font-family:'Caveat',cursive;font-size:1.6rem;color:var(--lilac);margin-bottom:10px}
+
+/* facts pinboard */
+.pins{display:grid;grid-template-columns:repeat(4,1fr);gap:26px;margin-top:20px}
+.pin{position:relative;background:var(--card);border:1px solid var(--rule);padding:26px;box-shadow:var(--shadow);transform:rotate(var(--r,0deg))}
+.pin .tape{position:absolute;top:-12px;left:50%;transform:translateX(-50%) rotate(-3deg);width:86px;height:24px;background:rgba(167,139,250,.4);box-shadow:0 1px 3px rgba(37,27,62,.15)}
+.pin h3{font-family:'Caveat',cursive;font-size:1.7rem;font-weight:700;text-transform:none;color:var(--ink);margin-bottom:8px}
+.pin .k{font-family:'Fira Code',monospace;font-size:.6rem;letter-spacing:.2em;color:var(--lilac);margin-bottom:10px}
+.pin p{color:var(--sub);font-size:.9rem;font-weight:300}
+
+/* future bands */
+.future{display:flex;flex-direction:column}
+.frow{display:grid;grid-template-columns:120px 1fr 60px;align-items:center;gap:26px;padding:34px 0;border-bottom:1px solid var(--rule);transition:.3s;text-decoration:none;color:var(--ink)}
+.frow:hover{background:var(--lsoft);padding-left:22px}
+.frow .fn{font-family:'Archivo Black',sans-serif;font-size:2.4rem;color:transparent;-webkit-text-stroke:1.5px var(--lilac)}
+.frow h3{font-size:clamp(1.4rem,3vw,2.2rem)}
+.frow p{color:var(--sub);font-size:.92rem;font-weight:300;max-width:60ch;margin-top:6px}
+.frow .arr{font-family:'Archivo Black',sans-serif;font-size:2.2rem;color:var(--peach);text-align:right}
+
+/* footer */
+footer{background:var(--ink);color:#EFE7FB;padding:80px 0 34px;margin-top:70px}
+.foot-top{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:36px}
+.foot-word{font-family:'Archivo Black',sans-serif;font-size:clamp(2.6rem,8vw,6.5rem);line-height:.9;text-transform:uppercase;color:var(--paper)}
+.foot-word .o{color:transparent;-webkit-text-stroke:2px var(--paper)}
+.foot-col{font-family:'Fira Code',monospace;font-size:.6rem;letter-spacing:.2em;color:#B9AAF0;text-transform:uppercase;line-height:2}
+.foot-col a{color:#E9DFFC;text-decoration:none;display:block}
+.foot-col a:hover{color:var(--peach)}
+.foot-bot{border-top:1px solid rgba(255,255,255,.12);margin-top:26px;padding-top:20px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-family:'Fira Code',monospace;font-size:.6rem;letter-spacing:.18em;color:#B9AAF0;text-transform:uppercase}
+.foot-tag{color:var(--peach)}
+
+/* to-top */
+.to-top{position:fixed;right:30px;bottom:30px;width:52px;height:52px;border-radius:50%;background:var(--ink);color:var(--peach);display:grid;place-items:center;text-decoration:none;opacity:0;pointer-events:none;transform:translateY(16px);transition:.35s;border:2px solid var(--peach)}
+.to-top.show{opacity:1;pointer-events:auto;transform:none}
+.to-top svg{width:20px;height:20px}
+
+/* reveal */
+.rv,.rv-l,.rv-r{opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
+.rv-l{transform:translateX(-30px)}
+.rv-r{transform:translateX(30px)}
+.rv.on,.rv-l.on,.rv-r.on{opacity:1;transform:none}
+.rules{margin:0 0 26px;height:8px;background:repeating-linear-gradient(90deg,var(--ink) 0 10px,transparent 10px 22px)}
+
+/* responsive */
+@media(max-width:1024px){
+  .hero{grid-template-columns:1fr}
+  .hero-txt{padding:16vh 34px 8vh}
+  .hero-photo{min-height:420px}
+  .hero-stamp{right:0}
+  .spread{grid-template-columns:1fr}
+  .spread .body{padding:60px 34px}
+  .lab,.bigfigs{grid-template-columns:repeat(2,1fr)}
+  .bigfig{border-bottom:1px solid var(--rule)}
+  .pins{grid-template-columns:repeat(2,1fr)}
+  .gf{flex-basis:min(70vw,520px)}
+  .era{grid-template-columns:80px 130px 1fr;column-gap:20px}
+  .era-grid{grid-template-columns:1fr}
+  .ledger-nums .row,.share-row{grid-template-columns:90px 1fr}
+  .share-row .pc{display:none}
+  .specrow{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .wrap{padding:0 20px}
+  .nav-links{position:fixed;top:0;right:-100%;width:74%;height:100vh;background:var(--paper);flex-direction:column;padding:100px 30px 40px;gap:18px;transition:.4s;box-shadow:-24px 0 60px -30px rgba(37,27,62,.4);border-left:1px solid var(--rule)}
+  .nav-links.open{right:0}
+  .burger{display:flex}
+  .chap{grid-template-columns:1fr}
+  .era{grid-template-columns:1fr;gap:8px}
+  .era-grid{grid-template-columns:1fr}
+  .lab,.bigfigs,.pins{grid-template-columns:1fr}
+  .ledger-nums .row{grid-template-columns:1fr}
+  .bigfig{border-right:0;border-bottom:1px solid var(--rule)}
+  .frow{grid-template-columns:56px 1fr}
+  .frow .arr{display:none}
+  .gf{flex-basis:84vw}
+  .foot-top{flex-direction:column;align-items:flex-start}
+}
+
+
+.hero h1{line-height:1.06}
+.chap h2{line-height:1.06;font-size:clamp(2.2rem,6vw,4.8rem)}
+.era-name{line-height:1.1}
+.frow h3{line-height:1.08}
+.spread .body h2{line-height:1.06}
+/* ===== calligraphy re-theme ===== */
+body{font-family:'Caveat',cursive;font-size:1.22rem}
+h1,h2,h3,.brand,.foot-word,.era-name,.cat,.nm,.marquee .m,.chip b{font-family:'Kaushan Script',cursive;text-transform:none;letter-spacing:.01em;font-weight:400}
+h1{line-height:1.04}
+h2{line-height:1.05}
+.outline{color:var(--lilac);-webkit-text-stroke:0}
+.chap h2 b{color:var(--lilac);-webkit-text-stroke:0}
+.era-year,.ledger-nums .row .num,.bigfig .n,.frow .fn{-webkit-text-stroke:0;color:var(--sub)}
+.era:hover .era-year,.ledger-nums .row:hover .num,.frow:hover .fn{color:var(--lilac)}
+.era-year{font-family:'Kaushan Script',cursive;font-size:clamp(1.9rem,3.6vw,3rem)}
+.ledger-nums .row .num,.bigfig .n{font-family:'Kaushan Script',cursive;font-size:clamp(2.6rem,6vw,4.8rem)}
+.bigfig .n em{color:var(--lilac)}
+.mono,.nav-link,.era-no,.chap-no,.chap-k,.gf figcaption,.foot-col,.foot-bot,.fact-info,.k{font-family:'Caveat',cursive;text-transform:none;letter-spacing:.08em;font-size:1rem;line-height:1.5}
+.era-no,.chap-no{letter-spacing:.06em;font-size:.95rem;font-weight:600}
+.nav-link{font-size:1rem;font-weight:600;letter-spacing:.06em}
+.giant{font-family:'Kaushan Script',cursive}
+.specrow .meta{font-family:'Caveat',cursive;text-transform:none;letter-spacing:.04em;font-size:1.06rem}
+.specrow .meta b{color:var(--lilac);font-weight:600}
+.specrow .cat{font-size:1.9rem}
+.chip span{font-family:'Caveat',cursive;text-transform:none;font-size:.9rem;letter-spacing:.14em}
+.ledger-nums .row .note{color:var(--lilac)}
+.hero-eyebrow{font-family:'Caveat',cursive;font-size:1.1rem;letter-spacing:.08em;text-transform:none}
+.hero-note{font-family:'Caveat',cursive;font-size:1rem;letter-spacing:.1em}
+.brand{font-size:1.15rem}
+.foot-word{font-size:clamp(3rem,9vw,7.5rem)}
+
+
+/* ===== notebook retheme: bigger, no clip, ruled sheets ===== */
+body{font-size:1.32rem;line-height:1.7;background:var(--lines)}
+h1,h2,h3{line-height:1.2;overflow:visible}
+.hero h1{font-size:clamp(3.4rem,9vw,8rem);line-height:1.15;padding:1.5vh 0}
+.chap h2{font-size:clamp(2.6rem,7vw,5.6rem);line-height:1.22}
+.spread .body h2{font-size:clamp(2.6rem,5.4vw,4.6rem);line-height:1.22}
+.hero-sub{font-size:1.35rem}
+.era p,.spread .body p,.specrow .meta{font-size:1.25rem;line-height:1.6}
+.era-name{font-size:clamp(2rem,4.6vw,3.4rem);line-height:1.16}
+.era-year{font-size:clamp(2.2rem,4vw,3.4rem)}
+.era{grid-template-columns:120px 210px 1fr}
+.spread ul li{font-size:1.22rem;line-height:1.55}
+.chip b{font-size:2rem}
+.chip span{font-size:1.02rem}
+.ledger-nums .row{grid-template-columns:minmax(230px,1.2fr) 2fr auto;gap:36px;align-items:center}
+.ledger-nums .row .num{font-size:clamp(3rem,7vw,5.8rem);line-height:1}
+.ledger-nums .row .lbl{font-size:clamp(1.4rem,2.8vw,2rem);line-height:1.3}
+.ledger-nums .row .note{font-size:1.6rem}
+.bigfig .n{font-size:clamp(2rem,4vw,3.6rem);line-height:1.1}
+.bigfig .l{font-size:1.05rem}
+.specrow{grid-template-columns:250px 1fr 150px}
+.specrow .cat{font-size:2.3rem;line-height:1.2}
+.specrow .star{font-size:1.7rem}
+.note h3{font-size:1.9rem;line-height:1.25}
+.note p,.pin p,.frow p{font-size:1.2rem;line-height:1.55}
+.pin h3{font-size:2.1rem;line-height:1.25}
+.frow h3{font-size:clamp(1.8rem,3.6vw,2.6rem);line-height:1.25}
+.frow p{font-size:1.2rem}
+.frow .fn{font-size:3rem}
+.mono,.era-no,.chap-no,.gf figcaption,.foot-col,.foot-bot,.k{font-size:1.08rem;line-height:1.6}
+.nav-link{font-size:1.1rem}.brand{font-size:1.3rem}
+.marquee .m{font-size:2.1rem}
+.strip-hint{font-size:2rem}.hand-note{font-size:1.8rem}
+.gf img{height:440px}
+section{padding:110px 0}
+/* notebook sheets: ruled + red margin + binder holes */
+.nb{background:var(--lines)}
+.nb .wrap{position:relative;padding-left:70px;padding-right:44px}
+.nb .wrap::before{content:"";position:absolute;left:-6px;top:-70px;bottom:-70px;width:24px;
+  background:
+    radial-gradient(circle at 12px 20px, rgba(37,27,62,.55) 3px, rgba(37,27,62,.12) 4.2px, transparent 4.8px),
+    radial-gradient(circle at 12px 52px, rgba(37,27,62,.55) 3px, rgba(37,27,62,.12) 4.2px, transparent 4.8px);
+  background-size:24px 72px;background-repeat:repeat-y}
+.nb .wrap::after{content:"";position:absolute;left:40px;top:-70px;bottom:-70px;width:2px;background:rgba(231,122,150,.55)}
+@media(max-width:1024px){.nb .wrap{padding-left:52px}}
+@media(max-width:640px){
+  .nb .wrap{padding-left:40px;padding-right:16px}
+  .nb .wrap::before{width:18px;background-size:18px 72px;background-position:0 0,0 20px}
+  .nb .wrap::after{left:26px}
+  .ledger-nums .row{grid-template-columns:1fr;gap:8px}
+  .era{grid-template-columns:1fr}
+  .specrow{grid-template-columns:1fr}
+  body{font-size:1.22rem}
+}
+/* notebook cover */
+.cover{background:var(--ink);color:var(--paper);padding:64px 0 58px;position:relative;overflow:hidden}
+.cover .wrap{position:relative;z-index:1}
+.cover-strip{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 40px,rgba(255,255,255,.05) 40px 42px);pointer-events:none}
+.cover-label{font-family:'Caveat',cursive;font-size:1.15rem;letter-spacing:.3em;color:var(--peach);text-transform:uppercase}
+.cover-title{font-family:'Kaushan Script',cursive;font-size:clamp(2.8rem,8vw,6rem);line-height:1.1;color:var(--paper);margin:16px 0 26px}
+.cover-title span{color:var(--peach)}
+.cover-sub{font-family:'Caveat',cursive;font-size:1.5rem;color:#D9CCF5;max-width:46ch}
+.cover-row{display:flex;gap:44px;flex-wrap:wrap;align-items:center;border-top:2px dashed rgba(255,255,255,.25);margin-top:30px;padding-top:18px;font-family:'Caveat',cursive;font-size:1.35rem;color:#EDE4FF}
+.cover-row i{color:var(--peach2, #F6C9DE);font-style:normal}
+.cover-row .dots{flex:1;border-bottom:2px dotted rgba(255,255,255,.35)}
+
+
+/* --- hero: never clip --- */
+.hero{overflow:visible;min-height:100svh;height:auto}
+.hero-txt{padding:19vh 40px 14vh 34px;max-width:680px;align-self:center}
+.hero h1{font-size:clamp(3rem,7.6vw,6.6rem);line-height:1.28;padding:2vh 0}
+.hero h1 .outline,.hero h1 span{display:inline-block}
+.hero-sub{padding-bottom:6px}
+.hero-photo{min-height:640px;height:auto}
+.hero-photo img{min-height:640px}
+.wmark{top:-40px;right:-20px;z-index:0;color:rgba(139,92,246,.05);pointer-events:none}
+@media(max-width:900px){
+  .hero-txt{padding:140px 24px 60px;max-width:100%}
+  .hero{grid-template-columns:1fr}
+  .hero h1{font-size:clamp(2.6rem,11vw,4.4rem);line-height:1.3}
+  .wmark{display:none}
+}
+
+</style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="ic-quill" viewBox="0 0 24 24"><path fill="currentColor" d="M4 20c4-1 9-5 14-12.5 1.5-2-2 .5-1.5-2.5-1 .5 0 3.5-2 5C12 12 8 15.5 4 20z"/></symbol>
+    <symbol id="ic-droplet" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c3 4.2 6 8 6 12a6 6 0 0 1-12 0C6 10 9 6.2 12 2z"/></symbol>
+    <symbol id="ic-pen" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M4 20c.5-2 1.3-4.6 3-6.3L17 4a2 2 0 0 1 3 3L10 19c-1.7 1.7-4.3 2.5-6 3z"/></g></symbol>
+    <symbol id="ic-nib" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M4 20 8 16l9-9 3-3-3 3-9 9-4 4z"/></g></symbol>
+    <symbol id="ic-spark" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 3c1 3.5 3 5.5 7 6-4 .5-6 2.5-7 6-1-3.5-3-5.5-7-6 4-.5 6-2.5 7-6z"/></g></symbol>
+    <symbol id="ic-refill" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 3v5h-5"/></g></symbol>
+    <symbol id="ic-globe" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><ellipse cx="12" cy="12" rx="4" ry="8.5"/></g></symbol>
+    <symbol id="ic-paper" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/></g></symbol>
+    <symbol id="ic-flash" viewBox="0 0 24 24"><path fill="currentColor" d="M13 2 5 13h6l-1 9 8-11h-6z"/></symbol>
+    <symbol id="ic-leaf" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 20C4 10 10 5 20 4c0 10-6 16-16 16z"/></g></symbol>
+    <symbol id="ic-cap" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M6 3h12v6l-3 3H9L6 9z"/><path d="M9 16h6M9 19h6"/></g></symbol>
+  </svg>
+
+  <div class="progress" id="inkLine"></div>
+
+  <nav class="nav" id="nav">
+    <div class="wrap">
+      <a href="#hero" class="brand"><svg><use href="#ic-quill"/></svg> INK &amp; PIXELS</a>
+      <ul class="nav-links" id="navLinks">
+        <li><a class="nav-link" href="#history">Journal</a></li>
+        <li><a class="nav-link" href="#spread-fountain">Fountain</a></li>
+        <li><a class="nav-link" href="#spread-ball">Ball</a></li>
+        <li><a class="nav-link" href="#lab">Ink Lab</a></li>
+        <li><a class="nav-link" href="#numbers">Ledger</a></li>
+        <li><a class="nav-link" href="#compare">Sheet</a></li>
+        <li><a class="nav-link" href="#future">Zine ∞</a></li>
+      </ul>
+      <button class="burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <section class="hero" id="hero">
+    <div class="wmark">1000</div>
+    <div class="hero-txt">
+      <p class="hero-eyebrow">A ZINE ABOUT THE MOST OVERLOOKED MACHINE</p>
+      <h1>From<br><span class="outline">Quill</span><br>To <span class="accent">Pixel</span></h1>
+      <div class="rules"></div>
+      <p class="hero-sub">Ten centuries. One tool. Every law, love letter, equation and apology — drafted by a hand that held a pen. This page is a love letter to the line.</p>
+      <p class="hand" style="font-size:1.8rem;color:var(--lilac)">glide, pause, dip, write …</p>
+    </div>
+    <div class="hero-photo">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/%D7%A7%D7%9C%D7%A3%2C_%D7%A0%D7%95%D7%A6%D7%94_%D7%95%D7%93%D7%99%D7%95.jpg/960px-%D7%A7%D7%9C%D7%A3%2C_%D7%A0%D7%95%D7%A6%D7%94_%D7%95%D7%93%D7%99%D7%95.jpg" alt="A feather quill with ink">
+      <div class="hero-stamp"><svg><use href="#ic-quill"/></svg></div>
+    </div>
+    <div class="hero-note"><span class="lid"></span> SCROLL THE INK</div>
+  </section>
+
+  <div class="marquee">
+    <div class="m">
+      <span>Quill <i>✦</i> Ink <i>✦</i> Nib <i>✦</i> Fountain <i>✦</i> Capillary <i>✦</i> Ballpoint <i>✦</i> 0.7&nbsp;mm <i>✦</i> Gel <i>✦</i> Roller <i>✦</i> Refill <i>✦</i> Blot <i>✦</i> Signature <i>✦</i> Stylus <i>✦</i> Pixel <i>✦</i></span>
+      <span>Quill <i>✦</i> Ink <i>✦</i> Nib <i>✦</i> Fountain <i>✦</i> Capillary <i>✦</i> Ballpoint <i>✦</i> 0.7&nbsp;mm <i>✦</i> Gel <i>✦</i> Roller <i>✦</i> Refill <i>✦</i> Blot <i>✦</i> Signature <i>✦</i> Stylus <i>✦</i> Pixel <i>✦</i></span>
+    </div>
+  </div>
+  <section class="cover">
+    <div class="cover-strip"></div>
+    <div class="wrap">
+      <div class="cover-label">Exercise Book Nº 01 · Ruled</div>
+      <div class="cover-title">The Pen — <span>a study in ink</span></div>
+      <p class="cover-sub">Everything a civilisation ever committed to paper began with a hand, a tool, and one uninterrupted line.</p>
+      <div class="cover-row">
+        <span>NAME · <i>the reader</i></span>
+        <span class="dots"></span>
+        <span>YEAR · 1884 → ∞</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="nb" id="history">
+    <div class="wrap">
+      <header class="chap">
+        <div class="chap-no">CHAPTER 01</div>
+        <h2>The <b>Journal</b><br>— A Thousand <br><span class="accent">Years of Ink</span></h2>
+        <div class="chap-k">Eight entries · every law, poem and map was one nib wide</div>
+      </header>
+      <div class="ledger">
+        <div class="era rv">
+          <span class="era-no">ENTRY 01</span>
+          <div class="era-year">700 AD</div>
+          <div class="era-grid">
+            <h3 class="era-name">Quill &amp; Reed</h3>
+            <p>Scribes score feather shafts and dip them in iron-gall ink. For ten centuries the written word is cut, not typed.</p>
+          </div>
+          <span class="era-dot"></span>
+        </div>
+        <div class="era rv" style="transition-delay:.05s">
+          <span class="era-no">ENTRY 02</span>
+          <div class="era-year">1820s</div>
+          <div class="era-grid">
+            <h3 class="era-name">Steel Nibs</h3>
+            <p>Machines stamp out hardened, interchangeable nibs by the million. The flex of a feather becomes a factory spec.</p>
+          </div>
+          <span class="era-dot"></span>
+        </div>
+        <div class="era rv" style="transition-delay:.1s">
+          <span class="era-no">ENTRY 03</span>
+          <div class="era-year">1884</div>
+          <div class="era-grid">
+            <h3 class="era-name">Fountain Pen</h3>
+            <p>A leaky pen ruins a contract — and an inventor builds a reservoir that never needs dipping. Capillary action, no blot.</p>
+          </div>
+          <span class="era-dot"></span>
+        </div>
+        <div class="era rv" style="transition-delay:.15s">
+          <span class="era-no">ENTRY 04</span>
+          <div class="era-year">1938</div>
+          <div class="era-grid">
+            <h3 class="era-name">The Ballpoint</h3>
+            <p>Journalist László Bíró + chemist brother. A free-spinning ball rolls quick-drying oil ink. The world stops blotting.</p>
+          </div>
+          <span class="era-dot"></span>
+        </div>
+        <div class="era rv" style="transition-delay:.2s">
+          <span class="era-no">ENTRY 05</span>
+          <div class="era-year">1950s</div>
+          <div class="era-grid">
+            <h3 class="era-name">The Boom</h3>
+            <p>Prices crash to pocket change; in 1949 the first cheap ballpoint sells out in a single afternoon.</p>
+          </div>
+          <span class="era-dot"></span>
+        </div>
+        <div class="era rv" style="transition-delay:.25s">
+          <span class="era-no">ENTRY 06</span>
+          <div class="era-year">1963</div>
+          <div class="era-grid">
+            <h3 class="era-name">Rollerball</h3>
+            <p>Fountain-pen water ink delivered by a ball. Speed of a biro, silk of a nib — a lovely, quiet marriage.</p>
+          </div>
+          <span class="era-dot"></span>
+        </div>
+        <div class="era rv" style="transition-delay:.3s">
+          <span class="era-no">ENTRY 07</span>
+          <div class="era-year">1984</div>
+          <div class="era-grid">
+            <h3 class="era-name">Gel Pen</h3>
+            <p>A Japanese maker perfects thixotropic gel ink — thick at rest, liquid under the ball. Colour explodes from 0.38 mm tips.</p>
+          </div>
+          <span class="era-dot"></span>
+        </div>
+        <div class="era rv" style="transition-delay:.35s">
+          <span class="era-no">ENTRY 08</span>
+          <div class="era-year">TODAY</div>
+          <div class="era-grid">
+            <h3 class="era-name">Pixel Pen</h3>
+            <p>A stylus sweeps across glass; your handwriting becomes data the machine can read back. The quill and the cursor share a spine.</p>
+          </div>
+          <span class="era-dot"></span>
+        </div>
+        <p class="hand-note">— the whole of civilization is written in this margin</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="spread" id="spread-fountain">
+    <div class="img rv-l">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Fountain_pen_writing_%28literacy%29.jpg/960px-Fountain_pen_writing_%28literacy%29.jpg" alt="Fountain pen writing a flowing line" loading="lazy">
+      <span class="cap">Fountain pen — photo · Wikimedia Commons</span>
+    </div>
+    <div class="body rv-r">
+      <div class="giant">NIB</div>
+      <p class="mono" style="color:var(--lilac)">CHAPTER 02 · THE FOUNTAIN PEN</p>
+      <h2>Self-Contained<br>Ink</h2>
+      <p>The fountain pen did what quills could not: it carried its ink with it. A rubber sac or cartridge lives inside the barrel, and a slotted feed uses capillary action to feed the nib — relentlessly, gently, blot-free.</p>
+      <ul>
+        <li>A reservoir of liquid ink living inside the barrel</li>
+        <li>Slotted feed wicks ink by pure surface tension</li>
+        <li>Breather hole keeps the flow from starving mid-word</li>
+        <li>Flexible steel &amp; 14k/18k gold nibs for handwriting that breathes</li>
+      </ul>
+      <div class="stat-line">
+        <div class="chip"><b>1884</b><span>PATENT</span></div>
+        <div class="chip"><b>CAPILLARY</b><span>FLOW SYSTEM</span></div>
+        <div class="chip"><b>STEEL/GOLD</b><span>FLEX NIB</span></div>
+      </div>
+    </div>
+  </section>
+  <section class="spread photo-left" id="spread-ball">
+    <div class="img rv-l">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/03-BICcristal2008-03-26.jpg/960px-03-BICcristal2008-03-26.jpg" alt="A classic ballpoint pen" loading="lazy">
+      <span class="cap">Ballpoint — photo · Wikimedia Commons</span>
+    </div>
+    <div class="body rv-r">
+      <div class="giant">BALL</div>
+      <p class="mono" style="color:var(--lilac)">CHAPTER 03 · THE BALLPOINT</p>
+      <h2>One Ball To Rule Them All</h2>
+      <p>Journalist László Bíró was tired of smeared ink. With his chemist brother György he married a free-spinning tungsten-carbide ball to quick-drying oil ink — and built the most successful writing instrument ever made.</p>
+      <ul>
+        <li>The ball spins 360°, scooping ink and rolling it onto paper</li>
+        <li>Oil ink dries on contact — no blotting, no waiting</li>
+        <li>Roughly 16 billion pens roll off the lines each year</li>
+        <li>One refill draws a line about two kilometres long</li>
+      </ul>
+      <div class="stat-line">
+        <div class="chip"><b>1938</b><span>PATENT</span></div>
+        <div class="chip"><b>OIL INK</b><span>DRIES FAST</span></div>
+        <div class="chip"><b>16 B</b><span>PER YEAR</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="paper nb" id="lab">
+    <div class="wrap">
+      <header class="chap">
+        <div class="chap-no">CHAPTER 04</div>
+        <h2>The <b>Ink Lab</b><br>— Six <span class="accent">Formulas</span></h2>
+        <div class="chap-k">Same tool, six brains · the chemistry of one stroke</div>
+      </header>
+      <div class="lab">
+        <div class="note rv">
+          <svg><use href="#ic-droplet"/></svg>
+          <h3>Water-Based</h3>
+          <p>Thin, fast-absorbing and gorgeous — the ink of fountains and rollers. Runs like summer, too.</p>
+          <div class="ink-bar"><i style="--w:90%"></i></div>
+        </div>
+        <div class="note rv" style="transition-delay:.05s">
+          <svg><use href="#ic-globe"/></svg>
+          <h3>Oil-Based</h3>
+          <p>The ballpoint classic. Dense, greasy, waterproof, eternal — the accountant's quiet ally since 1938.</p>
+          <div class="ink-bar"><i style="--w:70%"></i></div>
+        </div>
+        <div class="note rv" style="transition-delay:.1s">
+          <svg><use href="#ic-spark"/></svg>
+          <h3>Gel</h3>
+          <p>Thixotropic paste that flows only when sheared by the ball. Vivid, clicky, doodler-approved.</p>
+          <div class="ink-bar"><i style="--w:80%"></i></div>
+        </div>
+        <div class="note rv" style="transition-delay:.15s">
+          <svg><use href="#ic-paper"/></svg>
+          <h3>Pigmented</h3>
+          <p>Fade-proof and water-fast. Blueprints, deeds and museum labels that must outlive us all.</p>
+          <div class="ink-bar"><i style="--w:85%"></i></div>
+        </div>
+        <div class="note rv" style="transition-delay:.2s">
+          <svg><use href="#ic-flash"/></svg>
+          <h3>Erasable</h3>
+          <p>Thermosensitive ink goes invisible under friction heat. Mistake management, solved in the 1970s.</p>
+          <div class="ink-bar"><i style="--w:60%"></i></div>
+        </div>
+        <div class="note rv" style="transition-delay:.25s">
+          <svg><use href="#ic-nib"/></svg>
+          <h3>Marker</h3>
+          <p>Solvent colour for glass, cardboard and whiteboards. The loudest voice on any desk.</p>
+          <div class="ink-bar"><i style="--w:100%"></i></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="nb" id="numbers">
+    <div class="wrap">
+      <header class="chap">
+        <div class="chap-no">CHAPTER 05</div>
+        <h2>The <b>Ledger</b><br>— Numbers <span class="accent">That</span> <span class="outline">Ink</span></h2>
+        <div class="chap-k">The most counted object on earth</div>
+      </header>
+      <div class="ledger-nums">
+        <div class="row rv">
+          <div class="num"><span class="counting" data-target="16" data-suffix=" B">0</span></div>
+          <div class="lbl">Pens made every year</div>
+          <div class="note">more pens than people.</div>
+        </div>
+        <div class="row rv">
+          <div class="num"><span class="counting" data-target="0.7" data-decimals="1" data-suffix=" MM">0</span></div>
+          <div class="lbl">The classic ball</div>
+          <div class="note">small enough to hide a word.</div>
+        </div>
+        <div class="row rv">
+          <div class="num"><span class="counting" data-target="2000" data-suffix=" M">0</span></div>
+          <div class="lbl">One refill's line</div>
+          <div class="note">about a whole neighbourhood.</div>
+        </div>
+        <div class="row rv">
+          <div class="num"><span class="counting" data-target="1884" data-suffix="">0</span></div>
+          <div class="lbl">The fountain's patent</div>
+          <div class="note">a blot that changed everything.</div>
+        </div>
+      </div>
+      <div class="rules" style="margin-top:44px"></div>
+      <div class="share-row">
+        <span class="nm">Ballpoint</span>
+        <div class="track"><span class="fill" data-width="60"></span></div>
+        <span class="pc">60%</span>
+      </div>
+      <div class="share-row">
+        <span class="nm">Gel</span>
+        <div class="track"><span class="fill" data-width="15"></span></div>
+        <span class="pc">15%</span>
+      </div>
+      <div class="share-row">
+        <span class="nm">Rollerball</span>
+        <div class="track"><span class="fill" data-width="10"></span></div>
+        <span class="pc">10%</span>
+      </div>
+      <div class="share-row">
+        <span class="nm">Marker+Dip</span>
+        <div class="track"><span class="fill" data-width="7"></span></div>
+        <span class="pc">7%</span>
+      </div>
+      <div class="share-row">
+        <span class="nm">Digital</span>
+        <div class="track"><span class="fill" data-width="5"></span></div>
+        <span class="pc">5%</span>
+      </div>
+      <div class="share-row">
+        <span class="nm">Fountain</span>
+        <div class="track"><span class="fill" data-width="3"></span></div>
+        <span class="pc">3%</span>
+      </div>
+    </div>
+  </section>
+  <section class="nb" id="compare">
+    <div class="wrap">
+      <header class="chap">
+        <div class="chap-no">CHAPTER 06</div>
+        <h2>The <b>Sheet</b> — Pick<br>Your <span class="accent">Weapon</span></h2>
+        <div class="chap-k">Seven ways to make one letter · nobody loses</div>
+      </header>
+      <div class="sheet">
+        <div class="specrow rv">
+          <h3 class="cat">Quill</h3>
+          <div class="meta"><span>INK <b>IRON-GALL</b></span><span>POINT <b>HAND-CUT</b></span><span>REFILL <b>RE-DIP</b></span></div>
+          <div class="star">ceremony</div>
+        </div>
+        <div class="specrow rv">
+          <h3 class="cat">Fountain</h3>
+          <div class="meta"><span>INK <b>WATER DYE</b></span><span>POINT <b>0.5–1.1 MM</b></span><span>REFILL <b>SAC/CTRG</b></span></div>
+          <div class="star">handwriting class</div>
+        </div>
+        <div class="specrow hot rv">
+          <h3 class="cat">Ballpoint</h3>
+          <div class="meta"><span>INK <b>OIL PASTE</b></span><span>POINT <b>0.5–1.0 MM</b></span><span>REFILL <b>CHEAPLY</b></span></div>
+          <div class="star">every pocket ★</div>
+        </div>
+        <div class="specrow rv">
+          <h3 class="cat">Rollerball</h3>
+          <div class="meta"><span>INK <b>WATER DYE</b></span><span>POINT <b>0.5–0.8 MM</b></span><span>REFILL <b>YES</b></span></div>
+          <div class="star">smooth ride</div>
+        </div>
+        <div class="specrow rv">
+          <h3 class="cat">Gel</h3>
+          <div class="meta"><span>INK <b>GEL PASTE</b></span><span>POINT <b>0.38–1.0 MM</b></span><span>REFILL <b>YES</b></span></div>
+          <div class="star">bullet journal</div>
+        </div>
+        <div class="specrow rv">
+          <h3 class="cat">Marker</h3>
+          <div class="meta"><span>INK <b>SOLVENT</b></span><span>POINT <b>1.0–6.0 MM</b></span><span>REFILL <b>INK PUMP</b></span></div>
+          <div class="star">labels &amp; light</div>
+        </div>
+        <div class="specrow rv">
+          <h3 class="cat">Stylus</h3>
+          <div class="meta"><span>INK <b>PIXELS</b></span><span>POINT <b>0</b></span><span>REFILL <b>CHARGERS</b></span></div>
+          <div class="star">the future →</div>
+        </div>
+      </div>
+      <div class="bigfigs">
+        <div class="bigfig rv"><div class="n"><span class="counting" data-target="16" data-suffix=" B">0</span></div><div class="l">Every year</div></div>
+        <div class="bigfig rv"><div class="n">0<span class="counting" data-target=".38" data-decimals="2" data-suffix=" MM">.00</span></div><div class="l">Thin gel frontier</div></div>
+        <div class="bigfig rv"><div class="n"><span class="counting" data-target="2000" data-suffix=" M">0</span></div><div class="l">One cartridge</div></div>
+        <div class="bigfig rv"><div class="n"><span class="counting" data-target="1884" data-suffix="">0</span></div><div class="l">Fountain birth</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="paper" id="gallery">
+    <div class="wrap">
+      <header class="chap">
+        <div class="chap-no">PLATE GALLERY</div>
+        <h2>Real Pens, <span class="accent">Real Close</span></h2>
+        <div class="chap-k">Unretouched specimens · shot on glass &amp; steel</div>
+      </header>
+      <p class="strip-hint">← drag or scroll sideways →</p>
+      <div class="strip">
+        <figure class="gf">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/9/9d/Gelpen_cylindric_tip_detail.jpg" alt="Gel pen tip close-up" loading="lazy">
+          <figcaption><em>PL.01</em> Gel tip · 0.38 mm world</figcaption>
+        </figure>
+        <figure class="gf">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Felt_Tip.jpg/960px-Felt_Tip.jpg" alt="Felt tip marker" loading="lazy">
+          <figcaption><em>PL.02</em> Felt tip · the loud voice</figcaption>
+        </figure>
+        <figure class="gf">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/d/d5/GelPen.jpg" alt="Rollerball pen" loading="lazy">
+          <figcaption><em>PL.03</em> Rollerball ride</figcaption>
+        </figure>
+        <figure class="gf">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Letter_by_Ouyang_Xiu.jpg/960px-Letter_by_Ouyang_Xiu.jpg" alt="Calligraphy strokes" loading="lazy">
+          <figcaption><em>PL.04</em> Calligraphy · the art nib</figcaption>
+        </figure>
+        <figure class="gf">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Table_with_was_and_stylus_Roman_times.jpg/960px-Table_with_was_and_stylus_Roman_times.jpg" alt="Ancient stylus and wax tablet" loading="lazy">
+          <figcaption><em>PL.05</em> Stylus &amp; wax · a 2,000-year-old ancestor</figcaption>
+        </figure>
+        <figure class="gf">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Fountain_pen_writing_%28literacy%29.jpg/960px-Fountain_pen_writing_%28literacy%29.jpg" alt="Fountain pen writing" loading="lazy">
+          <figcaption><em>PL.06</em> Fountain · where it all flows from</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="nb" id="facts">
+    <div class="wrap">
+      <header class="chap">
+        <div class="chap-no">CHAPTER 07</div>
+        <h2>The <b>Pinboard</b><br>— Ink-Stained <span class="accent">Truths</span></h2>
+        <div class="chap-k">Taxonomy of desktop wisdom</div>
+      </header>
+      <div class="pins">
+        <div class="pin rv" style="--r:-1.5deg"><div class="tape"></div><div class="k">ANNO 1970S</div><h3>Erasable Ink</h3><p>Thermosensitive ink goes invisible under friction heat. "Oops" became a science.</p></div>
+        <div class="pin rv" style="--r:1.2deg;transition-delay:.05s"><div class="tape"></div><div class="k">ANNO 1884</div><h3>The Leak That Mattered</h3><p>A dripping pen ruined a contract — and the fountain pen was born from one blot.</p></div>
+        <div class="pin rv" style="--r:-1deg;transition-delay:.1s"><div class="tape"></div><div class="k">ANNO 1938</div><h3>Brothers in Ink</h3><p>A journalist and a chemist patented the ballpoint. Journalism improved the world again.</p></div>
+        <div class="pin rv" style="--r:1.5deg;transition-delay:.15s"><div class="tape"></div><div class="k">DIST 2 KM</div><h3>One Cartridge's Line</h3><p>A single ballpoint refill draws a continuous line roughly two kilometres long.</p></div>
+        <div class="pin rv" style="--r:-1.3deg;transition-delay:.2s"><div class="tape"></div><div class="k">PER FILL</div><h3>Twelve Pages</h3><p>One fountain fill of liquid ink yields about a dozen dense pages before it asks for more.</p></div>
+        <div class="pin rv" style="--r:.8deg;transition-delay:.25s"><div class="tape"></div><div class="k">THE BALL</div><h3>360° All at Once</h3><p>The ball spins in every direction at once — nothing to sharpen, nothing to wear flat.</p></div>
+        <div class="pin rv" style="--r:-2deg;transition-delay:.3s"><div class="tape"></div><div class="k">OUTER SPACE</div><h3>Ink That Wrote in Orbit</h3><p>Pressurised refills write in zero gravity. Astronauts sign things like it's nothing.</p></div>
+        <div class="pin rv" style="--r:1deg;transition-delay:.35s"><div class="tape"></div><div class="k">RIGHT NOW</div><h3>The Paper Comeback</h3><p>Journals, flex nibs and fountain pens are booming. Slow ink is suddenly fashionable again.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="paper nb" id="future">
+    <div class="wrap">
+      <header class="chap">
+        <div class="chap-no">CHAPTER 08</div>
+        <h2>The <b>Back Page</b><br>— Where the Line Is Going</h2>
+        <div class="chap-k">The pen refuses to retire · it just changes hands</div>
+      </header>
+      <div class="future">
+        <a class="frow rv" href="#lab"><span class="fn">01</span><div><h3>Smart Ink Meets Paper</h3><p>A stylus glides over real paper while a micro-camera reads the grid — every stroke mirrored to the cloud in real time.</p></div><span class="arr">→</span></a>
+        <a class="frow rv" href="#lab"><span class="fn">02</span><div><h3>One Pen, Forever</h3><p>Plant-based resins, lifetime warranties, refills that cost less than a coffee. The throwaway pen fades out.</p></div><span class="arr">→</span></a>
+        <a class="frow rv" href="#lab"><span class="fn">03</span><div><h3>Ink That Learns</h3><p>AI studies your handwriting and reproduces it pixel-perfect — your signature stays yours, even on a screen.</p></div><span class="arr">→</span></a>
+        <a class="frow rv" href="#lab"><span class="fn">04</span><div><h3>The Click That Saves</h3><p>Refillable cartridges and standardised nibs cut barrels of plastic from the waste stream, one click at a time.</p></div><span class="arr">→</span></a>
+        <a class="frow rv" href="#lab"><span class="fn">05</span><div><h3>Ink for Billions</h3><p>Writing tools priced for every pocket on Earth — the two-billion-person classroom is being outfitted now.</p></div><span class="arr">→</span></a>
+        <a class="frow rv" href="#lab"><span class="fn">06</span><div><h3>The Slow Ink</h3><p>While everything compresses, calligraphy flexes back. The most ancient tool becomes the most luxurious one.</p></div><span class="arr">→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <div class="foot-top">
+        <div class="foot-word">Ink &amp; <span class="o">Pixels</span></div>
+        <div class="foot-col">
+          <span>© 2026 · A love letter to the line</span>
+          <a href="#history">Journal</a><a href="#compare">Sheet</a><a href="#gallery">Plates</a>
+          <span>Photos · Wikimedia Commons · CC / P.D.</span>
+        </div>
+      </div>
+      <div class="foot-bot">
+        <span>STYLE: RULED PAPER + LILAC INK</span>
+        <span class="foot-tag">WRITE ON //</span>
+        <span>ARCHIVO · CAVEAT · FIRA</span>
+      </div>
+    </div>
+  </footer>
+
+  <a href="#hero" class="to-top" id="toTop" aria-label="Back to top"><svg><use href="#ic-quill"/></svg></a>
+
+  <script>
+    const qs=(s,c)=>(c||document).querySelector(s);
+    const qsa=(s,c)=>Array.from((c||document).querySelectorAll(s));
+    const ink=qs('#inkLine'), nav=qs('#nav'), toTop=qs('#toTop');
+    const burger=qs('#burger'), navLinks=qs('#navLinks');
+    let tk=false;
+    function tick(){
+      if(tk)return;tk=true;
+      requestAnimationFrame(()=>{
+        const y=window.scrollY, h=document.documentElement.scrollHeight-innerHeight;
+        ink.style.width=(h?y/h*100:0)+'%';
+        nav.classList.toggle('on',y>40);
+        toTop.classList.toggle('show',y>600);
+        tk=false;
+      });
+    }
+    addEventListener('scroll',tick,{passive:true});tick();
+    burger.addEventListener('click',()=>{
+      const open=navLinks.classList.toggle('open');
+      burger.classList.toggle('active',open);
+    });
+    qsa('a[href^="#"]').forEach(a=>a.addEventListener('click',e=>{
+      const id=a.getAttribute('href');
+      if(id.length>1){const el=qs(id);if(el){e.preventDefault();el.scrollIntoView({behavior:'smooth'});}}
+      navLinks.classList.remove('open');burger.classList.remove('active');
+    }));
+    const io=new IntersectionObserver(es=>es.forEach(en=>{
+      if(en.isIntersecting){en.target.classList.add('on');io.unobserve(en.target);}
+    }),{threshold:.15});
+    qsa('.rv,.rv-l,.rv-r').forEach(el=>io.observe(el));
+    function countUp(el){
+      const t=parseFloat(el.dataset.target),dec=parseInt(el.dataset.decimals||'0',10),suf=el.dataset.suffix||'';
+      const d=1500,st=performance.now();
+      (function frame(now){
+        const p=Math.min((now-st)/d,1),v=t*(1-Math.pow(1-p,3));
+        el.textContent=(dec?v.toFixed(dec):Math.round(v).toLocaleString('en-US'))+suf;
+        if(p<1)requestAnimationFrame(frame);
+      })(st);
+    }
+    const io2=new IntersectionObserver(es=>es.forEach(en=>{
+      if(!en.isIntersecting)return;
+      const el=en.target;
+      if(el.dataset.width)el.style.width=el.dataset.width+'%';
+      else if(el.dataset.target)countUp(el);
+      io2.unobserve(el);
+    }),{threshold:.25});
+    qsa('[data-target], .fill[data-width]').forEach(el=>io2.observe(el));
+  </script>
+</body>
+</html>

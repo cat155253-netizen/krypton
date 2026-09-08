@@ -1,0 +1,10 @@
+# Never commit secrets
+.env
+.env.local
+
+# Node
+node_modules/
+npm-debug.log*
+
+# OS
+.DS_Store

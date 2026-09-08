@@ -1,0 +1,21 @@
+{
+  "name": "apple-orchard",
+  "version": "1.0.0",
+  "description": "Krypton studio — web application funnel, K-Tron assistant, and admin dashboard.",
+  "main": "ktron-server.js",
+  "scripts": {
+    "start": "node ktron-server.js",
+    "test": "node --check ktron-server.js && node --check store.js && node --check apply-mail.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "nodemailer": "^6.10.1",
+    "pg": "^8.23.0"
+  }
+}

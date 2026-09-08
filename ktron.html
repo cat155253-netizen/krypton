@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K-Tron — Krypton AI Copilot</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = { theme: { extend: {
+  fontFamily: { marker:['"Permanent Marker","Marker Felt",cursive'], ser:['"Source Serif 4","Georgia",serif'] },
+  colors: { deep:'#1d4454', soft:'#5b7d8c', ink:'#0e2e3a', mint:'#7fd0b5', cy:'#3fa7c9' }
+} } };
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Permanent+Marker&family=Source+Serif+4:ital,wght@1,600&display=swap" rel="stylesheet">
+<style>
+  html,body{overflow-x:clip}
+  body{font-family:'Inter',sans-serif;color:#1d4454;min-height:100vh;
+    background:
+      radial-gradient(1100px 600px at 8% -5%, rgba(127,208,181,.35), transparent 60%),
+      radial-gradient(1000px 700px at 100% 10%, rgba(63,167,201,.30), transparent 55%),
+      linear-gradient(160deg,#cdeaf5 0%,#e6f6fa 45%,#eef4ff 100%);}
+  .sk-serif{font-family:'Source Serif 4',Georgia,serif;font-style:italic}
+  .marker{font-family:'Permanent Marker','Marker Felt',cursive;letter-spacing:.02em}
+  .fade-in{animation:fade .3s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .typing span{display:inline-block;width:6px;height:6px;margin:0 2px;border-radius:50%;background:#3fa7c9;animation:blink 1.2s infinite}
+  .typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+  @keyframes blink{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+  .ql{margin-bottom:14px;max-width:78%}
+  .ql-u{align-self:flex-end;background:linear-gradient(135deg,#2e8fb0,#3fa7c9);color:#fff;border-radius:18px 18px 4px 18px}
+  .ql-a{align-self:flex-start;background:rgba(255,255,255,.78);backdrop-filter:blur(6px);border:1px solid rgba(29,68,84,.12);border-radius:18px 18px 18px 4px;box-shadow:0 4px 14px rgba(29,68,84,.06)}
+  .chip{border:1px solid rgba(29,68,84,.16);background:#fff;box-shadow:0 2px 10px rgba(29,68,84,.05)}
+  .chip:hover{border-color:#3fa7c9;box-shadow:0 4px 16px rgba(63,167,201,.18)}
+  .faq-head{display:flex;align-items:center;justify-content:space-between;gap:1rem;width:100%;text-align:left;
+    padding:.95rem 1.1rem;border:1px solid rgba(29,68,84,.15);border-radius:14px;background:#fff;
+    font-weight:600;color:#1d4454;cursor:pointer;transition:.2s}
+  .faq-head:hover{border-color:#3fa7c9;box-shadow:0 3px 12px rgba(63,167,201,.14)}
+  .faq-icon{font-size:1.3rem;line-height:1;color:#3fa7c9;transition:transform .25s}
+  .faq-item.open .faq-icon{transform:rotate(45deg)}
+  .faq-body{max-height:0;overflow:hidden;transition:max-height .3s ease}
+  .faq-inner{padding:.65rem 1.1rem 1.05rem;color:#33586a;font-size:.93rem;line-height:1.6}
+  .format-card{position:relative;border:2px solid rgba(29,68,84,.12);border-radius:20px;
+    padding:1.5rem;background:#fff;transition:all .3s;cursor:pointer;overflow:hidden}
+  .format-card:hover{border-color:rgba(63,167,201,.45);box-shadow:0 8px 30px rgba(63,167,201,.12)}
+  .format-card.sel{border-color:#3fa7c9;background:linear-gradient(135deg,rgba(63,167,201,.04),rgba(127,208,181,.06));
+    box-shadow:0 8px 30px rgba(63,167,201,.18)}
+  .format-icon-wrap{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;
+    background:linear-gradient(135deg,#e8f6fb,#f0f9f5);border:1px solid rgba(29,68,84,.08);
+    transition:all .3s}
+  .format-card:hover .format-icon-wrap{background:linear-gradient(135deg,#d6eef7,#e2f5ec)}
+  .format-card.sel .format-icon-wrap{background:linear-gradient(135deg,#3fa7c9,#7fd0b5);border-color:transparent}
+  .format-card.sel .format-icon-wrap .format-icon{color:#fff}
+  .format-icon{width:26px;height:26px;color:#3fa7c9;transition:color .3s}
+  .format-list{list-style:none;padding:0;margin:0;font-size:.82rem;line-height:1.55}
+  .format-list li{padding-left:1.1rem;position:relative;margin-bottom:.35rem}
+  .format-list li::before{content:'';position:absolute;left:0;top:.5em;width:5px;height:5px;
+    border-radius:50%;background:#3fa7c9;opacity:.45;transition:opacity .3s}
+  .format-card.sel .format-list li::before{opacity:1}
+  .format-check{position:absolute;top:16px;right:16px;width:28px;height:28px;border-radius:50%;
+    border:2px solid rgba(29,68,84,.12);display:grid;place-items:center;transition:all .3s;
+    background:#fff}
+  .format-card.sel .format-check{border-color:#3fa7c9;background:#3fa7c9}
+  .format-check::after{content:'✓';font-size:.7rem;color:transparent;transition:color .3s;font-weight:700}
+  .format-card.sel .format-check::after{color:#fff}
+</style>
+<style>
+  header{position:sticky;top:0;z-index:50;width:100%;background:rgba(255,255,255,.7);backdrop-filter:blur(10px);border-bottom:1px solid rgba(29,68,84,.1)}
+  .logo{font-size:1.4rem;line-height:1.4;color:#1d4454}
+</style>
+</head>
+<body class="flex flex-col" style="min-height:100vh">
+
+<header class="px-5 py-3">
+  <div class="max-w-4xl mx-auto flex items-center justify-between leading-[1.4]">
+    <div class="logo marker">K-Tron<span class="sk-serif text-cy" style="font-style:italic"> · AI</span></div>
+    <div class="mono text-[0.7rem] tracking-widest uppercase text-deep/70">Krypton Web Copilot</div>
+  </div>
+</header>
+
+<main class="flex-1 w-full max-w-4xl mx-auto px-5 pb-6 pt-6 flex flex-col" style="min-height:0">
+  <div class="flex-1 flex flex-col" style="min-height:0">
+    <div id="welcome" class="text-center pt-10 pb-6">
+      <h1 class="sk-serif text-4xl sm:text-5xl text-deep mb-3">Talk to K-Tron</h1>
+      <p class="text-deep/70 max-w-xl mx-auto mb-6">Scope sites, price packages, plan features — your design-studio copilot.</p>
+      <div class="flex flex-wrap justify-center gap-2 max-w-2xl mx-auto">
+        <button class="chip rounded-full px-4 py-2 text-sm text-deep" onclick="ask('How much should a 4-page business site cost me?')">Price a 4-page site</button>
+        <button class="chip rounded-full px-4 py-2 text-sm text-deep" onclick="ask('What pages should a coffee shop website have?')">Coffee shop pages</button>
+        <button class="chip rounded-full px-4 py-2 text-sm text-deep" onclick="ask('Should I add an online store or a booking system first?')">Store vs bookings</button>
+        <button class="chip rounded-full px-4 py-2 text-sm text-deep" onclick="ask('How long does a typical project take?')">Project timeline</button>
+      </div>
+    </div>
+    <div id="chat" class="flex flex-col overflow-y-auto pr-1" style="min-height:0"></div>
+  </div>
+</main>
+
+<section id="faq" class="max-w-4xl mx-auto w-full px-5 pt-10 pb-2">
+  <div class="rounded-3xl bg-white/70 backdrop-blur border border-deep/10 p-6 sm:p-8">
+    <div class="text-center mb-2">
+      <div class="mono text-xs tracking-widest uppercase text-cy mb-1">Quick Answers</div>
+      <h2 class="sk-serif text-3xl text-deep mb-6">Frequently Asked</h2>
+    </div>
+    <div id="faqList" class="space-y-3 max-w-2xl mx-auto">
+      <div class="faq-item">
+        <button type="button" class="faq-head" onclick="toggleFaq(this)">
+          <span>What can K-Tron help me with?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-body"><div class="faq-inner">
+          K-Tron scopes websites, prices packages, plans features, and advises on web projects for a one-person design studio. Ask it about page counts, budgets, or what to build next.
+        </div></div>
+      </div>
+      <div class="faq-item">
+        <button type="button" class="faq-head" onclick="toggleFaq(this)">
+          <span>Is my data private?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-body"><div class="faq-inner">
+          Your questions are sent to a hosted API endpoint; the API key stays on the server and is never exposed to your browser. Don't paste passwords, keys, or sensitive data into chat.
+        </div></div>
+      </div>
+      <div class="faq-item">
+        <button type="button" class="faq-head" onclick="toggleFaq(this)">
+          <span>How much does a typical site cost?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-body"><div class="faq-inner">
+          It depends on complexity. A small 4–6 page business site generally lands well under $1,000; custom stores, apps, or add-ons push the total higher. Ask K-Tron to cost a specific build.
+        </div></div>
+      </div>
+      <div class="faq-item">
+        <button type="button" class="faq-head" onclick="toggleFaq(this)">
+          <span>How long does a project take?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-body"><div class="faq-inner">
+          A focused site is often deliverable in 1–2 weeks. Larger builds with shops, logins, or lots of pages take longer. K-Tron can help you scope a realistic timeline for your project.
+        </div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="format-picker" class="max-w-4xl mx-auto w-full px-5 pt-10 pb-4">
+  <div class="rounded-3xl bg-white/70 backdrop-blur border border-deep/10 p-6 sm:p-8">
+    <div class="text-center mb-6">
+      <div class="mono text-xs tracking-widest uppercase text-cy mb-1">Project Setup</div>
+      <h2 class="sk-serif text-3xl text-deep mb-3">How do you want your project?</h2>
+      <p class="text-deep/65 max-w-lg mx-auto text-sm leading-relaxed">Choose how K-Tron hands off the final build. You can always change this before submission.</p>
+    </div>
+    <div id="formatCards" class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+      <button type="button" class="format-card group text-left" onclick="setFormat('single')">
+        <div class="format-icon-wrap">
+          <svg class="format-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6m-3-3v6m9-3a9 9 0 11-18 0 9 9 0 0118 0z"/><circle cx="12" cy="12" r="9"/></svg>
+        </div>
+        <h3 class="sk-serif text-xl text-deep mt-4 mb-1">Single .html file</h3>
+        <p class="text-deep/60 text-sm leading-relaxed mb-3">Everything baked into one self-contained file — styles, scripts, content, all in one place.</p>
+        <ul class="format-list text-deep/65">
+          <li>Drag onto any server or open locally — zero setup</li>
+          <li>Easy to email, hand off, or embed via an iframe</li>
+          <li>No file management — one file, one deploy</li>
+          <li>Best for landing pages, prototypes, and quick launches</li>
+        </ul>
+        <div class="format-check"></div>
+      </button>
+      <button type="button" class="format-card group text-left" onclick="setFormat('multi')">
+        <div class="format-icon-wrap">
+          <svg class="format-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+        </div>
+        <h3 class="sk-serif text-xl text-deep mt-4 mb-1">Multiple files</h3>
+        <p class="text-deep/60 text-sm leading-relaxed mb-3">Organized into separate HTML, CSS, and JavaScript files — clean, maintainable, and professional.</p>
+        <ul class="format-list text-deep/65">
+          <li>Clean separation of concerns — easier to edit later</li>
+          <li>Scalable for growing sites and ongoing work</li>
+          <li>Standard project structure any developer can navigate</li>
+          <li>Best for shops, multi-page sites, and client handoffs</li>
+        </ul>
+        <div class="format-check"></div>
+      </button>
+    </div>
+    <div id="formatSummary" class="text-center text-sm text-deep/50 mt-4 mono tracking-wide hidden">selected: <span id="formatLabel" class="text-cy font-semibold"></span></div>
+  </div>
+</section>
+
+<form id="composer" class="sticky bottom-0 max-w-4xl mx-auto w-full px-5 pb-5 pt-2" autocomplete="off">
+  <div class="flex items-end gap-2 rounded-2xl bg-white/80 backdrop-blur border border-deep/15 p-3 shadow-lg">
+    <textarea id="input" rows="1" placeholder="Ask about building your site…" class="flex-1 resize-none bg-transparent outline-none text-deep placeholder-deep/40 max-h-40 leading-relaxed"></textarea>
+    <button type="submit" class="shrink-0 rounded-full bg-cy text-white font-semibold px-5 py-2.5 hover:brightness-105 active:scale-95 transition">Send</button>
+  </div>
+</form>
+
+<script>
+const chat = document.getElementById('chat');
+const welcome = document.getElementById('welcome');
+const input = document.getElementById('input');
+const form = document.getElementById('composer');
+
+let formatPick = null;
+
+function setFormat(f) {
+  formatPick = f;
+  document.querySelectorAll('.format-card').forEach((c, i) => {
+    c.classList.toggle('sel', (f === 'single' && i === 0) || (f === 'multi' && i === 1));
+  });
+  const summary = document.getElementById('formatSummary');
+  const label = document.getElementById('formatLabel');
+  if (f) {
+    summary.classList.remove('hidden');
+    label.textContent = f === 'single' ? 'Single .html file' : 'Multiple files (HTML / CSS / JS)';
+  }
+}
+
+function addMessage(role, text) {
+  welcome.style.display = 'none';
+  const d = document.createElement('div');
+  d.className = 'ql fade-in px-4 py-3 text-[0.95rem] leading-relaxed whitespace-pre-wrap ' + (role === 'user' ? 'ql-u' : 'ql-a');
+  d.textContent = text;
+  chat.appendChild(d);
+  chat.scrollTop = chat.scrollHeight;
+  return d;
+}
+
+function showTyping() {
+  const d = document.createElement('div');
+  d.className = 'ql ql-a typing fade-in px-4 py-3';
+  d.innerHTML = '<span></span><span></span><span></span>';
+  chat.appendChild(d);
+  chat.scrollTop = chat.scrollHeight;
+  return d;
+}
+
+async function ask(text) {
+  addMessage('user', text);
+  input.value = '';
+  autosize();
+  const typing = showTyping();
+  const messages = [{ role: 'user', content: text }];
+  if (formatPick) {
+    const fmtLabel = formatPick === 'single' ? 'Single .html file delivery' : 'Multi-file project (HTML / CSS / JS)';
+    messages.unshift({ role: 'user', content: '[Project format preference: ' + fmtLabel + ']' });
+  }
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages }),
+    });
+    const data = await res.json();
+    typing.remove();
+    if (!res.ok) {
+      addMessage('assistant', 'K-Tron is offline: ' + (data.error || 'unknown error'));
+    } else {
+      addMessage('assistant', data.choices?.[0]?.message?.content?.trim() || '(no reply)');
+    }
+  } catch (e) {
+    typing.remove();
+    addMessage('assistant', 'Could not reach K-Tron. Is the server running?');
+  }
+}
+
+function autosize() {
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 160) + 'px';
+}
+
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-item');
+  const body = item.querySelector('.faq-body');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach((i) => {
+    i.classList.remove('open');
+    i.querySelector('.faq-body').style.maxHeight = null;
+  });
+  if (!isOpen) {
+    item.classList.add('open');
+    body.style.maxHeight = body.scrollHeight + 'px';
+  }
+}
+
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const t = input.value.trim();
+  if (t) ask(t);
+});
+input.addEventListener('input', autosize);
+input.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); }
+});
+</script>
+</body>
+</html>
