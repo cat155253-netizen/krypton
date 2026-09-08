@@ -200,11 +200,7 @@ tailwind.config = {
         <button type="button" class="cur-btn" data-cur="eur" onclick="setCurrency('eur')">€</button>
         <button type="button" class="cur-btn" data-cur="inr" onclick="setCurrency('inr')">₹</button>
       </div>
-      <div class="flex items-center gap-2 chip !text-[0.85rem] !py-2 !px-5">
-        <span class="dot !w-2.5 !h-2.5"></span>
-        <span class="mono !text-lg font-bold !text-deep" id="liveCount">000</span>
-        <span class="hidden sm:inline !text-sm !text-deep/80">SITES DELIVERED</span>
-      </div>
+      <button type="button" onclick="openPortal()" class="chip !py-2 !px-5 cursor-pointer">CLIENT LOGIN</button>
     </div>
   </div>
 </header>
@@ -300,18 +296,13 @@ tailwind.config = {
       </div>
       <div class="matrix-row grid grid-cols-12 items-center px-6 md:px-8 py-7 transition duration-300">
         <div class="col-span-6 md:col-span-4 font-sans text-2xl font-semibold">1 Week</div>
-        <div class="col-span-6 md:col-span-3 hand text-3xl text-neon">+$100</div>
+        <div class="col-span-6 md:col-span-3 hand text-3xl text-neon">+$500</div>
         <div class="hidden md:block col-span-5 text-deep/60 text-base">Prioritized build, weekly check-ins</div>
       </div>
       <div class="matrix-row grid grid-cols-12 items-center px-6 md:px-8 py-7 transition duration-300">
         <div class="col-span-6 md:col-span-4 font-sans text-2xl font-semibold">3 Days</div>
-        <div class="col-span-6 md:col-span-3 hand text-3xl text-neon">+$500</div>
-        <div class="hidden md:block col-span-5 text-deep/60 text-base">Dedicated sprint, daily builds</div>
-      </div>
-      <div class="matrix-row grid grid-cols-12 items-center px-6 md:px-8 py-7 transition duration-300">
-        <div class="col-span-6 md:col-span-4 font-sans text-2xl font-semibold">1 Day</div>
         <div class="col-span-6 md:col-span-3 hand text-3xl text-neon">+$1,000</div>
-        <div class="hidden md:block col-span-5 text-deep/60 text-base">Express build, priority queue</div>
+        <div class="hidden md:block col-span-5 text-deep/60 text-base">Dedicated sprint, daily builds</div>
       </div>
     </div>
 
@@ -397,9 +388,8 @@ tailwind.config = {
           <label class="block hand text-2xl text-ink mb-2">Delivery Speed</label>
           <select id="speed" onchange="updateCalc()" class="field mb-6">
             <option value="0" class="bg-white">1 Month — FREE</option>
-            <option value="100" class="bg-white">1 Week — +$100</option>
-            <option value="500" class="bg-white">3 Days — +$500</option>
-            <option value="1000" class="bg-white">1 Day — +$1,000</option>
+            <option value="500" class="bg-white">1 Week — +$500</option>
+            <option value="1000" class="bg-white">3 Days — +$1,000</option>
           </select>
 
           <label class="block hand text-2xl text-ink mb-2">Website Length</label>
@@ -663,13 +653,6 @@ tailwind.config = {
 </div>
 
 <script>
-/* ============ live template counter ============ */
-(function(){
-  let n = 312; const el = document.getElementById('liveCount');
-  el.textContent = String(n).padStart(3,'0');
-  setInterval(()=>{ n = 312 + Math.floor(Math.random()*18); el.textContent = String(n).padStart(3,'0'); }, 4000);
-})();
-
 /* ============ theme library data ============ */
 const THEMES = [
   {name:'Agentic Tech', desc:'SaaS-style landing with routing dashboard, live status and trace highlights.', len:'≈ 4 pages', base:420, acc:'#3fa7c9', tags:'SAAS · TECH', demo:'synapse.html'},
@@ -700,8 +683,8 @@ const ADDONS = [
   {key:'mail', label:'Newsletter & automation', cost:95},
 ];
 
-const RUSH = { "0":0, "100":100, "500":500, "1000":1000 };
-const SPEED_LBL = { "0":"1 Month","100":"1 Week","500":"3 Days","1000":"1 Day" };
+const RUSH = { "0":0, "500":500, "1000":1000 };
+const SPEED_LBL = { "0":"1 Month","500":"1 Week","1000":"3 Days" };
 const LENGTHS = [
   {key:'1', label:'1–2 pages', cost:0},
   {key:'3', label:'3–4 pages', cost:120},
@@ -884,7 +867,7 @@ function fillLayerOptions(){
   if(fl) fl.innerHTML = LENGTHS.map(l=>`<option value="${l.key}" class="bg-white">${l.label} — ${fmt(l.cost)}</option>`).join('');
   if(fs) fs.innerHTML = STYLES.map(s=>`<option value="${s.key}" class="bg-white">${s.label} — FREE</option>`).join('');
   const spd = document.getElementById('speed');
-  if(spd) spd.innerHTML = Object.keys(RUSH).map(k=>`<option value="${k}" class="bg-white">${SPEED_LBL[k]} — ${fmt(RUSH[k])}</option>`).join('');
+  if(spd) spd.innerHTML = Object.keys(RUSH).map(k=>`<option value="${k}" class="bg-white">${SPEED_LBL[k]} — ${RUSH[k] ? '+'+fmt(RUSH[k]) : 'FREE'}</option>`).join('');
   syncFormOrigin();
 }
 
@@ -1049,6 +1032,14 @@ function togglePortal(btn){
   const open = panel.classList.contains('hidden');
   panel.classList.toggle('hidden');
   if (chev) chev.style.transform = open ? 'rotate(180deg)' : 'rotate(0deg)';
+}
+
+function openPortal(){
+  const panel = document.getElementById('clientPortal');
+  if (panel.classList.contains('hidden')) togglePortal();
+  document.getElementById('contact').scrollIntoView({behavior:'smooth', block:'start'});
+  setTimeout(()=>{ panel.scrollIntoView({behavior:'smooth', block:'center'}); }, 350);
+  setTimeout(()=>{ document.getElementById('pEmail').focus(); }, 650);
 }
 
 function esc(s){
