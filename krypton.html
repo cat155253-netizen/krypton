@@ -364,6 +364,20 @@ tailwind.config = {
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- form -->
       <div class="sticky-card p-8 md:p-10 reveal">
+        <button type="button" onclick="togglePortal(this)" class="w-full text-center hand text-lg mb-6 px-4 py-3 rounded-2xl border border-neon/30 bg-aqua3/60 hover:bg-aqua3 transition" style="color:#2c5f72">
+          Already applied? View your application &nbsp;<span id="portalChev" class="inline-block transition-transform" style="color:#3fa7c9">▾</span>
+        </button>
+
+        <div id="clientPortal" class="hidden mb-8 rounded-2xl border border-neon/35 bg-white/80 p-6">
+          <p class="hand text-xl text-ink mb-1">Client Portal</p>
+          <p class="text-sm text-deep/60 mb-4">Enter the email you applied with and the 6-digit passcode from your confirmation card.</p>
+          <input id="pEmail" type="email" placeholder="Contact email" class="field mb-3" autocomplete="off">
+          <input id="pCode" inputmode="numeric" maxlength="6" placeholder="Passcode — 6 digits" class="field mb-3 tracking-[.3em]" autocomplete="off">
+          <p id="pErr" class="hidden text-xs mb-3" style="color:#e2332e"></p>
+          <button type="button" onclick="clientLookup()" class="btn-soft w-full mono text-sm py-3 rounded-full">VIEW MY APPLICATION</button>
+          <div id="clientResult" class="hidden mt-5"></div>
+        </div>
+
         <form id="contactForm" novalidate>
           <label class="block hand text-2xl text-ink mb-2">Company Name <span class="text-sm text-soft">*required</span></label>
           <input id="company" required placeholder="Acme Industries" class="field mb-6" />
@@ -1026,6 +1040,94 @@ function closeDemo(){
   m.classList.add('hidden'); m.style.display='none';
   document.getElementById('demoFrame').src='about:blank';
   document.body.style.overflow='';
+}
+
+/* ============ client portal ============ */
+function togglePortal(btn){
+  const panel = document.getElementById('clientPortal');
+  const chev = document.getElementById('portalChev');
+  const open = panel.classList.contains('hidden');
+  panel.classList.toggle('hidden');
+  if (chev) chev.style.transform = open ? 'rotate(180deg)' : 'rotate(0deg)';
+}
+
+function esc(s){
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function clientLookup(){
+  const err = document.getElementById('pErr');
+  const res = document.getElementById('clientResult');
+  const email = document.getElementById('pEmail').value.trim();
+  const code = document.getElementById('pCode').value.trim();
+  err.classList.add('hidden');
+  if (!email || !code){
+    err.textContent = 'Enter both your email and passcode.';
+    err.classList.remove('hidden');
+    return;
+  }
+  fetch('/api/client/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, appCode: code })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data && data.ok && data.application){
+      renderClientApp(data.application);
+    } else {
+      err.textContent = (data && data.error) || 'No application found for that email + passcode.';
+      err.classList.remove('hidden');
+      res.classList.add('hidden');
+    }
+  })
+  .catch(() => {
+    err.textContent = 'Could not reach the server. Try again.';
+    err.classList.remove('hidden');
+    res.classList.add('hidden');
+  });
+}
+
+function renderClientApp(a){
+  const fmt = (x) => '$' + Number(x || 0).toLocaleString('en-US');
+  const d = a.createdAt ? new Date(a.createdAt).toLocaleDateString('en-US', { dateStyle: 'medium' }) : '—';
+  const rows = [
+    ['STATUS', (a.status || 'open').toUpperCase()],
+    ['THEME', a.theme],
+    ['LENGTH', a.lengthSelection],
+    ['STYLE', a.styleSelection],
+    ['DELIVERY', a.deliveryFormat],
+    ['SPEED', a.deliverySpeed],
+    ['SUBMITTED', d],
+  ].filter(r => r[1]);
+  const el = document.getElementById('clientResult');
+  el.innerHTML =
+    '<div class="rounded-2xl p-5 text-left" style="background:linear-gradient(135deg,#124a5e,#3fa7c9);border:1px solid rgba(127,208,181,.45)">' +
+      '<div class="flex items-center justify-between">' +
+        '<span class="marker text-sm" style="color:#fff">Krypton Studio</span>' +
+        '<span class="mono text-[10px] tracking-[.2em]" style="color:#7fd0b5">K-TRON</span>' +
+      '</div>' +
+      '<div class="mt-4 flex items-end justify-between">' +
+        '<div>' +
+          '<div class="mono text-[10px] tracking-[.18em] mb-1" style="color:#7fd0b5">APPLICATION NO.</div>' +
+          '<div class="mono text-lg tracking-widest" style="color:#fff">' + esc(a.appNo) + '</div>' +
+        '</div>' +
+        '<div class="text-right">' +
+          '<div class="mono text-[10px] tracking-[.18em] mb-1" style="color:#7fd0b5">APPLICATION ID</div>' +
+          '<div class="mono text-sm tracking-[.14em]" style="color:#fff">' + esc(a.appId) + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="mt-4 mono text-[10px] tracking-[.18em]" style="color:#7fd0b5">DELIVERY PASSCODE</div>' +
+      '<div class="mono text-2xl font-bold tracking-[.35em] mt-1" style="color:#fff">' + esc(String(a.appCode).split('').join(' ')) + '</div>' +
+      '<div class="mt-4 space-y-1.5">' +
+        rows.map(r => '<div class="flex justify-between gap-4 text-[11px]"><span class="mono text-[10px] tracking-widest" style="color:rgba(127,208,181,.9)">' + r[0] + '</span><span style="color:rgba(255,255,255,.92);text-align:right">' + esc(r[1]) + '</span></div>').join('') +
+      '</div>' +
+      '<div class="mt-4 mono text-lg" style="color:#fff">' + fmt(a.totalUSD) + '</div>' +
+      '<p class="mt-3 text-[11px] leading-relaxed" style="color:rgba(255,255,255,.75)">Keep your passcode private — it is required when we deliver your website.</p>' +
+    '</div>';
+  el.classList.remove('hidden');
+  el.scrollIntoView({behavior:'smooth', block:'nearest'});
 }
 
 /* ============ privacy policy modal ============ */

@@ -1,0 +1,358 @@
+window['google-adwords-newDeps'] = ["/integrations/vendor/commons.1b78f84a8c1751144d06.js"];window['google-adwords-newLoader'] = function() { return window["google-adwords-newIntegration"] =
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// install a JSONP callback for chunk loading
+/******/ 	function webpackJsonpCallback(data) {
+/******/ 		var chunkIds = data[0];
+/******/ 		var moreModules = data[1];
+/******/ 		var executeModules = data[2];
+/******/
+/******/ 		// add "moreModules" to the modules object,
+/******/ 		// then flag all "chunkIds" as loaded and fire callback
+/******/ 		var moduleId, chunkId, i = 0, resolves = [];
+/******/ 		for(;i < chunkIds.length; i++) {
+/******/ 			chunkId = chunkIds[i];
+/******/ 			if(Object.prototype.hasOwnProperty.call(installedChunks, chunkId) && installedChunks[chunkId]) {
+/******/ 				resolves.push(installedChunks[chunkId][0]);
+/******/ 			}
+/******/ 			installedChunks[chunkId] = 0;
+/******/ 		}
+/******/ 		for(moduleId in moreModules) {
+/******/ 			if(Object.prototype.hasOwnProperty.call(moreModules, moduleId)) {
+/******/ 				modules[moduleId] = moreModules[moduleId];
+/******/ 			}
+/******/ 		}
+/******/ 		if(parentJsonpFunction) parentJsonpFunction(data);
+/******/
+/******/ 		while(resolves.length) {
+/******/ 			resolves.shift()();
+/******/ 		}
+/******/
+/******/ 		// add entry modules from loaded chunk to deferred list
+/******/ 		deferredModules.push.apply(deferredModules, executeModules || []);
+/******/
+/******/ 		// run deferred modules when all chunks ready
+/******/ 		return checkDeferredModules();
+/******/ 	};
+/******/ 	function checkDeferredModules() {
+/******/ 		var result;
+/******/ 		for(var i = 0; i < deferredModules.length; i++) {
+/******/ 			var deferredModule = deferredModules[i];
+/******/ 			var fulfilled = true;
+/******/ 			for(var j = 1; j < deferredModule.length; j++) {
+/******/ 				var depId = deferredModule[j];
+/******/ 				if(installedChunks[depId] !== 0) fulfilled = false;
+/******/ 			}
+/******/ 			if(fulfilled) {
+/******/ 				deferredModules.splice(i--, 1);
+/******/ 				result = __webpack_require__(__webpack_require__.s = deferredModule[0]);
+/******/ 			}
+/******/ 		}
+/******/
+/******/ 		return result;
+/******/ 	}
+/******/
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// object to store loaded and loading chunks
+/******/ 	// undefined = chunk not loaded, null = chunk preloaded/prefetched
+/******/ 	// Promise = chunk loading, 0 = chunk loaded
+/******/ 	var installedChunks = {
+/******/ 		"google-adwords-new": 0
+/******/ 	};
+/******/
+/******/ 	var deferredModules = [];
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// define __esModule on exports
+/******/ 	__webpack_require__.r = function(exports) {
+/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 		}
+/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/
+/******/ 	// create a fake namespace object
+/******/ 	// mode & 1: value is a module id, require it
+/******/ 	// mode & 2: merge all properties of value into the ns
+/******/ 	// mode & 4: return value when already ns object
+/******/ 	// mode & 8|1: behave like require
+/******/ 	__webpack_require__.t = function(value, mode) {
+/******/ 		if(mode & 1) value = __webpack_require__(value);
+/******/ 		if(mode & 8) return value;
+/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
+/******/ 		var ns = Object.create(null);
+/******/ 		__webpack_require__.r(ns);
+/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
+/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+/******/ 		return ns;
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/ 	var jsonpArray = window["webpackJsonp_name_Integration"] = window["webpackJsonp_name_Integration"] || [];
+/******/ 	var oldJsonpFunction = jsonpArray.push.bind(jsonpArray);
+/******/ 	jsonpArray.push = webpackJsonpCallback;
+/******/ 	jsonpArray = jsonpArray.slice();
+/******/ 	for(var i = 0; i < jsonpArray.length; i++) webpackJsonpCallback(jsonpArray[i]);
+/******/ 	var parentJsonpFunction = oldJsonpFunction;
+/******/
+/******/
+/******/ 	// add entry module to deferred list
+/******/ 	deferredModules.push(["OMmk","commons"]);
+/******/ 	// run deferred modules when ready
+/******/ 	return checkDeferredModules();
+/******/ })
+/************************************************************************/
+/******/ ({
+
+/***/ "OMmk":
+/*!******************************************************!*\
+  !*** ./integrations/google-adwords-new/lib/index.js ***!
+  \******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+/**
+ * Module dependencies.
+ */
+
+var integration = __webpack_require__(/*! @segment/analytics.js-integration */ "hjHq");
+
+var each = __webpack_require__(/*! @ndhoule/each */ "6YGp");
+
+var find = __webpack_require__(/*! obj-case */ "WiAo");
+
+var reject = __webpack_require__(/*! reject */ "bmjW");
+
+var extend = __webpack_require__(/*! extend */ "6dBs");
+/**
+ * Expose `GoogleAdWordsNew` integration.
+ */
+
+
+var GoogleAdWordsNew = module.exports = integration('Google AdWords New').option('accountId', '').option('sendPageView', true).option('conversionLinker', true).option('clickConversions', []).option('pageLoadConversions', []).option('defaultPageConversion', '').option('disableAdPersonalization', false).option('floodlightAccountId', '') // The ID in this line (i.e. the gtag.js ID) does not determine which account(s) will receive data from the tag; rather, it is used to uniquely identify your global site tag. Which account(s) receive data from the tag is determined by calling the config command (and by using the send_to parameter on an event). For instance, if you use Google Analytics, you may already have the gtag.js global site tag installed on your site. In that case, the gtag.js ID may be that of the Google Analytics property where you first obtained the snippet.
+.tag('<script src="https://www.googletagmanager.com/gtag/js?id={{ accountId }}">');
+/**
+ * Initialize.
+ *
+ * https://support.google.com/adwords/answer/6095821?hl=en&ref_topic=3165803
+ * @api public
+ */
+
+GoogleAdWordsNew.prototype.initialize = function () {
+  var self = this;
+  window.dataLayer = window.dataLayer || [];
+
+  window.gtag = function () {
+    window.dataLayer.push(arguments);
+  };
+
+  var config = {};
+  if (this.options.sendPageView === false) config.send_page_view = this.options.sendPageView;
+  if (this.options.conversionLinker === false) config.conversion_linker = this.options.conversionLinker; // not recommended to set this by GA docs — less accurate measurements
+
+  this.load(function () {
+    window.gtag('js', new Date()); // ad personalization must be disabled before any 'config' statements
+    // https://support.google.com/analytics/answer/9050852?hl=en
+
+    if (self.options.disableAdPersonalization) window.gtag('set', 'allow_ad_personalization_signals', false);
+
+    if (self.options.floodlightAccountId) {
+      window.gtag('config', self.options.floodlightAccountId, config);
+    }
+
+    window.gtag('config', self.options.accountId, config);
+    self.ready();
+  });
+};
+/**
+ * Loaded?
+ *
+ * @api public
+ * @return {boolean}
+ */
+
+
+GoogleAdWordsNew.prototype.loaded = function () {
+  return window.dataLayer.push !== Array.prototype.push;
+};
+/**
+ * Page
+ *
+ * https://support.google.com/adwords/answer/6095821?hl=en&ref_topic=3165803
+ * @api public
+ */
+
+
+GoogleAdWordsNew.prototype.page = function (page) {
+  var self = this; // If there is no pageName, we support firing default Page Load conversion if provided in options
+
+  var configs = this.options;
+  var pageName = page.name(); // If you are naming your `.page()` calls, you should explicitly map each one rather than expecting a fallback to default page conversion
+
+  if (!pageName && configs.defaultPageConversion) return sendPageLoadConversion(configs.defaultPageConversion); // A mapped event can either be a 'Page Load' or a 'Click' conversion in AdWords.
+  // Since the Page Load conversions are meant to just be dropped on a given page, we are mapping named page calls rather than `.track()`
+
+  var mappedConversions = matchConversion(this.options.pageLoadConversions, pageName);
+  each(function (mappedConversion) {
+    sendPageLoadConversion(mappedConversion.id, mappedConversion.override);
+  }, mappedConversions);
+
+  function sendPageLoadConversion(id, override) {
+    var semanticMetadata = reject({
+      send_to: (override || configs.accountId) + '/' + id,
+      // the below are not spec'd props of page API, AdWords accepts can accept them for this type of conversions
+      value: page.options(self.name).value,
+      currency: page.options(self.name).currency,
+      transaction_id: find(page.options(self.name), 'order_id')
+    });
+    var metadata = extend(page.properties(), semanticMetadata); // metadata shouldn't contain PII — warning by Google
+
+    return window.gtag('event', pageName || 'conversion', metadata);
+  }
+};
+/**
+ * Track
+ *
+ * https://support.google.com/adwords/answer/6331314?hl=en&ref_topic=3165803&co=ADWORDS.IsAWNCustomer%3Dtrue&oco=0
+ * https://developers.google.com/adwords-remarketing-tag/
+ * NOTE: If customers want to send conversions to multiple accounts, they should:
+ * "Alternatively, you should consider using cross-account conversion tracking which allows you to have a manager account (MCC) own
+ * the conversion actions and share them with one or more of its sub-accounts. In doing so, you only need to specify a single conversion
+ * identifier in the event snippet. Learn more about cross- account conversion tracking."
+ *
+ * But assuming pushback, we will allow overriding the default AdWords account ID per `.track()` if needed via UI settings
+ * NOTE: Conversion tracking and remarketing functionalities are now combined into a single tag so no need for feature flag for remarketing
+ *
+ * @api public
+ */
+
+
+GoogleAdWordsNew.prototype.track = function (track) {
+  var self = this; // A mapped event can either be a 'Page Load' or a 'Click' conversion in AdWords.
+  // Depending on what you chose inside Adwords when creating the conversions, we should expect `properties.value` if that is what they want to send
+  // But for purchase events, we should map revenue/total
+
+  var eventName = track.event();
+  var mappedConversions = matchConversion(this.options.clickConversions, track.event());
+  each(function (mappedConversion) {
+    var properties = track.properties({
+      orderId: 'transaction_id'
+    });
+    var metadata = extend(properties, {
+      send_to: (mappedConversion.override || self.options.accountId) + '/' + mappedConversion.id
+    }); // metadata shouldn't contain PII — warning by Google
+
+    return window.gtag('event', eventName, metadata);
+  }, mappedConversions);
+};
+/**
+ * Order Completed
+ *
+ * https://support.google.com/adwords/answer/6331314?hl=en&ref_topic=3165803&co=ADWORDS.IsAWNCustomer%3Dtrue&oco=0
+ * @api public
+ */
+
+
+GoogleAdWordsNew.prototype.orderCompleted = function (track) {
+  var self = this; // A mapped event can either be a 'Page Load' or a 'Click' conversion in AdWords.
+  // Depending on what you chose inside Adwords when creating the conversions, we should expect `properties.value` if that is what they want to send
+  // But for purchase events, we should map revenue/total
+
+  var eventName = track.event();
+  var mappedConversions = matchConversion(this.options.clickConversions, track.event());
+  each(function (mappedConversion) {
+    var properties = track.properties({
+      orderId: 'transaction_id',
+      order_id: 'transaction_id',
+      revenue: 'value'
+    });
+    var metadata = extend(properties, {
+      send_to: (mappedConversion.override || self.options.accountId) + '/' + mappedConversion.id
+    }); // metadata shouldn't contain PII — warning by Google
+
+    return window.gtag('event', eventName, metadata);
+  }, mappedConversions);
+};
+/**
+ * Match Mapped AdWords conversions to your `.page()` or `.track()` calls
+ *
+ * @param {Array} mappedConversions
+ * @param {String} segmentEvent
+ */
+
+
+function matchConversion(mappedConversions, segmentEvent) {
+  var ret = [];
+  each(function (setting) {
+    var conversion = setting.value || setting; // to prevent common casing mistakes in our UI
+
+    if (typeof segmentEvent === 'string' && segmentEvent.toLowerCase() === conversion.event.toLowerCase()) {
+      var con = {
+        id: conversion.id
+      };
+      if (conversion.accountId) con.override = conversion.accountId;
+      ret.push(con);
+    }
+  }, mappedConversions);
+  return ret;
+}
+
+/***/ })
+
+/******/ });
+//# sourceMappingURL=google-adwords-new.js.map
+};

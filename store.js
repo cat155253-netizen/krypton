@@ -85,6 +85,7 @@ async function insertApplication(app) {
     total_usd: app.totalUSD || 0,
     currency: app.currency || 'usd',
     privacy_consent: Boolean(app.privacyConsent),
+    status: app.status || 'new',
   };
   if (pool) {
     const { rows } = await pool.query(
@@ -148,6 +149,20 @@ async function getApplication(id) {
   return memory.applications.find((a) => a.id === Number(id)) || null;
 }
 
+async function getApplicationByEmailAndCode(email, code) {
+  const em = String(email).trim().toLowerCase();
+  const co = String(code).trim().toUpperCase();
+  if (pool) {
+    const { rows } = await pool.query(
+      'SELECT * FROM applications WHERE LOWER(founder_email)=$1 AND UPPER(app_code)=$2 LIMIT 1',
+      [em, co]);
+    return rows[0] ? mapRow(rows[0]) : null;
+  }
+  return memory.applications.find(
+    (a) => String(a.founderEmail).toLowerCase() === em && String(a.appCode) === co
+  ) || null;
+}
+
 async function deleteApplication(id) {
   if (pool) {
     const { rows } = await pool.query('DELETE FROM applications WHERE id=$1 RETURNING id', [Number(id)]);
@@ -192,4 +207,4 @@ async function deleteSession(token) {
   else memory.sessions.delete(hash);
 }
 
-module.exports = { init, hasDb, insertApplication, listApplications, getApplication, deleteApplication, createSession, getSession, deleteSession, hashToken };
+module.exports = { init, hasDb, insertApplication, listApplications, getApplication, getApplicationByEmailAndCode, deleteApplication, createSession, getSession, deleteSession, hashToken };

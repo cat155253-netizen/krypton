@@ -198,6 +198,27 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  /* applicant lookup (client portal) */
+  if (url.pathname === '/api/client/login' && req.method === 'POST') {
+    const body = await readBody(req);
+    const email = String(body.email || '').trim();
+    const code = String(body.appCode || body.code || '').trim();
+    if (!email || !code) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Email and passcode are required.' }));
+      return;
+    }
+    const app = await store.getApplicationByEmailAndCode(email, code);
+    if (!app) {
+      res.writeHead(401, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'No application matches that email + passcode.' }));
+      return;
+    }
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+    res.end(JSON.stringify({ ok: true, application: app }));
+    return;
+  }
+
   /* admin auth */
   if (url.pathname === '/api/login' && req.method === 'POST') {
     if (!ADMIN_PASSWORD) {
