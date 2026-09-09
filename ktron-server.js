@@ -607,9 +607,9 @@ const server = http.createServer(async (req, res) => {
     if (!token) return;
     const kf = generateKeyFile();
     await store.setSetting('panel_key_hash', kf.hash);
-    await store.insertEvent('keyfile', 'panel key file minted at ' + new Date().toISOString());
+    await store.insertEvent('keyfile', 'Admin-Passkey file minted at ' + new Date().toISOString());
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ ok: true, filename: 'krypton-panel.key', content: kf.content }));
+    res.end(JSON.stringify({ ok: true, filename: 'Admin-Passkey.key', content: kf.content }));
     return;
   }
 
