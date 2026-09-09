@@ -22,8 +22,8 @@ const crypto = require('crypto');
 const PORT = Number(process.env.PORT || 4173);
 const HOST = process.env.HOST || (process.env.RENDER ? '0.0.0.0' : '127.0.0.1');
 const BASE_URL = (process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1').replace(/\/$/, '');
-const MODEL = process.env.KTRON_MODEL || 'openai/gpt-4o-mini';
-const MAX_TOKENS = Number(process.env.KTRON_MAX_TOKENS || 900);
+const MODEL = process.env.KTRON_MODEL || 'openrouter/auto';
+const MAX_TOKENS = Number(process.env.KTRON_MAX_TOKENS || 1400);
 
 const API_KEY = process.env.OPENAI_API_KEY;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
@@ -44,10 +44,15 @@ const applyQueue = [];
 const loginAttempts = new Map(); // ip -> { fails, lockedUntil }
 
 const SYSTEM_PROMPT =
-  'You are K-Tron, a focused web-agency assistant for Krypton, a one-person design studio. ' +
-  'You answer conversationally and concisely in plain text. You can help scope small websites, ' +
-  'price packages, plan features, and advise on web projects. Keep replies under 4 short sentences ' +
-  'unless asked for detail. Never claim to have access to files or personal user data.';
+  'You are K-Tron, the AI co-pilot of Krypton, a one-person design studio. ' +
+  'You answer conversationally and concisely in plain text, scoping small websites, pricing packages, ' +
+  'and planning features. Keep replies under 4 short sentences unless asked for detail. Never claim to ' +
+  'have access to files or personal user data. ' +
+  'KNOW YOUR PRICING (quote these exact numbers, always compute total): ' +
+  'site base price $300–$340 depending on the theme. Delivery speed adds: +$0 for 1 Month, +$500 for 1 Week, ' +
+  '+$1,000 for 3 Days. Optional add-on features (CMS, blog, shop, booking, etc.) add on top, plus an optional ' +
+  '10% tip. Final price = base + speed + add-ons + tip. So a landing page at $340 at 1-week speed is $840, and ' +
+  'at standard 1-month speed it is $340.';
 
 function serveFile(res, file, code = 200) {
   fs.readFile(file, (err, data) => {
