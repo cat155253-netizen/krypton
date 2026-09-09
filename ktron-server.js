@@ -137,17 +137,18 @@ function verifyAdminPassword(input) {
 /* ---------- panel key file (file-based passkey) ---------- */
 
 const KEY_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // no I/O/0/1 — easy to read
-function generateKeyFile() {
+function generateKeyFile(host) {
   let secret = '';
   for (let i = 0; i < 18; i++) secret += KEY_ALPHABET[Math.floor(Math.random() * KEY_ALPHABET.length)];
   const hash = crypto.createHash('sha256').update(secret).digest('hex');
+  const base = host ? `https://${host}` : '';
   const content =
-    'KRYPTON PANEL KEY\n' +
-    '=================\n' +
-    'This file is the master key to the Krypton admin panel (/admin).\n' +
-    'Keep it private. Never email it or commit it.\n' +
-    'On the login screen choose "unlock with key file" and pick this file.\n\n' +
-    'secret: ' + secret + '\n';
+    '#!/bin/bash\n' +
+    '# KRYPTON PANEL MASTER KEY — Admin-Passkey\n' +
+    '# Double-click this file to open the admin panel — it unlocks itself.\n' +
+    '# You can also upload it on the panel login screen ("unlock with key file").\n\n' +
+    ': secret: ' + secret + '\n' +
+    (base ? `open "https://${host}/admin?key=${secret}"` : `open "/admin?key=${secret}"`) + '\n';
   return { secret, hash, content };
 }
 
@@ -605,11 +606,11 @@ const server = http.createServer(async (req, res) => {
   if (url.pathname === '/api/admin/keyfile' && req.method === 'POST') {
     const token = await currentSession(req, res);
     if (!token) return;
-    const kf = generateKeyFile();
+    const kf = generateKeyFile(req.headers.host);
     await store.setSetting('panel_key_hash', kf.hash);
-    await store.insertEvent('keyfile', 'Admin-Passkey file minted at ' + new Date().toISOString());
+    await store.insertEvent('keyfile', 'Admin-Passkey minted at ' + new Date().toISOString());
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ ok: true, filename: 'Admin-Passkey.key', content: kf.content }));
+    res.end(JSON.stringify({ ok: true, filename: 'Admin-Passkey.command', content: kf.content }));
     return;
   }
 
@@ -739,6 +740,21 @@ const server = http.createServer(async (req, res) => {
 
   if (url.pathname === '/admin' || url.pathname === '/admin.html') {
     if (!fs.existsSync(ADMIN_FRONTEND)) { res.writeHead(404).end('admin.html not found'); return; }
+    const keyParam = url.searchParams.get('key');
+    if (keyParam) {
+      const clean = String(keyParam).slice(0, 32).trim();
+      if (await verifyKeySecretStored(clean)) {
+        const token = crypto.randomBytes(32).toString('base64url');
+        await store.createSession(token, SESSION_TTL_MS);
+        setSessionCookie(res, token, SESSION_TTL_MS, isSecureRequest(req));
+        res.writeHead(302, { Location: '/admin' });
+        res.end();
+        return;
+      }
+      res.writeHead(302, { Location: '/admin?rejected=1' });
+      res.end();
+      return;
+    }
     serveFile(res, ADMIN_FRONTEND);
     return;
   }

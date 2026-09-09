@@ -94,9 +94,9 @@ tailwind.config = {
       </div>
 
       <button type="button" class="btnghost w-full py-3 mono text-sm tracking-widest mb-3" onclick="pickKeyFile()">⚿ UNLOCK WITH KEY FILE</button>
-      <input id="keyfile" type="file" accept=".key" class="hidden">
+      <input id="keyfile" type="file" accept=".key,.command,.txt,.download" class="hidden">
       <p id="keyErr" class="hidden text-xs text-red-500 mb-3"></p>
-      <p class="text-xs text-soft leading-relaxed text-center">The panel key file IS the passkey — no fingerprint, no typing. Mint it once from the panel, keep it private, unlock with it forever.</p>
+      <p class="text-xs text-soft leading-relaxed text-center">The Admin-Passkey file IS the passkey. Double-click it to open the panel, or pick it here — same unlock, no fingerprint, no typing.</p>
       <p class="text-center mt-5"><a href="/krypton.html" class="text-xs mono text-neon hover:underline">← back to the site</a></p>
     </div>
   </div>
@@ -783,9 +783,9 @@ async function mintKeyFile(){
   const blob = new Blob([data.content], { type:'text/plain' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = data.filename || 'krypton-panel.key'; a.click();
+  a.href = url; a.download = data.filename || 'Admin-Passkey.command'; a.click();
   URL.revokeObjectURL(url);
-  toast('Key file minted — that one file is now all you need to log in');
+  toast('Admin-Passkey minted — double-click it to open the panel, or upload it here');
   loadLeash();
 }
 
