@@ -181,6 +181,17 @@ tailwind.config = {
 </head>
 <body class="text-deep">
 
+<!-- global broadcast (admin transmits from the Admin Panel) -->
+<div id="announce" class="hidden relative z-20 border-b hairline" style="background:linear-gradient(120deg,#124a5e,#3fa7c9)">
+  <div class="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
+    <div class="flex items-center gap-3 min-w-0">
+      <span class="mono text-[10px] tracking-[.25em] shrink-0" style="color:#7fd0b5">▼ TRANSMISSION</span>
+      <p id="announceMsg" class="text-sm sm:text-base" style="color:#fff"></p>
+    </div>
+    <button type="button" onclick="document.getElementById('announce').classList.add('hidden')" class="shrink-0 cursor-pointer" style="background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:999px;font-family:'JetBrains Mono',monospace;font-size:.68rem;padding:.3rem .7rem">DISMISS ✕</button>
+  </div>
+</div>
+
 <!-- floating pastel blobs -->
 <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
   <div class="absolute w-96 h-96 -top-16 -left-24 rounded-full bg-mint/30 blur-3xl animate-drift"></div>
@@ -653,6 +664,17 @@ tailwind.config = {
 </div>
 
 <script>
+/* ============ global broadcast banner ============ */
+(function(){
+  fetch('/api/settings/announcement').then(r=>r.json()).then(d=>{
+    if (d && d.enabled && d.message){
+      const msg = document.getElementById('announceMsg');
+      const box = document.getElementById('announce');
+      if (msg && box){ msg.textContent = d.message; box.classList.remove('hidden'); }
+    }
+  }).catch(()=>{});
+})();
+
 /* ============ theme library data ============ */
 const THEMES = [
   {name:'Agentic Tech', desc:'SaaS-style landing with routing dashboard, live status and trace highlights.', len:'≈ 4 pages', base:420, acc:'#3fa7c9', tags:'SAAS · TECH', demo:'synapse.html'},

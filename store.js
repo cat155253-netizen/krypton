@@ -41,10 +41,14 @@ CREATE TABLE IF NOT EXISTS sessions (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   expires_at TIMESTAMPTZ NOT NULL
 );
+CREATE TABLE IF NOT EXISTS settings (
+  key TEXT PRIMARY KEY,
+  value TEXT
+);
 `;
 
 let pool = null;
-let memory = { applications: [], sessions: new Map(), seq: 0 };
+let memory = { applications: [], sessions: new Map(), settings: new Map(), seq: 0 };
 
 async function init() {
   if (!hasDb) {
@@ -58,6 +62,9 @@ async function init() {
       : undefined,
   });
   await pool.query(SCHEMA);
+  // Progressive upgrades so existing production DBs gain new powers.
+  await pool.query(`ALTER TABLE applications ADD COLUMN IF NOT EXISTS notes TEXT`);
+  await pool.query(`ALTER TABLE applications ADD COLUMN IF NOT EXISTS pinned BOOLEAN NOT NULL DEFAULT FALSE`);
   console.log('[store] Postgres connected. Schema ready.');
 }
 
@@ -128,6 +135,8 @@ function mapRow(r) {
     currency: r.currency,
     privacyConsent: r.privacy_consent,
     status: r.status,
+    notes: r.notes || null,
+    pinned: Boolean(r.pinned),
     createdAt: r.created_at,
   };
 }
@@ -135,10 +144,11 @@ function mapRow(r) {
 async function listApplications() {
   if (pool) {
     const { rows } = await pool.query(
-      'SELECT * FROM applications ORDER BY created_at DESC');
+      'SELECT * FROM applications ORDER BY pinned DESC, created_at DESC');
     return rows.map(mapRow);
   }
-  return [...memory.applications].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  return [...memory.applications]
+    .sort((a, b) => (b.pinned - a.pinned) || (new Date(b.created_at) - new Date(a.created_at)));
 }
 
 async function getApplication(id) {
@@ -186,6 +196,61 @@ async function updateApplicationStatus(id, status) {
   return app;
 }
 
+async function updateApplication(id, fields) {
+  const idNum = Number(id);
+  if (pool) {
+    const sets = [];
+    const vals = [];
+    if ('status' in fields) { sets.push(`status=$${vals.length + 1}`); vals.push(fields.status); }
+    if ('totalUSD' in fields) { sets.push(`total_usd=$${vals.length + 1}`); vals.push(Number(fields.totalUSD) || 0); }
+    if ('notes' in fields) { sets.push(`notes=$${vals.length + 1}`); vals.push(String(fields.notes || '')); }
+    if ('pinned' in fields) { sets.push(`pinned=$${vals.length + 1}`); vals.push(Boolean(fields.pinned)); }
+    if (!sets.length) return getApplication(idNum);
+    vals.push(idNum);
+    const { rows } = await pool.query(
+      `UPDATE applications SET ${sets.join(', ')} WHERE id=$${vals.length} RETURNING *`, vals);
+    return rows[0] ? mapRow(rows[0]) : null;
+  }
+  const app = memory.applications.find((a) => a.id === idNum);
+  if (!app) return null;
+  if ('status' in fields) app.status = fields.status;
+  if ('totalUSD' in fields) app.totalUSD = Number(fields.totalUSD) || 0;
+  if ('notes' in fields) app.notes = String(fields.notes || '');
+  if ('pinned' in fields) app.pinned = Boolean(fields.pinned);
+  return app;
+}
+
+async function reissueApplicationCode(id) {
+  const code = Math.floor(100000 + Math.random() * 900000);
+  if (pool) {
+    const { rows } = await pool.query(
+      'UPDATE applications SET app_code=$1 WHERE id=$2 RETURNING *', [String(code), Number(id)]);
+    return rows[0] ? { appCode: rows[0].app_code, ok: true } : { ok: false };
+  }
+  const app = memory.applications.find((a) => a.id === Number(id));
+  if (!app) return { ok: false };
+  app.appCode = String(code);
+  return { appCode: app.appCode, ok: true };
+}
+
+async function getSetting(key) {
+  if (pool) {
+    const { rows } = await pool.query('SELECT value FROM settings WHERE key=$1', [key]);
+    return rows.length ? rows[0].value : null;
+  }
+  return memory.settings.get(key) ?? null;
+}
+
+async function setSetting(key, value) {
+  if (pool) {
+    await pool.query(
+      'INSERT INTO settings (key, value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=$2',
+      [key, value]);
+    return;
+  }
+  memory.settings.set(key, value);
+}
+
 async function createSession(token, ttlMs) {
   const hash = hashToken(token);
   const expires = new Date(Date.now() + ttlMs).toISOString();
@@ -219,4 +284,4 @@ async function deleteSession(token) {
   else memory.sessions.delete(hash);
 }
 
-module.exports = { init, hasDb, insertApplication, listApplications, getApplication, getApplicationByEmailAndCode, deleteApplication, updateApplicationStatus, createSession, getSession, deleteSession, hashToken };
+module.exports = { init, hasDb, insertApplication, listApplications, getApplication, getApplicationByEmailAndCode, deleteApplication, updateApplicationStatus, updateApplication, reissueApplicationCode, getSetting, setSetting, createSession, getSession, deleteSession, hashToken };

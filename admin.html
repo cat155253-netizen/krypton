@@ -94,6 +94,7 @@ tailwind.config = {
       </div>
       <div class="flex items-center gap-3">
         <span class="mini hidden md:block" id="todayStr">—</span>
+        <button class="btnghost" onclick="openPalette()">⚡ POWERS</button>
         <a href="/krypton.html" class="btnghost">SITE</a>
         <button class="btnghost" onclick="doLogout()">LOG OUT</button>
       </div>
@@ -173,6 +174,33 @@ tailwind.config = {
 </aside>
 
 <div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] glass px-5 py-3 mono text-sm" style="box-shadow:0 14px 40px rgba(18,74,94,.25)"></div>
+
+<!-- ============ COMMAND PALETTE (god mode) ============ -->
+<div id="palette" class="hidden fixed inset-0 z-[70] flex items-start justify-center p-6 pt-[18vh]" style="background:rgba(9,32,44,.55);backdrop-filter:blur(4px)" onclick="if(event.target===this)closePalette()">
+  <div class="w-full max-w-lg glass overflow-hidden" style="border-radius:20px;box-shadow:0 40px 90px rgba(0,0,0,.4)">
+    <div class="flex items-center gap-3 px-5 py-4 border-b border-[#e3eef4]">
+      <span class="mono text-neon text-sm">⚡</span>
+      <input id="palInput" class="w-full bg-transparent outline-none mono text-sm text-deep" placeholder="Search applications or type a power… (esc to close)">
+    </div>
+    <div id="palList" class="max-h-[46vh] overflow-y-auto p-2"></div>
+  </div>
+</div>
+
+<!-- ============ BROADCAST ============ -->
+<div id="annModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-6" style="background:rgba(9,32,44,.55);backdrop-filter:blur(4px)" onclick="if(event.target===this)closeAnnModal()">
+  <div class="w-full max-w-md glass p-6" style="border-radius:20px;box-shadow:0 40px 90px rgba(0,0,0,.4)">
+    <div class="flex items-center justify-between mb-1">
+      <h3 class="sk-serif text-xl font-semibold italic text-deep">Transmit to site</h3>
+      <button class="btnghost" onclick="closeAnnModal()">✕</button>
+    </div>
+    <p class="text-sm text-soft mb-4">The banner appears instantly at the top of the public site for every visitor.</p>
+    <textarea id="annText" rows="3" class="field mb-3" maxlength="500" placeholder="Write something like: Booking for March is now open — deposit locks your sprint."></textarea>
+    <label class="flex items-center gap-2 text-sm text-deep mb-4 cursor-pointer">
+      <input id="annOn" type="checkbox" class="w-4 h-4" style="accent-color:#3fa7c9"> Show on the public site
+    </label>
+    <button class="btn w-full py-3 mono text-sm" onclick="publishAnn()">TRANSMIT ▸</button>
+  </div>
+</div>
 
 <script>
 const $ = (id) => document.getElementById(id);
@@ -336,12 +364,17 @@ async function openDrawer(id){
   const { status, data } = await json('/api/applications/' + id);
   if (status !== 200) { toast('Could not load application'); return; }
   const a = data.application;
+  const pinned = a.pinned ? 'UNPIN' : 'PIN UP';
+  const pinStyle = a.pinned ? 'box-shadow:inset 0 0 0 2px currentColor' : '';
   const addSum = (a.addOns || []).reduce((s,x)=> s + (Number(x.cost)||0), 0);
   const addRows = (a.addOns || []).length
     ? (a.addOns || []).map(x=>`<div class="flex justify-between text-sm py-1"><span class="text-deep">${esc(x.name)}</span><span class="mono">${money(x.cost)}</span></div>`).join('')
     : '<div class="text-sm text-soft">No add-on features</div>';
   $('drawerBody').innerHTML = `
-    <div class="mono text-[10px] tracking-[.3em] text-soft mb-1">APPLICATION</div>
+    <div class="flex items-start justify-between mb-1">
+      <span class="mono text-[10px] tracking-[.3em] text-soft">APPLICATION</span>
+      <button class="btnghost !px-2 !py-1" style="${pinStyle}" onclick="togglePin(${a.id})">${pinned}</button>
+    </div>
     <h2 class="sk-serif text-2xl font-semibold italic text-deep mb-1">${esc(a.company || a.applicant || 'Unknown')}</h2>
     <div class="flex flex-wrap gap-2 mb-6">
       <span class="kbadge">${esc(a.appNo || '')}</span>
@@ -351,18 +384,34 @@ async function openDrawer(id){
     <div class="glass p-5 mb-6" style="background:linear-gradient(135deg,#124a5e,#3fa7c9);border:none">
       <div class="mono text-[10px] tracking-[.18em] mb-1" style="color:#7fd0b5">DELIVERY PASSCODE</div>
       <div class="mono text-3xl font-bold tracking-[.35em] text-white">${esc(String(a.appCode || '').split('').join(' '))}</div>
-      <p class="mt-2 text-[11px]" style="color:rgba(255,255,255,.75)">Client shows this at delivery. Reissue = time + charge.</p>
+      <p class="mt-2 text-[11px]" style="color:rgba(255,255,255,.75)">Client shows this at delivery. Reissue = rotate instantly.</p>
     </div>
 
     <div class="mb-6 flex items-center gap-3">
       <span class="pill st-${a.status}" style="font-size:.65rem;padding:.34rem .8rem">${STATUS[a.status] ? STATUS[a.status].label : esc(String(a.status).toUpperCase())}</span>
       <button class="btnghost" onclick="resendApp(${a.id}, this)">⟶ RESEND EMAIL</button>
+      <button class="btnghost" onclick="reissueApp(${a.id})">♻ REISSUE</button>
       <button class="btndng" onclick="deleteApp(${a.id}, event)">DELETE</button>
     </div>
 
     <div class="glass p-5 mb-6">
       <div class="mono text-[10px] tracking-[.3em] text-soft mb-3">SET STATUS</div>
       ${statusSelect(a, `setStatus(${a.id}, this)`)}
+    </div>
+
+    <div class="glass p-5 mb-6">
+      <div class="mono text-[10px] tracking-[.3em] text-soft mb-3">TOTAL INVESTMENT</div>
+      <div class="flex items-center gap-3">
+        <input id="overrideInput" type="number" class="field" value="${a.totalUSD}" min="0" step="1">
+        <button class="btnghost" onclick="overrideTotal(${a.id})">APPLY</button>
+      </div>
+      <p class="mini mt-2">Overrides any calculation — the client portal shows this number.</p>
+    </div>
+
+    <div class="glass p-5 mb-6">
+      <div class="mono text-[10px] tracking-[.3em] text-soft mb-3">INTERNAL NOTES</div>
+      <textarea id="notesInput" rows="3" class="field mb-3" maxlength="2000" placeholder="Only you see these…">${esc(a.notes || '')}</textarea>
+      <button class="btnghost" onclick="saveNotes(${a.id})">SAVE NOTES</button>
     </div>
 
     <div class="glass p-5 mb-6">
@@ -400,9 +449,46 @@ async function openDrawer(id){
         <span class="mini">${esc(a.currency || 'usd')}</span>
       </div>
     </div>
+
+    <button class="btnghost w-full" onclick="copyJSON(${a.id})">⎘ COPY DOSSIER JSON</button>
   `;
   $('drawer').style.transform = 'translateX(0)';
   $('overlay').classList.remove('hidden');
+}
+
+async function togglePin(id){
+  const a = ALL.find(x=>x.id===id); if (!a) return;
+  const { status } = await json('/api/applications/' + id, { method:'PATCH', body: JSON.stringify({ pinned: !a.pinned }) });
+  if (status === 200){ toast(!a.pinned ? 'Pinned to top' : 'Unpinned'); refresh(); openDrawer(id); }
+  else toast('Failed');
+}
+
+async function overrideTotal(id){
+  const v = Number($('overrideInput').value);
+  if (!Number.isFinite(v) || v < 0){ toast('Invalid total'); return; }
+  const { status } = await json('/api/applications/' + id, { method:'PATCH', body: JSON.stringify({ totalUSD: Math.round(v) }) });
+  if (status === 200){ toast('Total overridden'); refresh(); openDrawer(id); } else toast('Failed');
+}
+
+async function saveNotes(id){
+  const { status } = await json('/api/applications/' + id, { method:'PATCH', body: JSON.stringify({ notes: $('notesInput').value }) });
+  if (status === 200) toast('Notes saved'); else toast('Failed');
+  refresh();
+}
+
+async function reissueApp(id){
+  if (!confirm('Rotate this application\'s delivery passcode now?')) return;
+  const { status, data } = await json('/api/applications/' + id + '/reissue', { method:'POST' });
+  if (status === 200){ toast('Passcode rotated → ' + data.appCode); refresh(); openDrawer(id); }
+  else toast('Failed');
+}
+
+async function copyJSON(id){
+  const { data } = await json('/api/applications/' + id);
+  const el = document.createElement('textarea');
+  el.value = JSON.stringify(data.application, null, 2);
+  document.body.appendChild(el); el.select(); document.execCommand('copy'); el.remove();
+  toast('Dossier copied');
 }
 
 function closeDrawer(){ $('drawer').style.transform = 'translateX(105%)'; $('overlay').classList.add('hidden'); }
@@ -441,6 +527,112 @@ function exportCSV(){
 }
 
 async function doLogout(){ await json('/api/logout', { method:'POST' }); location.reload(); }
+
+/* ============ COMMAND PALETTE — god mode ============ */
+const POWERS = [
+  { icon:'✶', name:'TRANSMIT', hint:'Broadcast a banner to the public site', run:()=>openAnnModal() },
+  { icon:'⇡', name:'PIN TOP', hint:'Order every dossier, pinned first', run:()=>{ toast('Pin ↑ or drop ↓ any dossier from its drawer'); openPalette(); } },
+  { icon:'⟲', name:'REFRESH', hint:'Pull fresh data, recalc everything', run:()=>{ refresh(); toast('Refreshed'); closePalette(); } },
+  { icon:'⎘', name:'EXPORT CSV', hint:'Download every application as CSV', run:()=>{ exportCSV(); closePalette(); } },
+  { icon:'↗', name:'OPEN LIVE SITE', hint:'See the public funnel the world sees', run:()=>{ window.open('/krypton.html', '_blank'); closePalette(); } },
+  { icon:'✎', name:'WRITE NOTES', hint:'Leave private context on any dossier', run:()=>palJump('notes') },
+  { icon:'♻', name:'REISSUE PASSCODE', hint:'Rotate a delivery passcode instantly', run:()=>palJump('reissue') },
+  { icon:'$', name:'OVERRIDE TOTAL', hint:'Rewrite any investment figure', run:()=>palJump('total') },
+  { icon:'✕', name:'CLOSE', hint:'Esc — back to the world', run:()=>closePalette() },
+];
+let palApps = [];
+
+function palJump(kind){
+  if (!ALL.length){ toast('No dossiers yet'); return; }
+  palView(ALL[0].id);
+}
+
+function renderPalette(q){
+  const list = $('palList'); list.innerHTML = '';
+  const term = q.trim().toLowerCase();
+  const apps = term
+    ? ALL.filter(a=> [a.company,a.applicant,a.founderEmail,a.appNo,a.appId].some(x=> x && String(x).toLowerCase().includes(term)))
+    : [];
+  const powers = term
+    ? POWERS.filter(p=> (p.name + ' ' + p.hint).toLowerCase().includes(term))
+    : POWERS;
+  if (!term){
+    const h = document.createElement('div');
+    h.className = 'mono text-[10px] tracking-[.3em] text-soft px-4 pt-2 pb-1';
+    h.textContent = 'POWERS';
+    list.appendChild(h);
+  }
+  powers.slice(0, 9).forEach(p=>{
+    const d = document.createElement('button');
+    d.className = 'palItem w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-[#eef6fa] cursor-pointer rounded-xl transition';
+    d.innerHTML = `<span class="mono text-neon w-6">${p.icon}</span><span class="mono text-sm text-deep flex-1">${p.name}</span><span class="text-xs text-soft hidden sm:block">${p.hint}</span>`;
+    d.onclick = () => { p.run(); };
+    list.appendChild(d);
+  });
+  if (apps.length){
+    const h = document.createElement('div');
+    h.className = 'mono text-[10px] tracking-[.3em] text-soft px-4 pt-3 pb-1';
+    h.textContent = 'DOSSIERS ' + apps.length;
+    list.appendChild(h);
+    apps.slice(0, 7).forEach(a=>{
+      const d = document.createElement('button');
+      d.className = 'palItem w-full text-left px-4 py-2.5 flex items-center gap-3 hover:bg-[#eef6fa] cursor-pointer rounded-xl transition';
+      d.innerHTML = `<span class="pill st-${a.status}" style="font-size:.58rem;padding:.2rem .55rem">${STATUS[a.status] ? STATUS[a.status].label : a.status.toUpperCase()}</span><span class="text-sm text-deep flex-1 truncate">${esc(a.company || a.applicant)}</span><span class="mono text-xs text-soft">${a.totalUSD}</span>`;
+      d.onclick = () => { closePalette(); palView(a.id); };
+      list.appendChild(d);
+    });
+  }
+  if (!powers.length && !apps.length){
+    const e = document.createElement('div');
+    e.className = 'text-sm text-soft px-4 py-6 text-center';
+    e.textContent = 'No powers or dossiers match.';
+    list.appendChild(e);
+  }
+}
+
+function palView(id){ openDrawer(id); }
+
+function openPalette(){
+  $('palette').classList.remove('hidden');
+  renderPalette('');
+  setTimeout(()=> $('palInput').focus(), 30);
+}
+function closePalette(){
+  $('palette').classList.add('hidden');
+  $('palInput').value = '';
+  $('palInput').blur();
+}
+$('palInput').addEventListener('input', (e)=> renderPalette(e.target.value));
+document.addEventListener('keydown', (e)=>{
+  const el = e.target;
+  const typing = el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k'){
+    e.preventDefault();
+    if ($('palette').classList.contains('hidden')) openPalette(); else closePalette();
+  } else if (!typing && (e.key === 'k' || e.key === 'K')){
+    if ($('palette').classList.contains('hidden')) openPalette();
+  } else if (e.key === 'Escape'){
+    closePalette(); closeAnnModal();
+  }
+});
+
+/* ============ BROADCAST ============ */
+async function loadAnn(){
+  try {
+    const { status, data } = await json('/api/settings/announcement', { silent:true });
+    if (status === 200){ $('annText').value = data.message || ''; $('annOn').checked = data.enabled; }
+  } catch(e){}
+}
+function openAnnModal(){ $('annModal').classList.remove('hidden'); loadAnn(); $('annText').focus(); }
+function closeAnnModal(){ $('annModal').classList.add('hidden'); }
+async function publishAnn(){
+  const btn = $('annModal').querySelector('button');
+  btn.disabled = true;
+  const { status } = await json('/api/settings/announcement', { method:'PUT', body: JSON.stringify({ message: $('annText').value, enabled: $('annOn').checked }) });
+  btn.disabled = false;
+  if (status === 200){ toast($('annOn').checked ? 'Transmitted — live on the site now' : 'Broadcast taken down'); closeAnnModal(); refresh(); }
+  else toast('Transmission failed');
+}
 
 $('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();

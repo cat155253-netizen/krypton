@@ -281,16 +281,64 @@ const server = http.createServer(async (req, res) => {
     if (!token) return;
     const body = await readBody(req);
     const ALLOWED = ['new', 'in-progress', 'delivered', 'paid', 'cancelled'];
-    const status = String(body.status || '').trim().toLowerCase();
-    if (!ALLOWED.includes(status)) {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: `status must be one of: ${ALLOWED.join(', ')}` }));
-      return;
+    const fields = {};
+    if ('status' in body) {
+      const status = String(body.status).trim().toLowerCase();
+      if (!ALLOWED.includes(status)) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: `status must be one of: ${ALLOWED.join(', ')}` }));
+        return;
+      }
+      fields.status = status;
     }
-    const app = await store.updateApplicationStatus(Number(patchMatch[1]), status);
+    if ('totalUSD' in body) {
+      const n = Number(body.totalUSD);
+      if (!Number.isFinite(n) || n < 0 || n > 10000000) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'totalUSD must be a number between 0 and 10,000,000.' }));
+        return;
+      }
+      fields.totalUSD = Math.round(n);
+    }
+    if ('notes' in body) fields.notes = String(body.notes).slice(0, 2000);
+    if ('pinned' in body) fields.pinned = Boolean(body.pinned);
+    const app = await store.updateApplication(Number(patchMatch[1]), fields);
     if (!app) { res.writeHead(404, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Application not found.' })); return; }
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: true, application: app }));
+    return;
+  }
+
+  const reissueMatch = url.pathname.match(/^\/api\/applications\/(\d+)\/reissue$/);
+  if (reissueMatch && req.method === 'POST') {
+    const token = await currentSession(req, res);
+    if (!token) return;
+    const out = await store.reissueApplicationCode(Number(reissueMatch[1]));
+    if (!out.ok) { res.writeHead(404, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Application not found.' })); return; }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, appCode: out.appCode }));
+    return;
+  }
+
+  /* global broadcast — the public site shows whatever the admin transmits */
+  if (url.pathname === '/api/settings/announcement' && req.method === 'GET') {
+    const enabled = (await store.getSetting('announce_enabled')) === 'true';
+    const message = await store.getSetting('announce_message');
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+    res.end(JSON.stringify({ enabled, message: enabled ? (message || '') : '' }));
+    return;
+  }
+
+  if (url.pathname === '/api/settings/announcement' && req.method === 'PUT') {
+    const token = await currentSession(req, res);
+    if (!token) return;
+    const body = await readBody(req);
+    const message = String(body.message || '').slice(0, 500);
+    const enabled = Boolean(body.enabled);
+    await store.setSetting('announce_message', message);
+    await store.setSetting('announce_enabled', String(enabled));
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, enabled, message }));
     return;
   }
 
