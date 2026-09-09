@@ -7,7 +7,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@500;600&family=Inter:wght@300;400;500;600;700&family=Permanent+Marker&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&family=Permanent+Marker&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&display=swap" rel="stylesheet">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23124a5e'/%3E%3Cstop offset='1' stop-color='%233fa7c9'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3Ctext x='32' y='46' font-family='Georgia,serif' font-style='italic' font-weight='600' font-size='38' text-anchor='middle' fill='%237fd0b5'%3EK%3C/text%3E%3C/svg%3E">
 <script>
 tailwind.config = {
@@ -18,7 +18,7 @@ tailwind.config = {
       },
       fontFamily: {
         hand:['Permanent Marker','cursive'],
-        serif:['Source Serif 4','Georgia','Times New Roman','serif'],
+        serif:['Source Serif 4','Georgia','serif'],
         mono:['JetBrains Mono','monospace'],
       },
     }
@@ -26,215 +26,443 @@ tailwind.config = {
 };
 </script>
 <style>
-  body{font-family:'Inter',sans-serif;background:#eef4f8}
+  body{font-family:'Inter',sans-serif;background:#eef4f8;color:#12384a}
   .sk-serif{font-family:'Source Serif 4',Georgia,'Times New Roman',serif}
   .mono{font-family:'JetBrains Mono',monospace}
-  .btn-soft{background:linear-gradient(120deg,#3fa7c9,#5fc4b0);color:#fff;border-radius:999px;box-shadow:0 10px 24px rgba(63,167,201,.35);transition:.3s;font-weight:600;border:none;cursor:pointer}
-  .btn-soft:hover{transform:translateY(-1px);box-shadow:0 14px 30px rgba(63,167,201,.45)}
-  .btn-ghost{background:transparent;border:1px solid rgba(63,167,201,.4);color:#3fa7c9;border-radius:999px;padding:.5em 1.1em;font-family:'JetBrains Mono',monospace;font-size:.72rem;cursor:pointer;transition:.2s}
-  .btn-ghost:hover{background:#fff}
-  .btn-danger{background:transparent;border:1px solid rgba(226,51,46,.4);color:#e2332e;border-radius:999px;padding:.5em 1.1em;font-family:'JetBrains Mono',monospace;font-size:.72rem;cursor:pointer;transition:.2s}
-  .btn-danger:hover{background:rgba(226,51,46,.08)}
+  .glass{background:rgba(255,255,255,.82);backdrop-filter:blur(10px);border:1px solid #e3eef4;border-radius:18px}
+  .btn{background:linear-gradient(120deg,#3fa7c9,#5fc4b0);color:#fff;border-radius:999px;box-shadow:0 10px 22px rgba(63,167,201,.35);transition:.25s;font-weight:600;border:none;cursor:pointer}
+  .btn:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(63,167,201,.45)}
+  .btnghost{background:transparent;border:1px solid rgba(63,167,201,.4);color:#3fa7c9;border-radius:999px;padding:.5em 1.1em;font-family:'JetBrains Mono',monospace;font-size:.72rem;cursor:pointer;transition:.2s}
+  .btnghost:hover{background:#fff}
+  .btndng{background:transparent;border:1px solid rgba(226,51,46,.4);color:#e2332e;border-radius:999px;padding:.5em 1.1em;font-family:'JetBrains Mono',monospace;font-size:.72rem;cursor:pointer;transition:.2s}
+  .btndng:hover{background:rgba(226,51,46,.08)}
   .field{width:100%;border:1.5px solid rgba(63,167,201,.35);background:#fff;border-radius:14px;padding:.75rem 1rem;font-family:'JetBrains Mono',monospace;font-size:.85rem;color:#124a5e;outline:none;transition:.2s}
   .field:focus{border-color:#3fa7c9;box-shadow:0 0 0 4px rgba(63,167,201,.14)}
-  .row-card{background:#fff;border:1px solid #e2edf3;border-radius:16px}
-  .kfake{display:none}
+  .stsel{background:#fff;border:1px solid rgba(63,167,201,.28);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.66rem;padding:.32rem .5rem;color:#124a5e;outline:none;cursor:pointer}
+  .stsel:focus{border-color:#3fa7c9}
+  .pill{display:inline-flex;align-items:center;gap:.4rem;border-radius:999px;padding:.28rem .7rem;font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.08em;font-weight:600;white-space:nowrap}
+  .pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.85}
+  .st-new{color:#b46a1f;background:#e0783a1a;border:1px solid #e0783a50}
+  .st-in-progress{color:#1f7291;background:#3fa7c91a;border:1px solid #3fa7c950}
+  .st-delivered{color:#137a55;background:#22a06b18;border:1px solid #22a06b50}
+  .st-paid{color:#0f6b43;background:#2fbf7118;border:1px solid #1e8a5a55}
+  .st-cancelled{color:#a23048;background:#b13b5218;border:1px solid #b13b5250}
+  .trow{border-bottom:1px solid #edf3f7;transition:.15s;cursor:pointer}
+  .trow:hover{background:#f4fafc}
+  .trow td{padding:.95rem 1rem;vertical-align:middle}
+  .mini{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.05em;color:#5e8ea0}
+  .kbadge{background:linear-gradient(120deg,#124a5e,#3fa7c9);color:#fff;border-radius:10px;padding:.12rem .5rem;font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.12em;display:inline-block}
+  #drawer{transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+  #toast{transition:opacity .3s,transform .3s}
+  #overlay{transition:opacity .25s}
+  .chartbar{transition:height .6s cubic-bezier(.3,.7,.3,1)}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:#c5dce6;border-radius:8px;border:2px solid #eef4f8}
+  ::-webkit-scrollbar-track{background:transparent}
 </style>
 </head>
 <body class="min-h-screen">
-<!-- ============ LOGIN VIEW ============ -->
+
+<!-- ============ LOGIN ============ -->
 <div id="loginView" class="min-h-screen flex items-center justify-center p-6">
   <div class="w-full max-w-md">
     <div class="text-center mb-8">
-      <div class="marker text-4xl" style="font-family:'Permanent Marker',cursive;color:#124a5e">Krypton</div>
+      <div class="text-4xl" style="font-family:'Permanent Marker',cursive;color:#124a5e">Krypton</div>
       <div class="mono text-[11px] tracking-[.35em] text-soft mt-1">ADMIN PANEL</div>
     </div>
-    <div class="row-card p-8">
+    <div class="glass p-8" style="box-shadow:0 30px 70px rgba(18,74,94,.15)">
       <h2 class="sk-serif text-2xl font-semibold italic text-deep mb-1">Welcome back</h2>
-      <p class="text-sm text-soft mb-6">Sign in to review applications.</p>
+      <p class="text-sm text-soft mb-6">Sign in to manage applications.</p>
       <form id="loginForm" autocomplete="off">
         <input id="password" type="password" class="field mb-4" placeholder="Admin password" autocomplete="current-password">
         <p id="loginErr" class="hidden text-xs text-red-500 mb-3">Incorrect password. Try again.</p>
-        <button type="submit" class="btn-soft w-full py-3 mono text-sm tracking-widest">UNLOCK</button>
+        <button type="submit" class="btn w-full py-3 mono text-sm tracking-widest">UNLOCK</button>
       </form>
-      <p class="text-center mt-5"><a href="/krypton.html" class="text-xs mono text-neon hover:underline">← back to Krypton site</a></p>
+      <p class="text-center mt-5"><a href="/krypton.html" class="text-xs mono text-neon hover:underline">← back to the site</a></p>
     </div>
   </div>
 </div>
 
-<!-- ============ DASHBOARD VIEW ============ -->
+<!-- ============ DASHBOARD ============ -->
 <div id="dashView" class="hidden">
-  <header class="bg-white/80 backdrop-blur sticky top-0 z-40 border-b border-[#e2edf3]">
-    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-      <div>
-        <span class="marker text-2xl text-deep" style="font-family:'Permanent Marker',cursive">Krypton</span>
-        <span class="mono text-[10px] tracking-[.3em] text-neon ml-3">ADMIN PANEL</span>
+  <!-- top bar -->
+  <header class="glass rounded-none border-x-0 border-t-0 sticky top-0 z-40" style="border-radius:0">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl" style="font-family:'Permanent Marker',cursive;color:#124a5e">Krypton</span>
+        <span class="kbadge">ADMIN PANEL</span>
       </div>
-      <div class="flex items-center gap-4">
-        <span class="mono text-[11px] text-soft" id="liveCount">—</span>
-        <a href="/krypton.html" class="btn-ghost">SITE</a>
-        <button class="btn-ghost" onclick="doLogout()">LOG OUT</button>
+      <div class="flex items-center gap-3">
+        <span class="mini hidden md:block" id="todayStr">—</span>
+        <a href="/krypton.html" class="btnghost">SITE</a>
+        <button class="btnghost" onclick="doLogout()">LOG OUT</button>
       </div>
     </div>
   </header>
 
-  <main class="max-w-6xl mx-auto px-6 py-8">
-    <div class="flex items-end justify-between mb-6">
+  <main class="max-w-7xl mx-auto px-6 py-8 pb-24">
+    <!-- heading -->
+    <div class="flex items-end justify-between mb-6 flex-wrap gap-3">
       <div>
-        <h1 class="sk-serif text-3xl font-semibold italic text-deep">Applications</h1>
-        <p class="text-sm text-soft mt-1">Every submission, stored and ready.</p>
+        <h1 class="sk-serif text-3xl font-semibold italic text-deep">Operations</h1>
+        <p class="text-sm text-soft mt-1" id="summaryLine">Loading…</p>
       </div>
-      <button class="btn-ghost" onclick="refresh()">⟳ REFRESH</button>
+      <div class="flex gap-2">
+        <button class="btnghost" onclick="exportCSV()">⇩ EXPORT CSV</button>
+        <button class="btnghost" onclick="refresh()">⟳ REFRESH</button>
+      </div>
     </div>
 
-    <div id="stats" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"></div>
-    <div id="list" class="space-y-4"></div>
-    <p id="empty" class="hidden text-center py-16 hand text-2xl text-soft">No applications yet — they'll land here as they submit.</p>
+    <!-- stats -->
+    <div id="stats" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6"></div>
+
+    <!-- charts -->
+    <div class="grid lg:grid-cols-3 gap-4 mb-6">
+      <div class="glass p-6 lg:col-span-2">
+        <div class="flex items-baseline justify-between mb-5">
+          <span class="hand text-xl text-deep">Applications — last 8 weeks</span>
+          <span class="mini">VOLUME</span>
+        </div>
+        <div id="barChart" class="flex items-end gap-3 h-40"></div>
+      </div>
+      <div class="glass p-6">
+        <div class="flex items-baseline justify-between mb-5">
+          <span class="hand text-xl text-deep">Status mix</span>
+          <span class="mini">PIPELINE</span>
+        </div>
+        <div id="statusMix" class="space-y-3"></div>
+      </div>
+    </div>
+
+    <!-- filters -->
+    <div class="glass p-4 mb-6 flex flex-wrap items-center gap-3">
+      <input id="search" type="search" placeholder="Search company, email, or app no…" class="field !w-64" oninput="renderTable()">
+      <div id="filters" class="flex flex-wrap gap-2"></div>
+      <span class="mini ml-auto" id="countLine">—</span>
+    </div>
+
+    <!-- table -->
+    <div id="tableWrap" class="glass overflow-x-auto">
+      <table class="w-full min-w-[820px] text-sm">
+        <thead>
+          <tr class="text-left">
+            <th class="p-4 mini">APPLICANT</th>
+            <th class="p-4 mini">REFERENCE</th>
+            <th class="p-4 mini">PROJECT</th>
+            <th class="p-4 mini">SPEED</th>
+            <th class="p-4 mini text-right">TOTAL</th>
+            <th class="p-4 mini">STATUS</th>
+            <th class="p-4 mini">SUBMITTED</th>
+            <th class="p-4 mini">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <p id="empty" class="hidden text-center py-16" style="font-family:'Permanent Marker',cursive;font-size:1.5rem;color:#5e8ea0">Nothing here yet.</p>
   </main>
 </div>
 
+<!-- ============ DRAWER ============ -->
+<div id="overlay" class="hidden fixed inset-0 bg-deep/40 z-50" style="backdrop-filter:blur(2px)" onclick="closeDrawer()"></div>
+<aside id="drawer" class="fixed top-0 right-0 h-full w-full max-w-md z-50" style="transform:translateX(105%)">
+  <div class="h-full bg-[#f6fbfd] shadow-2xl overflow-y-auto relative">
+    <button class="absolute top-4 right-4 btnghost" onclick="closeDrawer()">✕</button>
+    <div id="drawerBody" class="p-7"></div>
+  </div>
+</aside>
+
+<div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] glass px-5 py-3 mono text-sm" style="box-shadow:0 14px 40px rgba(18,74,94,.25)"></div>
+
 <script>
 const $ = (id) => document.getElementById(id);
+const STATUS = {
+  new:          { label: 'NEW',          color: '#e0783a' },
+  'in-progress':{ label: 'IN PROGRESS',  color: '#3fa7c9' },
+  delivered:    { label: 'DELIVERED',    color: '#22a06b' },
+  paid:         { label: 'PAID',         color: '#1e8a5a' },
+  cancelled:    { label: 'CANCELLED',    color: '#b13b52' },
+};
+let ALL = []; let filterStatus = 'all'; let intervalId = null;
 
-async function json(url, opts) {
-  const r = await fetch(url, Object.assign({}, opts, { headers: { 'Content-Type': 'application/json' } }));
-  return { status: r.status, data: await r.json().catch(() => ({})) };
+function money(n){ return '$' + Number(n || 0).toLocaleString('en-US'); }
+function inr(n){ return '₹' + Math.round(Number(n || 0) * 87).toLocaleString('en-IN'); }
+function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function fmtDate(iso){ return iso ? new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—'; }
+function fmtDateTime(iso){ return iso ? new Date(iso).toLocaleString('en-US',{dateStyle:'medium',timeStyle:'short'}) : '—'; }
+
+async function json(url, opts){ const r = await fetch(url, Object.assign({}, opts, { headers:{ 'Content-Type':'application/json' } })); return { status:r.status, data: await r.json().catch(()=>({})) }; }
+
+function toast(msg){
+  const t = $('toast'); t.textContent = msg; t.classList.remove('hidden');
+  clearTimeout(t._x); t._x = setTimeout(()=> t.classList.add('hidden'), 2600);
 }
 
-function money(n) {
-  if (n === 0 || n == null) return '$0';
-  return '$' + Number(n).toLocaleString('en-US');
-}
-
-function fmtDate(iso) {
-  if (!iso) return '—';
-  const d = new Date(iso);
-  return d.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
-}
-
-function statCard(label, value, acc) {
-  return `<div class="row-card p-5" style="border-top:3px solid ${acc}">
-    <div class="mono text-[10px] tracking-[.2em] text-soft uppercase">${label}</div>
-    <div class="text-3xl font-bold text-deep mt-1">${value}</div>
+function statCard(label, value, sub, acc, icon){
+  return `<div class="glass p-4" style="border-top:3px solid ${acc}">
+    <div class="flex items-center justify-between mb-1">
+      <span class="mini">${label}</span><span style="color:${acc};font-size:.9rem">${icon}</span>
+    </div>
+    <div class="text-2xl md:text-[1.7rem] font-bold text-deep leading-tight">${value}</div>
+    ${sub ? `<div class="mini mt-1">${sub}</div>` : ''}
   </div>`;
 }
 
-function renderStats(apps) {
-  const total = apps.length;
-  const newCount = apps.filter(a => a.status === 'new').length;
-  const totalValue = apps.reduce((s, a) => s + (Number(a.totalUSD) || 0), 0);
+function renderStats(apps){
+  const c = s => apps.filter(a => a.status === s).length;
+  const newCount = c('new'), prog = c('in-progress'), deliv = c('delivered'), paid = c('paid');
+  const pipe = apps.reduce((s,a)=> s + (Number(a.totalUSD)||0), 0);
   $('stats').innerHTML =
-    statCard('Total', total, '#3fa7c9') +
-    statCard('Pending', newCount, '#e0783a') +
-    statCard('Pipeline value', money(totalValue), '#7fd0b5') +
-    statCard('Status', 'Live', '#e85b9c');
-  $('liveCount').textContent = total + ' applications';
+    statCard('NEW', newCount, 'awaiting you', '#e0783a', '●') +
+    statCard('IN PROGRESS', prog, 'in build', '#3fa7c9', '●') +
+    statCard('DELIVERED', deliv, 'handed over', '#22a06b', '●') +
+    statCard('PAID', paid, 'money in', '#1e8a5a', '●') +
+    statCard('PIPELINE', money(pipe), inr(pipe), '#7fd0b5', 'Σ') +
+    statCard('TOTAL', apps.length, 'all applications', '#2c5f72', '#');
+  $('summaryLine').textContent = apps.length
+    ? `${apps.length} application${apps.length===1?'':'s'} · ${paid} paid · ${money(pipe)} total order value`
+    : 'No applications yet — they\'ll land here as clients submit.';
 }
 
-function addOnsText(a) {
-  const list = Array.isArray(a.addOns) ? a.addOns : [];
-  return list.length ? list.map(x => x.name + ' (+' + money(x.cost) + ')').join('<br>') : '—';
+function renderChart(apps){
+  const buckets = [];
+  for (let i=7;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i*7); d.setHours(0,0,0,0); buckets.push({ start:d, end:new Date(d.getTime()+7*86400000), count:0, label:d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) }); }
+  apps.forEach(a=>{ const t=new Date(a.createdAt).getTime(); const b=buckets.find(x=> t>=x.start.getTime() && t<x.end.getTime()); if(b) b.count++; });
+  const max = Math.max(1, ...buckets.map(b=>b.count));
+  $('barChart').innerHTML = buckets.map(b=>{
+    const h = 8 + Math.round((b.count/max)*100);
+    return `<div class="flex-1 flex flex-col items-center gap-1 min-w-[8px]">
+      <span class="mono text-[10px] text-deep font-bold">${b.count}</span>
+      <div class="w-full rounded-t-md chartbar" style="height:${h}px;background:linear-gradient(180deg,#3fa7c9,#7fd0b5)"></div>
+      <span class="mini" style="font-size:.55rem">${b.label}</span>
+    </div>`;
+  }).join('');
 }
 
-function appCard(a) {
-  const newBadge = a.status === 'new'
-    ? '<span class="mono text-[10px] px-2 py-0.5 rounded-full" style="color:#e0783a;background:#e0783a18;border:1px solid #e0783a55">NEW</span>'
-    : '<span class="mono text-[10px] px-2 py-0.5 rounded-full" style="color:#2c5f72;background:#2c5f7214;border:1px solid #2c5f7233">OPEN</span>';
-  return `
-  <article class="row-card p-6">
-    <div class="flex flex-wrap items-start justify-between gap-3">
-      <div class="min-w-0">
-        <div class="flex items-center gap-3 flex-wrap">
-          <h3 class="sk-serif text-xl font-semibold italic text-deep">${escapeHtml(a.company || a.applicant || 'Company')}</h3>${newBadge}
+function renderMix(apps){
+  const tot = apps.length || 1;
+  const keys = ['new','in-progress','delivered','paid','cancelled'];
+  const rows = keys.map(k=>{
+    const n = apps.filter(a=>a.status===k).length; const pct = Math.round((n/tot)*100);
+    return `<div>
+      <div class="flex justify-between text-xs mb-1">
+        <span class="pill st-${k}" style="font-size:.6rem;padding:.16rem .5rem">${STATUS[k].label}</span>
+        <span class="mono text-deep">${n} <span class="text-soft">· ${pct}%</span></span>
+      </div>
+      <div class="h-1.5 rounded-full bg-[#e3eef4]"><div class="h-1.5 rounded-full" style="width:${pct}%;background:${STATUS[k].color}"></div></div>
+    </div>`;
+  });
+  $('statusMix').innerHTML = rows.join('');
+}
+
+function filtered(){
+  const q = $('search').value.trim().toLowerCase();
+  return ALL.filter(a=>{
+    if (filterStatus !== 'all' && a.status !== filterStatus) return false;
+    if (!q) return true;
+    const hay = [a.company, a.applicant, a.founderEmail, a.appNo, a.appId, a.theme].join(' ').toLowerCase();
+    return hay.includes(q);
+  });
+}
+
+function renderFilters(){
+  const keys = ['all', ...Object.keys(STATUS)];
+  $('filters').innerHTML = keys.map(k=>{
+    const on = filterStatus === k;
+    return `<button onclick="setFilter('${k}')" class="pill ${k==='all' ? (on?'text-white':'text-deep'):(on?'st-'+k:'st-'+k)}" style="${k==='all'
+      ? (on
+          ? 'background:linear-gradient(120deg,#3fa7c9,#5fc4b0);color:#fff'
+          : 'background:transparent;border:1px solid rgba(63,167,201,.35);color:#124a5e')
+      : (on
+          ? 'box-shadow:inset 0 0 0 2px currentColor'
+          : 'opacity:.55')}">${k==='all' ? 'ALL' : STATUS[k].label}</button>`;
+  }).join('');
+}
+
+function setFilter(k){ filterStatus = k; renderFilters(); renderTable(); }
+
+function statusSelect(a, onChange){
+  return `<select class="stsel" onchange="${onChange}">
+    ${Object.keys(STATUS).map(k=>
+      `<option value="${k}" ${a.status===k?'selected':''}>${STATUS[k].label}</option>`).join('')}
+  </select>`;
+}
+
+function renderTable(){
+  const apps = filtered();
+  $('countLine').textContent = apps.length + ' of ' + ALL.length + ' shown';
+  const tbody = $('tbody');
+  tbody.innerHTML = apps.map(a=>`
+    <tr class="trow" onclick="openDrawer(${a.id})">
+      <td>
+        <div class="font-semibold text-deep">${esc(a.company || a.applicant || '—')}</div>
+        <div class="mini">${esc(a.applicant || '')}${a.post ? ' · ' + esc(a.post) : ''}</div>
+        <div class="mini" style="color:#3fa7c9">${esc(a.founderEmail || '')}</div>
+      </td>
+      <td><span class="mini" style="font-size:.7rem;color:#124a5e">${esc(a.appNo || '—')}</span><br><span class="mini">${esc(a.appId || '')}</span></td>
+      <td><div class="text-deep">${esc(a.theme || '—')}</div><div class="mini">${esc(a.lengthSelection || '')}${a.styleSelection ? ' · ' + esc(a.styleSelection) : ''}</div></td>
+      <td><span class="mini">${esc(a.deliverySpeed || '—')}</span></td>
+      <td class="text-right"><div class="font-bold text-deep">${money(a.totalUSD)}</div><div class="mini">${inr(a.totalUSD)}</div></td>
+      <td onclick="event.stopPropagation()">${statusSelect(a, `setStatus(${a.id}, this)`)}</td>
+      <td><span class="mini">${fmtDate(a.createdAt)}</span></td>
+      <td onclick="event.stopPropagation()">
+        <div class="flex gap-1.5">
+          <button class="btnghost !px-2 !py-1" title="Open" onclick="openDrawer(${a.id})">VIEW</button>
+          <button class="btnghost !px-2 !py-1" title="Resend confirmation" onclick="resendApp(${a.id}, this)">⟶</button>
+          <button class="btndng !px-2 !py-1" title="Delete" onclick="deleteApp(${a.id}, event)">✕</button>
         </div>
-        <p class="text-sm text-soft mt-1">${escapeHtml(a.applicant || '—')}${a.post ? ' · ' + escapeHtml(a.post) : ''} · ${escapeHtml(a.founderEmail || '—')}</p>
-      </div>
-      <div class="text-right">
-        <div class="text-2xl font-bold text-deep">${money(a.totalUSD)}</div>
-        <div class="mono text-[10px] text-neon tracking-widest mt-1">${escapeHtml((a.appNo || ''))} · ${escapeHtml((a.appId || ''))}</div>
-      </div>
-    </div>
-
-    <div class="grid md:grid-cols-2 gap-x-8 gap-y-2 mt-5 text-sm">
-      <div class="flex justify-between gap-4"><span class="mono text-[11px] text-soft uppercase tracking-widest">Theme</span><span class="text-deep text-right">${escapeHtml(a.theme || '—')}</span></div>
-      <div class="flex justify-between gap-4"><span class="mono text-[11px] text-soft uppercase tracking-widest">Pages</span><span class="text-deep text-right">${escapeHtml(a.lengthSelection || '—')}</span></div>
-      <div class="flex justify-between gap-4"><span class="mono text-[11px] text-soft uppercase tracking-widest">Style</span><span class="text-deep text-right">${escapeHtml(a.styleSelection || '—')}</span></div>
-      <div class="flex justify-between gap-4"><span class="mono text-[11px] text-soft uppercase tracking-widest">Delivery format</span><span class="text-deep text-right">${escapeHtml(a.deliveryFormat || '—')}</span></div>
-      <div class="flex justify-between gap-4"><span class="mono text-[11px] text-soft uppercase tracking-widest">Speed</span><span class="text-deep text-right">${escapeHtml(a.deliverySpeed || '—')}</span></div>
-      <div class="flex justify-between gap-4"><span class="mono text-[11px] text-soft uppercase tracking-widest">Submitted</span><span class="text-deep text-right">${fmtDate(a.createdAt)}</span></div>
-    </div>
-
-    <div class="mt-6 pt-4 border-t border-[#e2edf3] flex flex-wrap items-center justify-between gap-3">
-      <div class="mono text-[11px] text-soft">PASSCODE &nbsp;<span class="tracking-[.25em] text-deep">${escapeHtml(String(a.appCode || ''))}</span></div>
-      <div class="flex gap-2">
-        <button class="btn-ghost" onclick="resendNow(${a.id}, this)">⟶ RESEND EMAIL</button>
-        <button class="btn-danger" onclick="deleteApp(${a.id}, this)">DELETE</button>
-      </div>
-    </div>
-  </article>`;
+      </td>
+    </tr>`).join('');
+  $('empty').classList.toggle('hidden', apps.length > 0);
+  $('tableWrap').classList.toggle('hidden', apps.length === 0);
 }
 
-function escapeHtml(s) {
-  return String(s == null ? '' : s)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-
-async function refresh() {
+async function refresh(){
   const { status, data } = await json('/api/applications');
   if (status !== 200) { location.reload(); return; }
-  const apps = data.applications || [];
-  renderStats(apps);
-  if (!apps.length) {
-    $('empty').classList.remove('hidden');
-    $('list').innerHTML = '';
-    return;
-  }
-  $('empty').classList.add('hidden');
-  $('list').innerHTML = apps.map(appCard).join('');
+  ALL = data.applications || [];
+  renderStats(ALL); renderChart(ALL); renderMix(ALL); renderFilters(); renderTable();
 }
 
-async function resendNow(id, btn) {
-  const old = btn.textContent;
-  btn.disabled = true; btn.textContent = 'SENDING…';
-  const { status, data } = await json('/api/applications/' + id + '/resend', { method: 'POST' });
+async function setStatus(id, sel){
+  const v = sel.value;
+  const { status } = await json('/api/applications/' + id, { method:'PATCH', body: JSON.stringify({ status: v }) });
+  if (status !== 200) { toast('Status update failed'); refresh(); return; }
+  toast('Status → ' + STATUS[v].label);
+  refresh();
+}
+
+async function openDrawer(id){
+  const { status, data } = await json('/api/applications/' + id);
+  if (status !== 200) { toast('Could not load application'); return; }
+  const a = data.application;
+  const addSum = (a.addOns || []).reduce((s,x)=> s + (Number(x.cost)||0), 0);
+  const addRows = (a.addOns || []).length
+    ? (a.addOns || []).map(x=>`<div class="flex justify-between text-sm py-1"><span class="text-deep">${esc(x.name)}</span><span class="mono">${money(x.cost)}</span></div>`).join('')
+    : '<div class="text-sm text-soft">No add-on features</div>';
+  $('drawerBody').innerHTML = `
+    <div class="mono text-[10px] tracking-[.3em] text-soft mb-1">APPLICATION</div>
+    <h2 class="sk-serif text-2xl font-semibold italic text-deep mb-1">${esc(a.company || a.applicant || 'Unknown')}</h2>
+    <div class="flex flex-wrap gap-2 mb-6">
+      <span class="kbadge">${esc(a.appNo || '')}</span>
+      <span class="mini" style="display:inline-flex;align-items:center">${esc(a.appId || '')}</span>
+    </div>
+
+    <div class="glass p-5 mb-6" style="background:linear-gradient(135deg,#124a5e,#3fa7c9);border:none">
+      <div class="mono text-[10px] tracking-[.18em] mb-1" style="color:#7fd0b5">DELIVERY PASSCODE</div>
+      <div class="mono text-3xl font-bold tracking-[.35em] text-white">${esc(String(a.appCode || '').split('').join(' '))}</div>
+      <p class="mt-2 text-[11px]" style="color:rgba(255,255,255,.75)">Client shows this at delivery. Reissue = time + charge.</p>
+    </div>
+
+    <div class="mb-6 flex items-center gap-3">
+      <span class="pill st-${a.status}" style="font-size:.65rem;padding:.34rem .8rem">${STATUS[a.status] ? STATUS[a.status].label : esc(String(a.status).toUpperCase())}</span>
+      <button class="btnghost" onclick="resendApp(${a.id}, this)">⟶ RESEND EMAIL</button>
+      <button class="btndng" onclick="deleteApp(${a.id}, event)">DELETE</button>
+    </div>
+
+    <div class="glass p-5 mb-6">
+      <div class="mono text-[10px] tracking-[.3em] text-soft mb-3">SET STATUS</div>
+      ${statusSelect(a, `setStatus(${a.id}, this)`)}
+    </div>
+
+    <div class="glass p-5 mb-6">
+      <div class="mono text-[10px] tracking-[.3em] text-soft mb-3">PROJECT</div>
+      <div class="space-y-2 text-sm">
+        <div class="flex justify-between"><span class="text-soft">Theme</span><span class="text-deep font-medium">${esc(a.theme || '—')}</span></div>
+        <div class="flex justify-between"><span class="text-soft">Length</span><span class="text-deep">${esc(a.lengthSelection || '—')}</span></div>
+        <div class="flex justify-between"><span class="text-soft">Style</span><span class="text-deep">${esc(a.styleSelection || '—')}</span></div>
+        <div class="flex justify-between"><span class="text-soft">Delivery</span><span class="text-deep">${esc(a.deliveryFormat || '—')}</span></div>
+        <div class="flex justify-between"><span class="text-soft">Speed</span><span class="text-deep">${esc(a.deliverySpeed || '—')}</span></div>
+        <div class="flex justify-between"><span class="text-soft">Submitted</span><span class="text-deep">${fmtDateTime(a.createdAt)}</span></div>
+      </div>
+    </div>
+
+    <div class="glass p-5 mb-6">
+      <div class="mono text-[10px] tracking-[.3em] text-soft mb-3">PROJECT DESCRIPTION</div>
+      <p class="text-sm text-deep/80 leading-relaxed whitespace-pre-wrap">${esc(a.projectDescription || '—')}</p>
+    </div>
+
+    <div class="glass p-5 mb-6">
+      <div class="mono text-[10px] tracking-[.3em] text-soft mb-3">ADD-ON FEATURES</div>
+      ${addRows}
+      <div class="border-t hairline mt-3 pt-3 flex justify-between text-sm">
+        <span class="text-soft">Base + add-ons</span><span class="mono text-deep">${money(a.totalUSD - addSum)} + ${money(addSum)}</span>
+      </div>
+    </div>
+
+    <div class="glass p-5 mb-6" style="border-top:3px solid #7fd0b5">
+      <div class="flex justify-between items-end">
+        <div>
+          <div class="mono text-[10px] tracking-[.3em] text-soft">TOTAL INVESTMENT</div>
+          <div class="text-4xl font-extrabold text-deep">${money(a.totalUSD)}</div>
+          <div class="mono text-soft mt-1">${inr(a.totalUSD)}</div>
+        </div>
+        <span class="mini">${esc(a.currency || 'usd')}</span>
+      </div>
+    </div>
+  `;
+  $('drawer').style.transform = 'translateX(0)';
+  $('overlay').classList.remove('hidden');
+}
+
+function closeDrawer(){ $('drawer').style.transform = 'translateX(105%)'; $('overlay').classList.add('hidden'); }
+
+async function resendApp(id, btn){
+  const old = btn.textContent; btn.disabled = true; btn.textContent = 'SENDING…';
+  const { status, data } = await json('/api/applications/' + id + '/resend', { method:'POST' });
   btn.disabled = false;
-  btn.textContent = status === 200 ? 'RESENT ✓' : 'FAILED — ' + ((data && data.error) || '');
-  if (status === 200) setTimeout(() => { btn.textContent = '⟶ RESEND EMAIL'; }, 2500);
+  if (status === 200){ btn.textContent = 'RESENT ✓'; toast('Confirmation email re-sent'); setTimeout(()=>{ btn.textContent = old; }, 2400); }
+  else { toast((data && data.error) || 'Resend failed'); btn.textContent = old; }
 }
 
-async function deleteApp(id, btn) {
+async function deleteApp(id, e){
+  e.preventDefault(); e.stopPropagation();
   if (!confirm('Delete this application permanently?')) return;
-  const old = btn.textContent; btn.disabled = true; btn.textContent = '…';
-  const { status } = await json('/api/applications/' + id, { method: 'DELETE' });
-  btn.disabled = false; btn.textContent = old;
-  if (status === 200) refresh();
+  const { status } = await json('/api/applications/' + id, { method:'DELETE' });
+  if (status === 200){ toast('Application deleted'); closeDrawer(); refresh(); }
+  else toast('Delete failed');
 }
 
-async function doLogout() {
-  await json('/api/logout', { method: 'POST' });
-  location.reload();
+function exportCSV(){
+  const head = ['appNo','appId','appCode','company','applicant','post','email','theme','lengthSelection','styleSelection','deliveryFormat','deliverySpeed','addOns','totalUSD','currency','status','createdAt'];
+  const rows = ALL.map(a=> head.map(h=>{
+    let v = a[h];
+    if (h === 'addOns') v = JSON.stringify(a.addOns || []);
+    v = v == null ? '' : String(v);
+    return /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v;
+  }).join(','));
+  const csv = [head.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type:'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a2 = document.createElement('a');
+  a2.href = url; a2.download = 'krypton-applications.csv'; a2.click();
+  URL.revokeObjectURL(url);
+  toast('CSV exported');
 }
+
+async function doLogout(){ await json('/api/logout', { method:'POST' }); location.reload(); }
 
 $('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = $('loginForm').querySelector('button[type=submit]');
   btn.disabled = true; btn.textContent = '…';
-  const { status, data } = await json('/api/login', { method: 'POST', body: JSON.stringify({ password: $('password').value }) });
+  const { status, data } = await json('/api/login', { method:'POST', body: JSON.stringify({ password: $('password').value }) });
   btn.disabled = false; btn.textContent = 'UNLOCK';
   if (status === 200) { showDash(); return; }
   $('loginErr').textContent = (data && data.error) || 'Login failed.';
   $('loginErr').classList.remove('hidden');
 });
 
-async function showDash() {
+async function showDash(){
   $('loginView').classList.add('hidden');
   $('dashView').classList.remove('hidden');
+  $('todayStr').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
   refresh();
-  setInterval(refresh, 30_000);
+  if (intervalId) clearInterval(intervalId);
+  intervalId = setInterval(refresh, 30000);
 }
 
-(async function boot() {
+(async function boot(){
   const { status } = await json('/api/session');
   if (status === 200) { showDash(); return; }
   $('loginView').classList.remove('hidden');

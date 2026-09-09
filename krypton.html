@@ -1083,8 +1083,9 @@ function clientLookup(){
 function renderClientApp(a){
   const fmt = (x) => '$' + Number(x || 0).toLocaleString('en-US');
   const d = a.createdAt ? new Date(a.createdAt).toLocaleDateString('en-US', { dateStyle: 'medium' }) : '—';
+  const statusLbl = { 'new':'NEW', 'in-progress':'IN PROGRESS', 'delivered':'DELIVERED', 'paid':'PAID', 'cancelled':'CANCELLED' }[String(a.status || '')] || (a.status || 'open').toString().toUpperCase();
   const rows = [
-    ['STATUS', (a.status || 'open').toUpperCase()],
+    ['STATUS', statusLbl],
     ['THEME', a.theme],
     ['LENGTH', a.lengthSelection],
     ['STYLE', a.styleSelection],

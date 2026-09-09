@@ -275,6 +275,25 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  const patchMatch = url.pathname.match(/^\/api\/applications\/(\d+)$/);
+  if (patchMatch && req.method === 'PATCH') {
+    const token = await currentSession(req, res);
+    if (!token) return;
+    const body = await readBody(req);
+    const ALLOWED = ['new', 'in-progress', 'delivered', 'paid', 'cancelled'];
+    const status = String(body.status || '').trim().toLowerCase();
+    if (!ALLOWED.includes(status)) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: `status must be one of: ${ALLOWED.join(', ')}` }));
+      return;
+    }
+    const app = await store.updateApplicationStatus(Number(patchMatch[1]), status);
+    if (!app) { res.writeHead(404, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Application not found.' })); return; }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, application: app }));
+    return;
+  }
+
   const appMatch = url.pathname.match(/^\/api\/applications\/(\d+)(?:\/(resend))?$/);
   if (appMatch && (req.method === 'GET' || req.method === 'DELETE' || req.method === 'POST')) {
     const token = await currentSession(req, res);

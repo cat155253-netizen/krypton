@@ -174,6 +174,18 @@ async function deleteApplication(id) {
   return true;
 }
 
+async function updateApplicationStatus(id, status) {
+  if (pool) {
+    const { rows } = await pool.query(
+      'UPDATE applications SET status=$1 WHERE id=$2 RETURNING *', [status, Number(id)]);
+    return rows[0] ? mapRow(rows[0]) : null;
+  }
+  const app = memory.applications.find((a) => a.id === Number(id));
+  if (!app) return null;
+  app.status = status;
+  return app;
+}
+
 async function createSession(token, ttlMs) {
   const hash = hashToken(token);
   const expires = new Date(Date.now() + ttlMs).toISOString();
@@ -207,4 +219,4 @@ async function deleteSession(token) {
   else memory.sessions.delete(hash);
 }
 
-module.exports = { init, hasDb, insertApplication, listApplications, getApplication, getApplicationByEmailAndCode, deleteApplication, createSession, getSession, deleteSession, hashToken };
+module.exports = { init, hasDb, insertApplication, listApplications, getApplication, getApplicationByEmailAndCode, deleteApplication, updateApplicationStatus, createSession, getSession, deleteSession, hashToken };
