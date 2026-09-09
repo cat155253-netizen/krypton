@@ -44,7 +44,8 @@ const applyQueue = [];
 const loginAttempts = new Map(); // ip -> { fails, lockedUntil }
 
 const SYSTEM_PROMPT =
-  'You are K-Tron, the AI co-pilot of Krypton, a one-person design studio. ' +
+  'You are K-Tron, the courteous AI co-pilot of Krypton, a one-person design studio. Polished, warm and highly ' +
+  'respectful; use a refined register (e.g. courteous greetings, measured phrasing) without being sycophantic. ' +
   'You answer conversationally and concisely in plain text, scoping small websites, pricing packages, ' +
   'and planning features. Keep replies under 4 short sentences unless asked for detail. Never claim to ' +
   'have access to files or personal user data. ' +
@@ -225,10 +226,20 @@ async function adminBrain() {
   for (const a of apps) { totals[a.status] = (totals[a.status] || 0) + 1; pipelineUSD += Number(a.totalUSD) || 0; }
   const announcementEnabled = (await store.getSetting('announce_enabled')) === 'true';
   const announcementMessage = announcementEnabled ? (await store.getSetting('announce_message')) : '';
+  const evs = await store.recentEvents(8);
+  const chat = await store.recentChat(6);
+  const site = {
+    maintenance: (await store.getSetting('site_maintenance')) === 'true',
+    applyOpen: (await store.getSetting('site_apply_open')) !== 'false',
+    chatOpen: (await store.getSetting('site_chat_open')) !== 'false',
+  };
   return {
     studio: 'Krypton — one-person premium site studio.',
     stats: { total: apps.length, byStatus: totals, pipelineUSD, pipelineINR: Math.round(pipelineUSD * 86) },
     announcement: { enabled: announcementEnabled, message: announcementMessage },
+    recentAdminActions: evs.map((e) => `${e.kind}: ${e.detail || ''}`),
+    recentVisitorChat: chat.map((c) => `[${c.role}${c.page ? '/' + c.page : ''}] ${(c.content || '').slice(0, 120)}`),
+    siteLocks: site,
     programs: apps.map((a) => ({
       id: a.id,
       ref: a.appNo,
@@ -247,11 +258,13 @@ async function adminBrain() {
 }
 
 const updateAdminSystemPrompt = (ctx) =>
-  'You are K-Tron, the AI co-pilot inside the Krypton admin panel. You have complete, current visibility of the ' +
-  'studio: every application, its status, price, client and the live site broadcast. Answer plainly and directly, with ' +
-  'exact numbers from the data you are given — never invent clients, prices, or statuses that are not in the data. ' +
-  'You can draft client emails, summarize the pipeline, flag stuck projects, and suggest next best actions. ' +
-  'Keep replies tight unless asked for more.\n\n' +
+  'You are K-Tron, the AI co-pilot inside the Krypton admin panel. You address the operator respectfully and always as ' +
+  '"Admin" (never by name or as "user"). You are polished, deferential, and precise. You have complete, current visibility ' +
+  'of the studio: every application, its status, price, client, the live site broadcast, the latest admin actions, system ' +
+  'health, and recent visitor conversations. Answer plainly and directly, with exact numbers from the data you are given — ' +
+  'never invent clients, prices, or statuses that are not in the data. You can draft client emails, summarize the pipeline, ' +
+  'flag stuck projects, and suggest next best actions. Use a respectful register ("With respect, Admin…") sparingly, never ' +
+  'sycophantically. Keep replies tight unless asked for more.\n\n' +
   'LIVE STUDIO CONTEXT:\n' + JSON.stringify(ctx) +
   '\n\nPRICING RULES (for estimates): site base $300–$340 by theme; speed adds +$0 (1 Month), +$500 (1 Week), +$1,000 (3 Days); ' +
   'plus optional add-ons and an optional 10% tip. Final price = base + speed + add-ons + tip.';
@@ -348,6 +361,7 @@ const server = http.createServer(async (req, res) => {
     const token = crypto.randomBytes(32).toString('base64url');
     await store.createSession(token, SESSION_TTL_MS);
     setSessionCookie(res, token, SESSION_TTL_MS, isSecureRequest(req));
+    await store.insertEvent('login', 'Admin signed in (password) from ' + ip);
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: true }));
     return;
@@ -369,6 +383,7 @@ const server = http.createServer(async (req, res) => {
       const token = crypto.randomBytes(32).toString('base64url');
       await store.createSession(token, SESSION_TTL_MS);
       setSessionCookie(res, token, SESSION_TTL_MS, isSecureRequest(req));
+      await store.insertEvent('login', 'Admin signed in with panel key file from ' + ip);
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ ok: true }));
       return;
@@ -435,6 +450,12 @@ const server = http.createServer(async (req, res) => {
     if ('pinned' in body) fields.pinned = Boolean(body.pinned);
     const app = await store.updateApplication(Number(patchMatch[1]), fields);
     if (!app) { res.writeHead(404, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Application not found.' })); return; }
+    const logBits = [];
+    if (fields.status) logBits.push('status → ' + fields.status);
+    if ('totalUSD' in fields) logBits.push('price → $' + fields.totalUSD);
+    if (fields.notes) logBits.push('notes added');
+    if ('pinned' in fields) logBits.push('pinned ' + (fields.pinned ? 'ON' : 'OFF'));
+    if (logBits.length) await store.insertEvent('application', app.appNo + ': ' + logBits.join(', '));
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: true, application: app }));
     return;
@@ -446,6 +467,7 @@ const server = http.createServer(async (req, res) => {
     if (!token) return;
     const out = await store.reissueApplicationCode(Number(reissueMatch[1]));
     if (!out.ok) { res.writeHead(404, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Application not found.' })); return; }
+    await store.insertEvent('application', (await store.getApplication(Number(reissueMatch[1])))?.appNo + ': passcode reissued');
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: true, appCode: out.appCode }));
     return;
@@ -468,6 +490,7 @@ const server = http.createServer(async (req, res) => {
     const enabled = Boolean(body.enabled);
     await store.setSetting('announce_message', message);
     await store.setSetting('announce_enabled', String(enabled));
+    await store.insertEvent('announce', (enabled ? 'broadcast ON: ' : 'broadcast OFF: ') + message.slice(0, 120));
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: true, enabled, message }));
     return;
@@ -484,17 +507,20 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  /* public site leash — flags the public funnel obeys (maintenance / apply / chat) */
+  /* public site leash — flags the public funnel obeys (maintenance / apply / chat) + main-site hero wording */
   if (url.pathname === '/api/settings/site' && req.method === 'GET') {
     const maintenance = (await store.getSetting('site_maintenance')) === 'true';
     const applyOpen = (await store.getSetting('site_apply_open')) !== 'false';
     const chatOpen = (await store.getSetting('site_chat_open')) !== 'false';
+    const heroRaw = (await store.getSetting('ktron_hero')) || '';
+    let mainHero = null;
+    if (heroRaw) { try { mainHero = JSON.parse(heroRaw); } catch { mainHero = null; } }
     res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-    res.end(JSON.stringify({ maintenance, applyOpen, chatOpen, now: new Date().toISOString() }));
+    res.end(JSON.stringify({ maintenance, applyOpen, chatOpen, mainHero, now: new Date().toISOString() }));
     return;
   }
 
-  /* admin: read site leash + live visitor street */
+  /* admin: read site leash + live visitor street + main-site hero */
   if (url.pathname === '/api/admin/site' && req.method === 'GET') {
     const token = await currentSession(req, res);
     if (!token) return;
@@ -502,25 +528,76 @@ const server = http.createServer(async (req, res) => {
     const applyOpen = (await store.getSetting('site_apply_open')) !== 'false';
     const chatOpen = (await store.getSetting('site_chat_open')) !== 'false';
     const hasKeyFile = Boolean(await store.getSetting('panel_key_hash'));
+    const heroRaw = (await store.getSetting('ktron_hero')) || '';
+    let mainHero = null;
+    if (heroRaw) { try { mainHero = JSON.parse(heroRaw); } catch { mainHero = null; } }
     const visits = await store.getVisits();
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ maintenance, applyOpen, chatOpen, hasKeyFile, visits, now: new Date().toISOString() }));
+    res.end(JSON.stringify({ maintenance, applyOpen, chatOpen, hasKeyFile, mainHero, visits, now: new Date().toISOString() }));
     return;
   }
 
-  /* admin: pull the leash — toggle maintenance / apply / chat */
+  /* admin: pull the leash — toggle maintenance / apply / chat / rewrite the main-site hero */
   if (url.pathname === '/api/admin/site' && req.method === 'PUT') {
     const token = await currentSession(req, res);
     if (!token) return;
     const body = await readBody(req);
-    if ('maintenance' in body) await store.setSetting('site_maintenance', String(Boolean(body.maintenance)));
-    if ('applyOpen' in body) await store.setSetting('site_apply_open', String(Boolean(body.applyOpen)));
-    if ('chatOpen' in body) await store.setSetting('site_chat_open', String(Boolean(body.chatOpen)));
+    if ('maintenance' in body) { await store.setSetting('site_maintenance', String(Boolean(body.maintenance))); await store.insertEvent('leash', 'maintenance ' + (body.maintenance ? 'ON' : 'OFF')); }
+    if ('applyOpen' in body) { await store.setSetting('site_apply_open', String(Boolean(body.applyOpen))); await store.insertEvent('leash', 'apply ' + (body.applyOpen ? 'OPEN' : 'PAUSED')); }
+    if ('chatOpen' in body) { await store.setSetting('site_chat_open', String(Boolean(body.chatOpen))); await store.insertEvent('leash', 'public K-Tron ' + (body.chatOpen ? 'ON' : 'OFF')); }
+    if (body.mainHero && typeof body.mainHero === 'object' && typeof body.mainHero.title === 'string') {
+      const hero = { title: body.mainHero.title.slice(0, 80), sub: String(body.mainHero.sub || '').slice(0, 160) };
+      await store.setSetting('ktron_hero', JSON.stringify(hero));
+      await store.insertEvent('hero', 'main K-Tron site retitled: ' + hero.title);
+    }
     const maintenance = (await store.getSetting('site_maintenance')) === 'true';
     const applyOpen = (await store.getSetting('site_apply_open')) !== 'false';
     const chatOpen = (await store.getSetting('site_chat_open')) !== 'false';
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: true, maintenance, applyOpen, chatOpen }));
+    return;
+  }
+
+  /* admin: command archive — audit trail of every pull of the leash */
+  if (url.pathname === '/api/admin/events' && req.method === 'GET') {
+    const token = await currentSession(req, res);
+    if (!token) return;
+    const events = await store.recentEvents(60);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, events }));
+    return;
+  }
+
+  /* admin: K-Tron oversight — recent visitor conversations from the main site */
+  if (url.pathname === '/api/admin/chatlog' && req.method === 'GET') {
+    const token = await currentSession(req, res);
+    if (!token) return;
+    const chat = await store.recentChat(80);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, chat }));
+    return;
+  }
+
+  /* admin: system health — mode, process, model, email, locks */
+  if (url.pathname === '/api/admin/health' && req.method === 'GET') {
+    const token = await currentSession(req, res);
+    if (!token) return;
+    const health = {
+      mode: store.hasDb ? 'Postgres (live)' : 'Memory',
+      node: process.version,
+      uptimeSec: Math.round(process.uptime()),
+      model: MODEL,
+      maxTokens: MAX_TOKENS,
+      email: process.env.SMTP_HOST ? (process.env.SMTP_USER || 'configured') : 'disabled',
+      openaiKey: Boolean(process.env.OPENAI_API_KEY),
+      maintenance: (await store.getSetting('site_maintenance')) === 'true',
+      applyOpen: (await store.getSetting('site_apply_open')) !== 'false',
+      chatOpen: (await store.getSetting('site_chat_open')) !== 'false',
+      keyFile: Boolean(await store.getSetting('panel_key_hash')),
+      now: new Date().toISOString(),
+    };
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, health }));
     return;
   }
 
@@ -530,6 +607,7 @@ const server = http.createServer(async (req, res) => {
     if (!token) return;
     const kf = generateKeyFile();
     await store.setSetting('panel_key_hash', kf.hash);
+    await store.insertEvent('keyfile', 'panel key file minted at ' + new Date().toISOString());
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: true, filename: 'krypton-panel.key', content: kf.content }));
     return;
@@ -540,6 +618,7 @@ const server = http.createServer(async (req, res) => {
     const token = await currentSession(req, res);
     if (!token) return;
     await store.setSetting('panel_key_hash', '');
+    await store.insertEvent('keyfile', 'panel key file revoked');
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: true }));
     return;
@@ -589,6 +668,12 @@ const server = http.createServer(async (req, res) => {
     if (!messages.length) { res.writeHead(400).end(JSON.stringify({ error: 'messages required' })); return; }
     const data = await callModel(messages);
     if (data.httpStatus) { res.writeHead(data.httpStatus, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: data.error })); return; }
+    const lastUser = [...messages].reverse().find((m) => m.role === 'user');
+    const reply = data.choices?.[0]?.message?.content?.trim?.();
+    if (reply) {
+      await store.logChat('user', lastUser ? String(lastUser.content).slice(0, 400) : '(empty)', 'k-tron');
+      await store.logChat('k-tron', reply.slice(0, 4000), 'k-tron');
+    }
     res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
     res.end(JSON.stringify(data));
     return;
@@ -601,9 +686,9 @@ const server = http.createServer(async (req, res) => {
     const body = await readBody(req);
     const cmd = String(body.command || '');
     let done = 0;
-    if (cmd === 'deliver-in-progress') done = await store.bulkUpdateStatus('in-progress', 'delivered');
-    else if (cmd === 'clear-cancelled') done = await store.deleteApplications('cancelled');
-    else if (cmd === 'clear-all') done = await store.deleteApplications('all');
+    if (cmd === 'deliver-in-progress') { done = await store.bulkUpdateStatus('in-progress', 'delivered'); await store.insertEvent('command', 'delivered ' + done + ' in-progress'); }
+    else if (cmd === 'clear-cancelled') { done = await store.deleteApplications('cancelled'); await store.insertEvent('command', 'purged ' + done + ' cancelled'); }
+    else if (cmd === 'clear-all') { done = await store.deleteApplications('all'); await store.insertEvent('command', 'zeroed the board (' + done + ')'); }
     else { res.writeHead(400, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Unknown command.' })); return; }
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: true, command: cmd, done }));

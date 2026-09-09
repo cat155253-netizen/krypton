@@ -51,10 +51,23 @@ CREATE TABLE IF NOT EXISTS visits (
   seen_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   PRIMARY KEY (vis_id, page)
 );
+CREATE TABLE IF NOT EXISTS events (
+  id SERIAL PRIMARY KEY,
+  kind TEXT NOT NULL,
+  detail TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS chat_log (
+  id SERIAL PRIMARY KEY,
+  role TEXT NOT NULL,
+  content TEXT,
+  page TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
 `;
 
 let pool = null;
-let memory = { applications: [], sessions: new Map(), settings: new Map(), visits: new Map(), seq: 0 };
+let memory = { applications: [], sessions: new Map(), settings: new Map(), visits: new Map(), events: [], chatLog: [], seq: 0 };
 
 async function init() {
   if (!hasDb) {
@@ -217,7 +230,49 @@ async function deleteApplications(status) {
   return before - memory.applications.length;
 }
 
-module.exports = { init, hasDb, insertApplication, listApplications, getApplication, getApplicationByEmailAndCode, deleteApplication, bulkUpdateStatus, deleteApplications, updateApplicationStatus, updateApplication, reissueApplicationCode, getSetting, setSetting, pingVisit, getVisits, createSession, getSession, deleteSession, hashToken };
+/* ---------- audit trail + chat oversight ---------- */
+
+async function insertEvent(kind, detail) {
+  const row = { kind: String(kind || '').slice(0, 60), detail: String(detail || '').slice(0, 400) };
+  if (pool) {
+    await pool.query('INSERT INTO events (kind, detail) VALUES ($1,$2)', [row.kind, row.detail]);
+    await pool.query(`DELETE FROM events WHERE id IN (SELECT id FROM events ORDER BY id DESC OFFSET 300)`);
+    return;
+  }
+  memory.events.push({ kind: row.kind, detail: row.detail, at: new Date() });
+  if (memory.events.length > 300) memory.events.splice(0, memory.events.length - 300);
+}
+
+async function recentEvents(limit = 40) {
+  if (pool) {
+    const { rows } = await pool.query(
+      `SELECT kind, detail, created_at FROM events ORDER BY created_at DESC, id DESC LIMIT $1`, [limit]);
+    return rows.map(r => ({ kind: r.kind, detail: r.detail, at: r.created_at }));
+  }
+  return [...memory.events].reverse().slice(0, limit);
+}
+
+async function logChat(role, content, page) {
+  const row = { role: String(role || 'system').slice(0,20), content: String(content || '').slice(0, 4000), page: String(page || 'k-tron').slice(0, 40) };
+  if (pool) {
+    await pool.query('INSERT INTO chat_log (role, content, page) VALUES ($1,$2,$3)', [row.role, row.content, row.page]);
+    await pool.query(`DELETE FROM chat_log WHERE id IN (SELECT id FROM chat_log ORDER BY id DESC OFFSET 400)`);
+    return;
+  }
+  memory.chatLog.push(row);
+  if (memory.chatLog.length > 400) memory.chatLog.splice(0, memory.chatLog.length - 400);
+}
+
+async function recentChat(limit = 60) {
+  if (pool) {
+    const { rows } = await pool.query(
+      'SELECT role, content, page, created_at FROM chat_log ORDER BY created_at DESC, id DESC LIMIT $1', [limit]);
+    return rows.map(r => ({ role: r.role, content: r.content, page: r.page, at: r.created_at }));
+  }
+  return [...memory.chatLog].reverse().slice(0, limit);
+}
+
+module.exports = { init, hasDb, insertApplication, listApplications, getApplication, getApplicationByEmailAndCode, deleteApplication, bulkUpdateStatus, deleteApplications, updateApplicationStatus, updateApplication, reissueApplicationCode, getSetting, setSetting, pingVisit, getVisits, insertEvent, recentEvents, logChat, recentChat, createSession, getSession, deleteSession, hashToken };
 
 async function updateApplicationStatus(id, status) {
   if (pool) {

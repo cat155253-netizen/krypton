@@ -222,6 +222,68 @@ tailwind.config = {
       </div>
     </div>
 
+    <!-- ============ MAIN K-TRON SITE — direct control of the front door ============ -->
+    <div id="mainSiteCard" class="glass dash-chrome p-6 mb-6" style="background:linear-gradient(160deg,rgba(120,63,4,.06),rgba(255,179,126,.05))">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="sk-serif text-xl font-semibold italic text-deep">Main K-Tron site</span>
+            <span class="pill" style="background:rgba(255,179,126,.18);color:#a1581f;font-size:.58rem;padding:.22rem .6rem">DIRECT CONTROL</span>
+          </div>
+          <p class="text-sm text-soft" style="max-width:560px">Rewrite the hero words the whole world sees on the chat page, instantly.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button class="btnghost" onclick="window.open('/','_blank')">OPEN MAIN SITE</button>
+          <button class="btnghost" onclick="window.open('/krypton.html','_blank')">OPEN FUNNEL</button>
+        </div>
+      </div>
+      <div class="grid md:grid-cols-[1fr_auto] gap-3 items-end">
+        <div class="grid md:grid-cols-2 gap-3 flex-1">
+          <div>
+            <div class="mini mb-1">HERO HEADLINE</div>
+            <input id="heroTitle" class="field" maxlength="80" placeholder="Talk to K-Tron">
+          </div>
+          <div>
+            <div class="mini mb-1">HERO SUBLINE</div>
+            <input id="heroSub" class="field" maxlength="160" placeholder="Scope sites, price packages…">
+          </div>
+        </div>
+        <button class="btn" onclick="saveHero()">TRANSMIT WORDS</button>
+      </div>
+      <p class="mini mt-3" id="heroStatus">Clear the headline and TRANSMIT WORDS to restore the original copy.</p>
+    </div>
+
+    <!-- ============ SYSTEM HEALTH ============ -->
+    <div id="healthCard" class="glass dash-chrome p-6 mb-6">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="sk-serif text-xl font-semibold italic text-deep">System health</span>
+        <span class="pill" style="background:rgba(84,172,120,.15);color:#2c7a4f;font-size:.58rem;padding:.22rem .6rem">PULSE</span>
+        <span class="mini ml-auto" id="healthTime">—</span>
+      </div>
+      <div id="healthWrap" class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm"></div>
+    </div>
+
+    <!-- ============ COMMAND ARCHIVE (audit trail) ============ -->
+    <div id="archiveCard" class="glass dash-chrome p-6 mb-6">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="sk-serif text-xl font-semibold italic text-deep">Command archive</span>
+        <span class="pill" style="background:rgba(63,167,201,.15);color:#2c5f72;font-size:.58rem;padding:.22rem .6rem">AUDIT TRAIL</span>
+      </div>
+      <div id="eventsList" class="space-y-2 text-sm max-h-80 overflow-y-auto"></div>
+    </div>
+
+    <!-- ============ K-TRON OVERSIGHT (who's talking to K-Tron) ============ -->
+    <div id="oversightCard" class="glass dash-chrome p-6 mb-6">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="sk-serif text-xl font-semibold italic text-deep">K-Tron oversight</span>
+        <span class="pill" style="background:rgba(167,84,190,.14);color:#7a2c8f;font-size:.58rem;padding:.22rem .6rem">VISITOR CHAT</span>
+      </div>
+      <div class="flex flex-wrap gap-2 mb-4">
+        <button class="btnghost" onclick="loadOversight()">REFRESH TRANSCRIPTS</button>
+      </div>
+      <div id="chatOverview" class="space-y-2 text-sm max-h-80 overflow-y-auto"></div>
+    </div>
+
     <!-- filters -->
     <div class="glass p-4 mb-6 flex flex-wrap items-center gap-3">
       <input id="search" type="search" placeholder="Search company, email, or app no…" class="field !w-64" oninput="renderTable()">
@@ -668,7 +730,7 @@ async function toggleKtron(){
       const b = await (await json('/api/admin/brain')).code || (await (await fetch('/api/admin/brain')).json());
       const st = b.stats;
       ktronMessages = [{ role:'assistant', content:
-        `Reading the live brain — ${st.total} application${st.total===1?'':'s'}, pipeline $${st.pipelineUSD.toLocaleString()}.\n\nAsk me anything: who's stuck, draft a client email, what to bill next, or the state of the board.` }];
+        `At your service, Admin. The studio brain is live — ${st.total} application${st.total===1?'':'s'}, pipeline $${st.pipelineUSD.toLocaleString()}.\n\nAsk me anything: who's stuck, a draft client email, what to bill next, or the state of the board. I answer with respect, always for you.` }];
     } catch(e) {
       ktronMessages = [{ role:'assistant', content:"Brain is up but the stats feed twitched — ask me something and I'll dig." }];
     }
@@ -766,6 +828,85 @@ async function loadLeash(){
     $('vRecent').innerHTML = (v.recent || []).slice(0, 6).map(r =>
       `<div class="flex justify-between"><span class="text-deep truncate">${esc('visitor')}</span><span class="mini">${esc(r.page || '')} · ${timeAgo(r.seen_at || r.seenAt)}</span></div>`
     ).join('') || '<div class="mini opacity-60">No visits recorded.</div>';
+    const h = data.mainHero;
+    if (h && typeof h.title === 'string'){
+      $('heroTitle').value = h.title;
+      $('heroSub').value = h.sub || '';
+      $('heroStatus').textContent = 'The site is currently speaking your words — TRANSMIT WORDS to change them.';
+    } else {
+      $('heroTitle').value = '';
+      $('heroSub').value = '';
+      $('heroStatus').textContent = 'Clear the headline and TRANSMIT WORDS to restore the original copy.';
+    }
+  } catch(e){}
+}
+
+async function saveHero(){
+  const title = $('heroTitle').value.trim();
+  const sub = $('heroSub').value.trim();
+  const { status, data } = await json('/api/admin/site', { method:'PUT', body: JSON.stringify({ mainHero: { title, sub } }) });
+  if (status !== 200){ toast('Could not transmit words'); return; }
+  toast(title ? `Main site now says: ${title}` : 'Restored the original headline');
+  $('heroStatus').textContent = title ? 'The site is currently speaking your words — TRANSMIT WORDS to change them.' : 'Original copy restored — the site no longer carries your override.';
+}
+
+/* ============ SYSTEM HEALTH ============ */
+async function loadHealth(){
+  try {
+    const { status, data } = await json('/api/admin/health');
+    if (status !== 200) return;
+    const h = data.health || {};
+    $('healthTime').textContent = 'checked ' + timeAgo(h.now);
+    const cells = [
+      ['STORE MODE', esc(h.mode || '—') || 'Memory'],
+      ['NODE', esc(h.node || '—')],
+      ['UPTIME', Math.floor((h.uptimeSec || 0) / 60) + 'm'],
+      ['MODEL', esc(h.model || '—')],
+      ['MAX TOKENS', String(h.maxTokens || '—')],
+      ['EMAIL', esc(h.email || 'disabled')],
+      ['OPENAI KEY', h.openaiKey ? '✓ set' : '✕ not set'],
+      ['KEY FILE', h.keyFile ? '✓ armed' : '✕ none'],
+      ['MAINTENANCE', h.maintenance ? 'UP' : 'down'],
+      ['FORM', h.applyOpen ? 'open' : 'paused'],
+      ['PUBLIC K-TRON', h.chatOpen ? 'on' : 'off'],
+      ['ENV', 'Render / bare', '…'],
+    ];
+    $('healthWrap').innerHTML = cells.map(c =>
+      `<div class="glass p-3"><div class="mono text-[10px] tracking-[.18em] text-soft uppercase">${c[0]}</div><div class="text-deep font-semibold mt-0.5">${c[1] || '—'}</div></div>`
+    ).join('');
+  } catch(e){}
+}
+
+/* ============ COMMAND ARCHIVE ============ */
+async function loadEvents(){
+  try {
+    const { status, data } = await json('/api/admin/events');
+    if (status !== 200) return;
+    const evs = data.events || [];
+    $('eventsList').innerHTML = evs.slice(0, 40).map(e => `
+      <div class="flex items-start gap-3 py-1 border-b border-[#e9f2f6] last:border-0">
+        <span class="pill shrink-0" style="background:rgba(63,167,201,.12);color:#2c5f72;font-size:.56rem;padding:.2rem .55rem;margin-top:2px">${esc(e.kind)}</span>
+        <span class="text-deep flex-1">${esc(e.detail || '')}</span>
+        <span class="mini shrink-0">${timeAgo(e.at)}</span>
+      </div>`).join('') || '<div class="mini opacity-60">Nothing logged yet — every pull of the leash appears here.</div>';
+  } catch(e){}
+}
+
+/* ============ K-TRON OVERSIGHT ============ */
+async function loadOversight(){
+  try {
+    const { status, data } = await json('/api/admin/chatlog');
+    if (status !== 200) return;
+    const chat = data.chat || [];
+    $('chatOverview').innerHTML = chat.slice(0, 40).map(c => {
+      const who = c.role === 'user' ? 'VISITOR' : 'K-TRON';
+      const color = c.role === 'user' ? 'rgba(255,179,126,.2);color:#a1581f' : 'rgba(63,167,201,.15);color:#2c5f72';
+      return `<div class="flex items-start gap-3 py-1 border-b border-[#e9f2f6] last:border-0">
+        <span class="pill shrink-0" style="background:${color};font-size:.56rem;padding:.2rem .55rem;margin-top:2px">${who}</span>
+        <span class="text-deep flex-1 whitespace-pre-wrap">${esc(c.content || '')}</span>
+        <span class="mini shrink-0">${timeAgo(c.at)}</span>
+      </div>`;
+    }).join('') || '<div class="mini opacity-60">No visitor conversations yet — the moment someone talks to K-Tron on the main site, it lands here.</div>';
   } catch(e){}
 }
 
@@ -843,9 +984,14 @@ const POWERS = [
   { icon:'$', name:'OVERRIDE TOTAL', hint:'Rewrite any investment figure', run:()=>palJump('total') },
   { icon:'⟲', name:'REFRESH', hint:'Pull fresh data, recalc everything', run:()=>{ refresh(); toast('Refreshed'); closePalette(); } },
   { icon:'☠', name:'ZERO THE BOARD', hint:'Delete absolutely everything', run:()=>{ closePalette(); runCommand('clear-all'); } },
+  { icon:'❦', name:'TRANSMIT WORDS', hint:'Rewrite the main site hero headline', run:()=>{ closePalette(); scrollToCard('mainSiteCard'); } },
+  { icon:'◷', name:'COMMAND ARCHIVE', hint:'Every pull of the leash, logged', run:()=>{ closePalette(); scrollToCard('archiveCard'); } },
+  { icon:'◉', name:'K-TRON OVERSIGHT', hint:'Read the visitor conversations live', run:()=>{ closePalette(); scrollToCard('oversightCard'); } },
   { icon:'✕', name:'CLOSE', hint:'Esc — back to the world', run:()=>closePalette() },
 ];
 let palApps = [];
+
+function scrollToCard(id){ const el = $(id); if (el) el.scrollIntoView({ behavior:'smooth', block:'start' }); }
 
 function palJump(kind){
   if (!ALL.length){ toast('No dossiers yet'); return; }
@@ -958,8 +1104,11 @@ async function showDash(){
   startClock();
   refresh();
   loadLeash();
+  loadHealth();
+  loadEvents();
+  loadOversight();
   if (intervalId) clearInterval(intervalId);
-  intervalId = setInterval(() => { refresh(); loadLeash(); }, 30000);
+  intervalId = setInterval(() => { refresh(); loadLeash(); loadHealth(); loadEvents(); loadOversight(); }, 30000);
 }
 
 (async function boot(){

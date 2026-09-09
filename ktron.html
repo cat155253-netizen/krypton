@@ -195,6 +195,50 @@ const welcome = document.getElementById('welcome');
 const input = document.getElementById('input');
 const form = document.getElementById('composer');
 
+/* the admin panel holds the leash of this site too */
+(async function obeyTheLeash() {
+  try {
+    const res = await fetch('/api/settings/site');
+    const site = await res.json();
+    if (site.maintenance) {
+      const wall = document.createElement('div');
+      wall.id = 'kreeShutdown';
+      wall.style.cssText = 'position:fixed;inset:0;z-index:9999;background:linear-gradient(160deg,#0e2a21,#05120d);color:#c9f2e4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:24px;font-family:ui-monospace,monospace';
+      const seal = document.createElement('div');
+      seal.style.cssText = 'font-size:52px;letter-spacing:8px;color:#ffb37e';
+      seal.textContent = 'KRYP/TON';
+      const note = document.createElement('div');
+      note.style.cssText = 'font-size:15px;letter-spacing:3px;text-transform:uppercase;opacity:.85';
+      note.textContent = 'The site is taking inventory. Stand by, Admin.';
+      const sub = document.createElement('div');
+      sub.style.cssText = 'font-size:12px;opacity:.5';
+      sub.textContent = 'the studio is mid-reset — nothing is broken';
+      wall.append(seal, note, sub);
+      document.body.append(wall);
+    }
+    if (site.chatOpen === false) {
+      input.disabled = true;
+      const sendBtn = form.querySelector('button[type=submit]');
+      if (sendBtn) { sendBtn.disabled = true; } else { form.style.pointerEvents = 'none'; }
+      input.placeholder = 'K-Tron is resting — check back soon, Admin.';
+      const lock = document.createElement('div');
+      lock.className = 'text-center text-xs text-deep/50 mt-2 mono tracking-widest uppercase';
+      lock.textContent = 'public K-Tron: paused by Admin';
+      lock.style.marginBottom = '4px';
+      form.insertBefore(lock, form.firstChild);
+    }
+    if (site.mainHero && typeof site.mainHero.title === 'string' && site.mainHero.title) {
+      const h1 = welcome.querySelector('h1');
+      const p = welcome.querySelector('p');
+      if (h1) h1.textContent = site.mainHero.title;
+      if (p && site.mainHero.sub) p.textContent = site.mainHero.sub;
+    }
+    let vid = sessionStorage.getItem('kree_vid');
+    if (!vid) { vid = 'v' + Math.random().toString(36).slice(2, 12); sessionStorage.setItem('kree_vid', vid); }
+    navigator.sendBeacon('/api/analytics/ping', new Blob([JSON.stringify({ vid, page: 'k-tron' })], { type: 'application/json' }));
+  } catch (e) { /* leash unreachable — serve as normal */ }
+})();
+
 let formatPick = null;
 
 function setFormat(f) {
