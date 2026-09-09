@@ -45,10 +45,16 @@ CREATE TABLE IF NOT EXISTS settings (
   key TEXT PRIMARY KEY,
   value TEXT
 );
+CREATE TABLE IF NOT EXISTS visits (
+  vis_id TEXT NOT NULL,
+  page TEXT NOT NULL,
+  seen_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (vis_id, page)
+);
 `;
 
 let pool = null;
-let memory = { applications: [], sessions: new Map(), settings: new Map(), seq: 0 };
+let memory = { applications: [], sessions: new Map(), settings: new Map(), visits: new Map(), seq: 0 };
 
 async function init() {
   if (!hasDb) {
@@ -211,7 +217,7 @@ async function deleteApplications(status) {
   return before - memory.applications.length;
 }
 
-module.exports = { init, hasDb, insertApplication, listApplications, getApplication, getApplicationByEmailAndCode, deleteApplication, bulkUpdateStatus, deleteApplications, updateApplicationStatus, updateApplication, reissueApplicationCode, getSetting, setSetting, createSession, getSession, deleteSession, hashToken };
+module.exports = { init, hasDb, insertApplication, listApplications, getApplication, getApplicationByEmailAndCode, deleteApplication, bulkUpdateStatus, deleteApplications, updateApplicationStatus, updateApplication, reissueApplicationCode, getSetting, setSetting, pingVisit, getVisits, createSession, getSession, deleteSession, hashToken };
 
 async function updateApplicationStatus(id, status) {
   if (pool) {
@@ -278,6 +284,42 @@ async function setSetting(key, value) {
     return;
   }
   memory.settings.set(key, value);
+}
+
+/* ---------- visitor analytics ---------- */
+
+async function pingVisit(visId, page) {
+  if (pool) {
+    await pool.query(
+      `INSERT INTO visits (vis_id, page) VALUES ($1,$2)
+       ON CONFLICT (vis_id, page) DO UPDATE SET seen_at=now()`,
+      [visId, page]);
+    await pool.query(`DELETE FROM visits WHERE seen_at < now() - interval '30 days'`);
+    return;
+  }
+  memory.visits.set(`${visId}|${page}`, { page, seenAt: Date.now() });
+}
+
+async function getVisits() {
+  let rows;
+  if (pool) {
+    const fiveSec = new Date(Date.now() - 5 * 60 * 1000);
+    const dayStart = new Date(); dayStart.setHours(0, 0, 0, 0);
+    const { rows: r } = await pool.query(`SELECT vis_id, page, seen_at FROM visits`);
+    rows = r;
+    const q = (clause, params) => pool.query(`SELECT COUNT(*) c, COUNT(DISTINCT vis_id) d FROM visits WHERE ${clause}`, params);
+    const now = await q(`seen_at > $1`, [fiveSec]); const today = await q(`seen_at >= $1`, [dayStart]);
+    const pages = await pool.query(`SELECT page, COUNT(DISTINCT vis_id) d, MAX(seen_at) last FROM visits GROUP BY page ORDER BY d DESC`);
+    return { now: Number(now.rows[0].d), today: Number(today.rows[0].d), total: rows.length, pages: pages.rows.map(x => ({ page: x.page, visitors: Number(x.d), last: x.last })), recent: rows.sort((a,b)=>new Date(b.seen_at)-new Date(a.seen_at)).slice(0,15) };
+  }
+  const list = [...memory.visits.values()];
+  const fiveSec = Date.now() - 5 * 60 * 1000;
+  const dayStart = new Date(); dayStart.setHours(0, 0, 0, 0);
+  const nr = list.filter(v => v.seenAt > fiveSec).length;
+  const tr = list.filter(v => v.seenAt >= dayStart.getTime()).length;
+  const byPage = {};
+  for (const v of list) { if (!byPage[v.page]) byPage[v.page] = { visitors: 0, last: 0 }; byPage[v.page].visitors++; byPage[v.page].last = Math.max(byPage[v.page].last, v.seenAt); }
+  return { now: nr, today: tr, total: list.length, pages: Object.entries(byPage).map(([page, s]) => ({ page, visitors: s.visitors, last: new Date(s.last) })), recent: [...list].sort((a,b)=>b.seenAt-a.seenAt).slice(0,15) };
 }
 
 async function createSession(token, ttlMs) {

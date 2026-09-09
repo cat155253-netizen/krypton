@@ -664,6 +664,37 @@ tailwind.config = {
 </div>
 
 <script>
+/* ============ site leash: the admin panel holds the whole system ============ */
+(function(){
+  fetch('/api/settings/site').then(r=>r.json()).then(s=>{
+    if (s.maintenance){
+      const m = document.createElement('div');
+      m.id = 'kreeShutdown';
+      m.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:2rem;background:linear-gradient(150deg,#0e2a3a,#124a5e 60%,#1d6a77);border-top:6px solid #7fd0b5';
+      m.innerHTML = '<div style="text-align:center;max-width:480px;color:#fff">' +
+        '<div style="font-family:\'Permanent Marker\',cursive;font-size:2.4rem;color:#7fd0b5">Krypton</div>' +
+        '<p style="font-family:\'Source Serif 4\',serif;font-style:italic;font-size:1.35rem;margin:1rem 0">Taking inventory — the studio is momentarily closed.</p>' +
+        '<p style="opacity:.7;font-size:.85rem">New applications pause and the workshop reopens shortly. Existing clients: your passcode keeps working.</p></div>';
+      document.body.appendChild(m);
+    }
+    if (!s.applyOpen){
+      const form = document.getElementById('contactForm');
+      if (form){
+        const btn = form.querySelector('[type=submit]');
+        if (btn){ btn.disabled = true; btn.textContent = 'NOT ACCEPTING APPLICATIONS THIS WEEK'; btn.style.opacity = .6; }
+      }
+    }
+    if (!s.chatOpen){
+      const fab = document.getElementById('kFab');
+      if (fab) fab.style.display = 'none';
+    }
+    let vid = sessionStorage.getItem('kree_vid');
+    if (!vid){ vid = Math.random().toString(36).slice(2, 12); sessionStorage.setItem('kree_vid', vid); }
+    navigator.sendBeacon ? navigator.sendBeacon('/api/analytics/ping', new Blob([JSON.stringify({ vid, page: 'krypton' })], { type: 'application/json' }))
+      : fetch('/api/analytics/ping', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ vid, page: 'krypton' }) });
+  }).catch(()=>{});
+})();
+
 /* ============ global broadcast banner ============ */
 (function(){
   fetch('/api/settings/announcement').then(r=>r.json()).then(d=>{

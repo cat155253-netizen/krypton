@@ -31,6 +31,10 @@ tailwind.config = {
   body.kt-focus .dash-head,
   body.kt-focus .dash-chrome{display:none !important}
   body.kt-focus main{padding-top:1rem}
+  .lswitch{position:relative;width:46px;height:26px;border-radius:999px;background:#cfe0ea;transition:.25s;cursor:pointer;flex-shrink:0;display:inline-block}
+  .lswitch i{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.25s;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+  .lswitch input:checked + i{transform:translateX(20px)}
+  .lswitch:has(input:checked){background:linear-gradient(120deg,#3fa7c9,#5fc4b0)}
   .sk-serif{font-family:'Source Serif 4',Georgia,'Times New Roman',serif}
   .mono{font-family:'JetBrains Mono',monospace}
   .glass{background:rgba(255,255,255,.82);backdrop-filter:blur(10px);border:1px solid #e3eef4;border-radius:18px}
@@ -82,6 +86,17 @@ tailwind.config = {
         <p id="loginErr" class="hidden text-xs text-red-500 mb-3">Incorrect password. Try again.</p>
         <button type="submit" class="btn w-full py-3 mono text-sm tracking-widest">UNLOCK</button>
       </form>
+
+      <div class="flex items-center gap-3 my-5">
+        <span class="h-px flex-1" style="background:#e3eef4"></span>
+        <span class="mono text-[10px] tracking-[.25em] text-soft">OR</span>
+        <span class="h-px flex-1" style="background:#e3eef4"></span>
+      </div>
+
+      <button type="button" class="btnghost w-full py-3 mono text-sm tracking-widest mb-3" onclick="pickKeyFile()">⚿ UNLOCK WITH KEY FILE</button>
+      <input id="keyfile" type="file" accept=".key" class="hidden">
+      <p id="keyErr" class="hidden text-xs text-red-500 mb-3"></p>
+      <p class="text-xs text-soft leading-relaxed text-center">The panel key file IS the passkey — no fingerprint, no typing. Mint it once from the panel, keep it private, unlock with it forever.</p>
       <p class="text-center mt-5"><a href="/krypton.html" class="text-xs mono text-neon hover:underline">← back to the site</a></p>
     </div>
   </div>
@@ -91,12 +106,14 @@ tailwind.config = {
 <div id="dashView" class="hidden">
   <!-- top bar -->
   <header class="glass rounded-none border-x-0 border-t-0 sticky top-0 z-40" style="border-radius:0">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div class="max-w-7xl mx-auto px-6 py-3.5 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <span class="text-2xl" style="font-family:'Permanent Marker',cursive;color:#124a5e">Krypton</span>
         <span class="kbadge">ADMIN PANEL</span>
+        <span class="hidden md:inline-flex items-center gap-1.5 mini" style="color:#22a06b"><span class="w-2 h-2 rounded-full" style="background:#22a06b;box-shadow:0 0 0 3px rgba(34,160,107,.2)"></span>SYSTEM ONLINE</span>
       </div>
       <div class="flex items-center gap-3">
+        <span class="mini hidden lg:block" id="clockStr">—</span>
         <span class="mini hidden md:block" id="todayStr">—</span>
         <button class="btnghost" onclick="openPalette()">⚡ POWERS</button>
         <a href="/krypton.html" class="btnghost">SITE</a>
@@ -136,6 +153,72 @@ tailwind.config = {
           <span class="mini">PIPELINE</span>
         </div>
         <div id="statusMix" class="space-y-3"></div>
+      </div>
+    </div>
+
+    <!-- ============ SYSTEM LEASH — hold the whole system ============ -->
+    <div class="glass dash-chrome p-6 mb-6" style="background:linear-gradient(160deg,rgba(18,74,94,.06),rgba(63,167,201,.05))">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="sk-serif text-xl font-semibold italic text-deep">System leash</span>
+            <span class="pill" style="background:rgba(63,167,201,.15);color:#2c5f72;font-size:.58rem;padding:.22rem .6rem">YOU RUN THE WHOLE THING</span>
+          </div>
+          <p class="text-sm text-soft" id="leashStatus" style="max-width:560px">Toggles below flip the public site instantly. No deploy, no code — just pull.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button class="btn" onclick="mintKeyFile()">⚿ MINT KEY FILE</button>
+          <button class="btnghost" onclick="revokeKeyFile()">REVOKE KEY</button>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-4 mb-6">
+        <div class="glass p-4 flex items-center justify-between gap-3">
+          <div>
+            <div class="mono text-[10px] tracking-[.2em] text-soft">SITE MODE</div>
+            <div class="text-sm font-semibold text-deep">Maintenance</div>
+            <div class="mini opacity-70">Visitors see "closed" wall</div>
+          </div>
+          <label class="lswitch"><input type="checkbox" id="leashMaintenance" onchange="setLeash('maintenance', this.checked)" hidden><i></i></label>
+        </div>
+        <div class="glass p-4 flex items-center justify-between gap-3">
+          <div>
+            <div class="mono text-[10px] tracking-[.2em] text-soft">FORM</div>
+            <div class="text-sm font-semibold text-deep">Accepting applications</div>
+            <div class="mini opacity-70">Turns the apply form off</div>
+          </div>
+          <label class="lswitch"><input type="checkbox" id="leashApply" onchange="setLeash('applyOpen', this.checked)" hidden><i></i></label>
+        </div>
+        <div class="glass p-4 flex items-center justify-between gap-3">
+          <div>
+            <div class="mono text-[10px] tracking-[.2em] text-soft">AI</div>
+            <div class="text-sm font-semibold text-deep">Public K-Tron</div>
+            <div class="mini opacity-70">Hides the chat widget</div>
+          </div>
+          <label class="lswitch"><input type="checkbox" id="leashChat" onchange="setLeash('chatOpen', this.checked)" hidden><i></i></label>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-4">
+        <div class="glass p-4">
+          <div class="flex items-baseline justify-between mb-3">
+            <span class="hand text-lg text-deep">Live street</span>
+            <span class="mini">WHO'S ON THE SITE</span>
+          </div>
+          <div class="flex gap-6 mb-4">
+            <div><div class="text-3xl font-extrabold text-deep" id="vNow">—</div><div class="mini">ONLINE NOW (5m)</div></div>
+            <div><div class="text-3xl font-extrabold text-deep" id="vToday">—</div><div class="mini">TODAY</div></div>
+            <div><div class="text-3xl font-extrabold text-deep" id="vTotal">—</div><div class="mini">ALL TIME</div></div>
+          </div>
+          <div id="vPages" class="space-y-2 text-sm"></div>
+        </div>
+        <div class="glass p-4">
+          <div class="flex items-baseline justify-between mb-3">
+            <span class="hand text-lg text-deep">Foot traffic</span>
+            <span class="mini">LAST VISITS</span>
+          </div>
+          <div id="vRecent" class="space-y-2 text-sm"></div>
+        </div>
       </div>
     </div>
 
@@ -255,12 +338,14 @@ function toast(msg){
 }
 
 function statCard(label, value, sub, acc, icon){
-  return `<div class="glass p-4" style="border-top:3px solid ${acc}">
-    <div class="flex items-center justify-between mb-1">
-      <span class="mini">${label}</span><span style="color:${acc};font-size:.9rem">${icon}</span>
+  return `<div class="glass p-4 relative overflow-hidden" style="border-top:3px solid ${acc}">
+    <div class="absolute -right-3 -bottom-4 opacity-10 select-none" style="color:${acc};font-size:3.6rem;font-weight:800">${icon}</div>
+    <div class="flex items-center justify-between mb-2">
+      <span class="mini tracking-[.22em]">${label}</span>
+      <span class="w-4 h-4 rounded-lg flex items-center justify-center text-[10px]" style="background:${acc}22;color:${acc};font-weight:700">${icon}</span>
     </div>
     <div class="text-2xl md:text-[1.7rem] font-bold text-deep leading-tight">${value}</div>
-    ${sub ? `<div class="mini mt-1">${sub}</div>` : ''}
+    ${sub ? `<div class="mini mt-1 opacity-70">${sub}</div>` : ''}
   </div>`;
 }
 
@@ -616,6 +701,90 @@ async function ktronAsk(q){
   renderKtron();
 }
 
+/* ============ PANEL KEY FILE (file-based passkey) ============ */
+function pickKeyFile(){ $('keyfile').click(); }
+$('keyfile').addEventListener('change', async (e) => {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  const key = await f.text();
+  const { status, data } = await json('/api/login-key', { method:'POST', body: JSON.stringify({ key }) });
+  if (status === 200) { showDash(); return; }
+  const err = $('keyErr');
+  err.textContent = (data && data.error) || 'Key file rejected.';
+  err.classList.remove('hidden');
+});
+
+async function mintKeyFile(){
+  if (!confirm('Mint a fresh panel key file? The old file stops unlocking the same second the new one is saved. Download + store it safely.')) return;
+  const { status, data } = await json('/api/admin/keyfile', { method:'POST' });
+  if (status !== 200){ toast('Could not mint — ' + ((data && data.error) || 'unknown')); return; }
+  const blob = new Blob([data.content], { type:'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = data.filename || 'krypton-panel.key'; a.click();
+  URL.revokeObjectURL(url);
+  toast('Key file minted — that one file is now all you need to log in');
+  loadLeash();
+}
+
+async function revokeKeyFile(){
+  if (!confirm('Revoke the panel key file? After this, the old file can no longer unlock the panel (password still works).')) return;
+  const { status } = await json('/api/admin/keyfile', { method:'DELETE' });
+  if (status === 200){ toast('Key file revoked'); loadLeash(); } else toast('Revoke failed');
+}
+
+/* ============ SYSTEM LEASH ============ */
+async function setLeash(kind, value){
+  const payload = {};
+  payload[kind] = value;
+  const { status, data } = await json('/api/admin/site', { method:'PUT', body: JSON.stringify(payload) });
+  if (status === 200){
+    $('leashStatus').textContent = `Live now — maintenance ${data.maintenance ? 'ON' : 'off'} · applications ${data.applyOpen ? 'OPEN' : 'PAUSED'} · public chat ${data.chatOpen ? 'ON' : 'OFF'}`;
+    toast(kind === 'maintenance' ? (data.maintenance ? 'Maintenance wall is up — site is closed' : 'Site is open again') : (value ? 'On' : 'Off'));
+  }
+  loadLeash();
+}
+
+async function loadLeash(){
+  try {
+    const { status, data } = await json('/api/admin/site');
+    if (status !== 200) return;
+    $('leashMaintenance').checked = data.maintenance;
+    $('leashApply').checked = !!data.applyOpen;
+    $('leashChat').checked = !!data.chatOpen;
+    const st = data.maintenance
+      ? 'MAINTENANCE WALL IS UP — press the switch to open the site'
+      : `System live — applications ${data.applyOpen ? 'open' : 'paused'} · public chat ${data.chatOpen ? 'on' : 'off'}`;
+    $('leashStatus').textContent = st;
+    const v = data.visits || {};
+    $('vNow').textContent = v.now || 0;
+    $('vToday').textContent = v.today || 0;
+    $('vTotal').textContent = v.total || 0;
+    $('vPages').innerHTML = (v.pages || []).slice(0, 4).map(p =>
+      `<div class="flex justify-between"><span class="text-deep">${esc(p.page)}</span><span class="mono text-soft">${p.visitors} visitor${p.visitors===1?'':'s'}</span></div>`
+    ).join('') || '<div class="mini opacity-60">Nobody yet — first ping lands as soon as someone opens the site.</div>';
+    $('vRecent').innerHTML = (v.recent || []).slice(0, 6).map(r =>
+      `<div class="flex justify-between"><span class="text-deep truncate">${esc('visitor')}</span><span class="mini">${esc(r.page || '')} · ${timeAgo(r.seen_at || r.seenAt)}</span></div>`
+    ).join('') || '<div class="mini opacity-60">No visits recorded.</div>';
+  } catch(e){}
+}
+
+/* live clock */
+let clockT = null;
+function startClock(){
+  if (clockT) clearInterval(clockT);
+  const tick = () => { const el = $('clockStr'); if (el) el.textContent = new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', second:'2-digit' }); };
+  tick(); clockT = setInterval(tick, 1000);
+}
+
+function timeAgo(ts){
+  if (!ts) return '—';
+  const s = Math.max(1, Math.round((Date.now() - new Date(ts).getTime()) / 1000));
+  if (s < 60) return s + 's ago';
+  const m = Math.round(s / 60); if (m < 60) return m + 'm ago';
+  const h = Math.round(m / 60); return h + 'h ago';
+}
+
 /* ============ today's tape ============ */
 function tapeReport(){
   const ago = Date.now() - 24*3600*1000;
@@ -660,6 +829,8 @@ const POWERS = [
   { icon:'✦', name:'K-TRON', hint:"Summon the studio's co-pilot", run:()=>{ closePalette(); toggleKtron(); } },
   { icon:'✶', name:'TRANSMIT', hint:'Broadcast a banner to the public site', run:()=>openAnnModal() },
   { icon:'⊘', name:'TAKE-DOWN', hint:'Kill the live transmission instantly', run:async()=>{ const r = await json('/api/settings/announcement', { method:'PUT', body: JSON.stringify({ message:'', enabled:false }) }); if (r.status===200){ toast('Transmission killed'); closePalette(); } } },
+  { icon:'⚿', name:'MINT KEY FILE', hint:'Generate the file that unlocks the panel', run:()=>{ closePalette(); mintKeyFile(); } },
+  { icon:'⚑', name:'FLIP MAINTENANCE', hint:'Close or reopen the whole public site instantly', run:async()=>{ const cur = $('leashMaintenance').checked; const r = await json('/api/admin/site', { method:'PUT', body: JSON.stringify({ maintenance: !cur }) }); if (r.status===200){ toast(!cur ? 'Maintenance wall is up' : 'Site reopened'); closePalette(); loadLeash(); } } },
   { icon:'⇡', name:'PIN TOP', hint:'Order every dossier, pinned first', run:()=>{ toast('Pin ↑ or drop ↓ any dossier from its drawer'); openPalette(); } },
   { icon:'⎘', name:'EXPORT CSV', hint:'Download every application as CSV', run:()=>{ exportCSV(); closePalette(); } },
   { icon:'▤', name:"TODAY'S TAPE", hint:'Daily report: activity, pipeline, board', run:()=>{ closePalette(); openTape(); } },
@@ -784,9 +955,11 @@ async function showDash(){
   $('dashView').classList.remove('hidden');
   $('ktronFab').classList.remove('hidden');
   $('todayStr').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+  startClock();
   refresh();
+  loadLeash();
   if (intervalId) clearInterval(intervalId);
-  intervalId = setInterval(refresh, 30000);
+  intervalId = setInterval(() => { refresh(); loadLeash(); }, 30000);
 }
 
 (async function boot(){

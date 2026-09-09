@@ -133,6 +133,44 @@ function verifyAdminPassword(input) {
   return crypto.timingSafeEqual(a, b);
 }
 
+/* ---------- panel key file (file-based passkey) ---------- */
+
+const KEY_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // no I/O/0/1 — easy to read
+function generateKeyFile() {
+  let secret = '';
+  for (let i = 0; i < 18; i++) secret += KEY_ALPHABET[Math.floor(Math.random() * KEY_ALPHABET.length)];
+  const hash = crypto.createHash('sha256').update(secret).digest('hex');
+  const content =
+    'KRYPTON PANEL KEY\n' +
+    '=================\n' +
+    'This file is the master key to the Krypton admin panel (/admin).\n' +
+    'Keep it private. Never email it or commit it.\n' +
+    'On the login screen choose "unlock with key file" and pick this file.\n\n' +
+    'secret: ' + secret + '\n';
+  return { secret, hash, content };
+}
+
+function extractKeySecret(text) {
+  const m = String(text || '').match(/secret:\s*([A-Z2-9]{18})/);
+  return m ? m[1] : null;
+}
+
+function storeHash(secret) {
+  return crypto.createHash('sha256').update(String(secret)).digest('hex');
+}
+
+async function getPanelKeyHash() { return store.getSetting('panel_key_hash'); }
+
+async function verifyKeySecretStored(secret) {
+  const stored = await getPanelKeyHash();
+  if (!stored) return false;
+  const a = Buffer.from(storeHash(secret), 'hex');
+  const b = Buffer.from(stored, 'hex');
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+function truthy(v) { return v === true || v === 'true'; }
+
 function rateLimited(ip) {
   const entry = loginAttempts.get(ip) || { fails: 0, lockedUntil: 0 };
   if (entry.lockedUntil > Date.now()) return true;
@@ -315,6 +353,32 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  /* unlock with the panel key file — the file works as a master passkey */
+  if (url.pathname === '/api/login-key' && req.method === 'POST') {
+    const body = await readBody(req);
+    const secret = extractKeySecret(body.key);
+    const hash = await getPanelKeyHash();
+    if (!hash) {
+      res.writeHead(503, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'No panel key file has been generated yet. Log in with the password and mint one from ⚡ POWERS.' }));
+      return;
+    }
+    const ip = clientIp(req);
+    if (secret && await verifyKeySecretStored(secret)) {
+      recordSuccess(ip);
+      const token = crypto.randomBytes(32).toString('base64url');
+      await store.createSession(token, SESSION_TTL_MS);
+      setSessionCookie(res, token, SESSION_TTL_MS, isSecureRequest(req));
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true }));
+      return;
+    }
+    recordFailure(ip);
+    res.writeHead(401, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Key file rejected.' }));
+    return;
+  }
+
   if (url.pathname === '/api/logout' && req.method === 'POST') {
     const token = cookieHeader(req)[SESSION_COOKIE];
     if (token) await store.deleteSession(token);
@@ -406,6 +470,78 @@ const server = http.createServer(async (req, res) => {
     await store.setSetting('announce_enabled', String(enabled));
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: true, enabled, message }));
+    return;
+  }
+
+  /* visitor analytics — anonymous presence ping from the public site */
+  if (url.pathname === '/api/analytics/ping' && req.method === 'POST') {
+    const body = await readBody(req);
+    const vid = String(body.vid || '').slice(0, 40);
+    const page = String(body.page || 'krypton').slice(0, 40);
+    if (vid) await store.pingVisit(vid, page);
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+    res.end(JSON.stringify({ ok: true }));
+    return;
+  }
+
+  /* public site leash — flags the public funnel obeys (maintenance / apply / chat) */
+  if (url.pathname === '/api/settings/site' && req.method === 'GET') {
+    const maintenance = (await store.getSetting('site_maintenance')) === 'true';
+    const applyOpen = (await store.getSetting('site_apply_open')) !== 'false';
+    const chatOpen = (await store.getSetting('site_chat_open')) !== 'false';
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+    res.end(JSON.stringify({ maintenance, applyOpen, chatOpen, now: new Date().toISOString() }));
+    return;
+  }
+
+  /* admin: read site leash + live visitor street */
+  if (url.pathname === '/api/admin/site' && req.method === 'GET') {
+    const token = await currentSession(req, res);
+    if (!token) return;
+    const maintenance = (await store.getSetting('site_maintenance')) === 'true';
+    const applyOpen = (await store.getSetting('site_apply_open')) !== 'false';
+    const chatOpen = (await store.getSetting('site_chat_open')) !== 'false';
+    const hasKeyFile = Boolean(await store.getSetting('panel_key_hash'));
+    const visits = await store.getVisits();
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ maintenance, applyOpen, chatOpen, hasKeyFile, visits, now: new Date().toISOString() }));
+    return;
+  }
+
+  /* admin: pull the leash — toggle maintenance / apply / chat */
+  if (url.pathname === '/api/admin/site' && req.method === 'PUT') {
+    const token = await currentSession(req, res);
+    if (!token) return;
+    const body = await readBody(req);
+    if ('maintenance' in body) await store.setSetting('site_maintenance', String(Boolean(body.maintenance)));
+    if ('applyOpen' in body) await store.setSetting('site_apply_open', String(Boolean(body.applyOpen)));
+    if ('chatOpen' in body) await store.setSetting('site_chat_open', String(Boolean(body.chatOpen)));
+    const maintenance = (await store.getSetting('site_maintenance')) === 'true';
+    const applyOpen = (await store.getSetting('site_apply_open')) !== 'false';
+    const chatOpen = (await store.getSetting('site_chat_open')) !== 'false';
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, maintenance, applyOpen, chatOpen }));
+    return;
+  }
+
+  /* admin: mint the panel key file (a file that works as a master passkey) */
+  if (url.pathname === '/api/admin/keyfile' && req.method === 'POST') {
+    const token = await currentSession(req, res);
+    if (!token) return;
+    const kf = generateKeyFile();
+    await store.setSetting('panel_key_hash', kf.hash);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, filename: 'krypton-panel.key', content: kf.content }));
+    return;
+  }
+
+  /* admin: revoke the panel key file — the file stops working immediately */
+  if (url.pathname === '/api/admin/keyfile' && req.method === 'DELETE') {
+    const token = await currentSession(req, res);
+    if (!token) return;
+    await store.setSetting('panel_key_hash', '');
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true }));
     return;
   }
 
