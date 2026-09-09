@@ -27,6 +27,10 @@ tailwind.config = {
 </script>
 <style>
   body{font-family:'Inter',sans-serif;background:#eef4f8;color:#12384a}
+  body.kt-focus header,
+  body.kt-focus .dash-head,
+  body.kt-focus .dash-chrome{display:none !important}
+  body.kt-focus main{padding-top:1rem}
   .sk-serif{font-family:'Source Serif 4',Georgia,'Times New Roman',serif}
   .mono{font-family:'JetBrains Mono',monospace}
   .glass{background:rgba(255,255,255,.82);backdrop-filter:blur(10px);border:1px solid #e3eef4;border-radius:18px}
@@ -103,7 +107,7 @@ tailwind.config = {
 
   <main class="max-w-7xl mx-auto px-6 py-8 pb-24">
     <!-- heading -->
-    <div class="flex items-end justify-between mb-6 flex-wrap gap-3">
+    <div class="dash-head flex items-end justify-between mb-6 flex-wrap gap-3">
       <div>
         <h1 class="sk-serif text-3xl font-semibold italic text-deep">Operations</h1>
         <p class="text-sm text-soft mt-1" id="summaryLine">Loading…</p>
@@ -115,10 +119,10 @@ tailwind.config = {
     </div>
 
     <!-- stats -->
-    <div id="stats" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6"></div>
+    <div id="stats" class="dash-chrome grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6"></div>
 
     <!-- charts -->
-    <div class="grid lg:grid-cols-3 gap-4 mb-6">
+    <div class="dash-chrome grid lg:grid-cols-3 gap-4 mb-6">
       <div class="glass p-6 lg:col-span-2">
         <div class="flex items-baseline justify-between mb-5">
           <span class="hand text-xl text-deep">Applications — last 8 weeks</span>
@@ -199,6 +203,30 @@ tailwind.config = {
       <input id="annOn" type="checkbox" class="w-4 h-4" style="accent-color:#3fa7c9"> Show on the public site
     </label>
     <button class="btn w-full py-3 mono text-sm" onclick="publishAnn()">TRANSMIT ▸</button>
+  </div>
+</div>
+
+<!-- ============ K-TRON CO-PILOT ============ -->
+<button id="ktronFab" class="hidden fixed bottom-6 right-6 z-[55] cursor-pointer items-center gap-2 px-5 py-3 mono text-sm" style="border:none;border-radius:999px;background:linear-gradient(135deg,#124a5e,#3fa7c9);color:#fff;box-shadow:0 14px 40px rgba(18,74,94,.45)" onclick="toggleKtron()">✦ K-TRON</button>
+<div id="ktron" class="hidden fixed bottom-6 right-6 z-[55] w-[clamp(340px,26vw,430px)] glass overflow-hidden" style="border-radius:22px;box-shadow:0 40px 90px rgba(0,0,0,.35)">
+  <div class="flex items-center justify-between px-5 py-3.5" style="background:linear-gradient(135deg,#124a5e,#3fa7c9)">
+    <div>
+      <div class="mono text-[10px] tracking-[.25em] leading-tight" style="color:#7fd0b5">K-TRON ✦ CO-PILOT</div>
+      <div class="text-sm text-white">The studio's brain</div>
+    </div>
+    <button class="cursor-pointer border-none bg-transparent text-white mono text-lg leading-none" onclick="toggleKtron()">✕</button>
+  </div>
+  <div id="ktronMsgs" class="h-[52vh] overflow-y-auto p-4 space-y-3" style="background:rgba(255,255,255,.72)"></div>
+  <div class="p-3 border-t hairline" style="background:rgba(255,255,255,.9)">
+    <div class="flex flex-wrap gap-1.5 mb-2">
+      <button class="btnghost !py-1.5 !px-3" onclick="ktronAsk('Summarize the studio pipeline right now.')">PIPELINE</button>
+      <button class="btnghost !py-1.5 !px-3" onclick="ktronAsk('Which clients might be stuck?')">STUCK?</button>
+      <button class="btnghost !py-1.5 !px-3" onclick="ktronAsk('Draft a warm welcome email to my newest client.')">EMAIL</button>
+    </div>
+    <div class="flex items-center gap-2">
+      <input id="ktronIn" class="field flex-1" placeholder="Ask anything about the studio…" autocomplete="off" onkeydown="if(event.key==='Enter')ktronAsk()">
+      <button class="btn !px-4" style="background:linear-gradient(135deg,#124a5e,#3fa7c9);border:none;color:#fff" onclick="ktronAsk()">➤</button>
+    </div>
   </div>
 </div>
 
@@ -528,16 +556,122 @@ function exportCSV(){
 
 async function doLogout(){ await json('/api/logout', { method:'POST' }); location.reload(); }
 
+/* ============ K-TRON CO-PILOT ============ */
+let ktronMessages = [];
+let ktronBusy = false;
+
+function ktronBubble(role, content){
+  const me = role === 'user';
+  return `<div class="flex ${me ? 'justify-end' : 'justify-start'}">
+    <div class="max-w-[85%] px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap" style="${me ? 'background:linear-gradient(135deg,#124a5e,#3fa7c9);color:#fff' : 'background:#fff;border:1px solid #e3eef4;color:#124a5e'};border-radius:16px">${esc(content)}</div>
+  </div>`;
+}
+function renderKtron(){
+  const box = $('ktronMsgs');
+  box.innerHTML = ktronMessages.map(m => ktronBubble(m.role, m.content)).join('');
+  box.scrollTop = box.scrollHeight;
+}
+async function toggleKtron(){
+  const box = $('ktron');
+  const opening = box.classList.contains('hidden');
+  box.classList.toggle('hidden');
+  $('ktronFab').classList.toggle('hidden');
+  if (opening && !ktronMessages.length){
+    ktronMessages.push({ role:'assistant', content:'Loading the studio brain…' });
+    renderKtron();
+    try {
+      const b = await (await json('/api/admin/brain')).code || (await (await fetch('/api/admin/brain')).json());
+      const st = b.stats;
+      ktronMessages = [{ role:'assistant', content:
+        `Reading the live brain — ${st.total} application${st.total===1?'':'s'}, pipeline $${st.pipelineUSD.toLocaleString()}.\n\nAsk me anything: who's stuck, draft a client email, what to bill next, or the state of the board.` }];
+    } catch(e) {
+      ktronMessages = [{ role:'assistant', content:"Brain is up but the stats feed twitched — ask me something and I'll dig." }];
+    }
+    renderKtron();
+  }
+}
+async function ktronAsk(q){
+  if (ktronBusy) return;
+  q = (q || $('ktronIn').value || '').trim();
+  if (!q) return;
+  $('ktronIn').value = '';
+  ktronMessages.push({ role:'user', content:q });
+  ktronMessages.push({ role:'assistant', content:'…' });
+  ktronBusy = true;
+  renderKtron();
+  try {
+    const r = await fetch('/api/admin/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ messages: ktronMessages.filter(m=>m.content!=='…') }) });
+    const d = await r.json();
+    const content = d && d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content;
+    ktronMessages.pop();
+    if (!content){
+      if (r.status === 503) ktronMessages.push({ role:'assistant', content:'The server has no AI key yet. In Render → your service → Environment, add OPENAI_API_KEY and save.' });
+      else ktronMessages.push({ role:'assistant', content: (d && d.error) ? 'K-Tron: ' + d.error : 'Something went sideways.' });
+    } else ktronMessages.push({ role:'assistant', content });
+  } catch(e){
+    ktronMessages.pop();
+    ktronMessages.push({ role:'assistant', content:'Could not reach the model provider.' });
+  }
+  ktronBusy = false;
+  renderKtron();
+}
+
+/* ============ today's tape ============ */
+function tapeReport(){
+  const ago = Date.now() - 24*3600*1000;
+  const today = ALL.filter(a=> a.createdAt && new Date(a.createdAt).getTime() > ago);
+  const by = Array.from(new Set(ALL.map(a=>a.status))).map(s=> `${s}: ${ALL.filter(a=>a.status===s).length}`).join(' · ');
+  return `TODAY'S TAPE — ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}\n` +
+    `New today: ${today.filter(a=>a.status==='new').length} · In today: ${today.length} total\n` +
+    `Pipeline: $${ALL.reduce((s,a)=>s+(Number(a.totalUSD)||0),0).toLocaleString()}\n` +
+    `Board: ${by}`;
+}
+function openTape(){
+  const sd = document.createElement('div');
+  sd.innerHTML = `<div class="fixed inset-0 z-[70] flex items-center justify-center p-6" style="background:rgba(9,32,44,.55);backdrop-filter:blur(4px)" onclick="this.remove()">
+    <div class="w-full max-w-md glass p-6" style="border-radius:20px;box-shadow:0 40px 90px rgba(0,0,0,.4)">
+      <div class="sk-serif text-xl font-semibold italic text-deep mb-3">Today's tape</div>
+      <pre class="text-sm text-deep whitespace-pre-wrap" style="font-family:'JetBrains Mono',monospace">${esc(tapeReport())}</pre>
+      <button class="btn w-full py-3 mono text-sm mt-4" onclick="this.closest('[onclick]').remove()">CLOSE</button>
+    </div>
+  </div>`;
+  document.body.appendChild(sd);
+}
+
+/* ============ focus mode ============ */
+function toggleFocus(){
+  document.body.classList.toggle('kt-focus');
+  const on = document.body.classList.contains('kt-focus');
+  toast(on ? 'Focus mode' : 'Focus off');
+  refresh();
+}
+
+/* ============ batch powers ============ */
+async function runCommand(cmd){
+  const LABEL = { 'deliver-in-progress':'Mark every IN PROGRESS dossier as DELIVERED — no undo. Continue?', 'clear-cancelled':'Delete every CANCELLED dossier forever — Continue?', 'clear-all':'DELETE EVERY APPLICATION ON THE BOARD. This is the reset. Continue?' };
+  if (!confirm(LABEL[cmd])) return;
+  const { status, data } = await json('/api/admin/commands', { method:'POST', body: JSON.stringify({ command: cmd }) });
+  if (status === 200){ toast((data.done||0) + ' affected'); refresh(); }
+  else toast((data && data.error) || 'Command failed');
+}
+
 /* ============ COMMAND PALETTE — god mode ============ */
 const POWERS = [
+  { icon:'✦', name:'K-TRON', hint:"Summon the studio's co-pilot", run:()=>{ closePalette(); toggleKtron(); } },
   { icon:'✶', name:'TRANSMIT', hint:'Broadcast a banner to the public site', run:()=>openAnnModal() },
+  { icon:'⊘', name:'TAKE-DOWN', hint:'Kill the live transmission instantly', run:async()=>{ const r = await json('/api/settings/announcement', { method:'PUT', body: JSON.stringify({ message:'', enabled:false }) }); if (r.status===200){ toast('Transmission killed'); closePalette(); } } },
   { icon:'⇡', name:'PIN TOP', hint:'Order every dossier, pinned first', run:()=>{ toast('Pin ↑ or drop ↓ any dossier from its drawer'); openPalette(); } },
-  { icon:'⟲', name:'REFRESH', hint:'Pull fresh data, recalc everything', run:()=>{ refresh(); toast('Refreshed'); closePalette(); } },
   { icon:'⎘', name:'EXPORT CSV', hint:'Download every application as CSV', run:()=>{ exportCSV(); closePalette(); } },
+  { icon:'▤', name:"TODAY'S TAPE", hint:'Daily report: activity, pipeline, board', run:()=>{ closePalette(); openTape(); } },
+  { icon:'⇥', name:'FOCUS', hint:'Collapse the chrome, maximize the board', run:()=>{ closePalette(); toggleFocus(); } },
+  { icon:'∅', name:'PURGE CANCELLED', hint:'Delete every CANCELLED dossier', run:()=>{ closePalette(); runCommand('clear-cancelled'); } },
   { icon:'↗', name:'OPEN LIVE SITE', hint:'See the public funnel the world sees', run:()=>{ window.open('/krypton.html', '_blank'); closePalette(); } },
+  { icon:'⇉', name:'DELIVER ALL IN PROGRESS', hint:'Batch-move every IN PROGRESS to DELIVERED', run:()=>{ closePalette(); runCommand('deliver-in-progress'); } },
   { icon:'✎', name:'WRITE NOTES', hint:'Leave private context on any dossier', run:()=>palJump('notes') },
   { icon:'♻', name:'REISSUE PASSCODE', hint:'Rotate a delivery passcode instantly', run:()=>palJump('reissue') },
   { icon:'$', name:'OVERRIDE TOTAL', hint:'Rewrite any investment figure', run:()=>palJump('total') },
+  { icon:'⟲', name:'REFRESH', hint:'Pull fresh data, recalc everything', run:()=>{ refresh(); toast('Refreshed'); closePalette(); } },
+  { icon:'☠', name:'ZERO THE BOARD', hint:'Delete absolutely everything', run:()=>{ closePalette(); runCommand('clear-all'); } },
   { icon:'✕', name:'CLOSE', hint:'Esc — back to the world', run:()=>closePalette() },
 ];
 let palApps = [];
@@ -562,7 +696,7 @@ function renderPalette(q){
     h.textContent = 'POWERS';
     list.appendChild(h);
   }
-  powers.slice(0, 9).forEach(p=>{
+  powers.slice(0, 99).forEach(p=>{
     const d = document.createElement('button');
     d.className = 'palItem w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-[#eef6fa] cursor-pointer rounded-xl transition';
     d.innerHTML = `<span class="mono text-neon w-6">${p.icon}</span><span class="mono text-sm text-deep flex-1">${p.name}</span><span class="text-xs text-soft hidden sm:block">${p.hint}</span>`;
@@ -648,6 +782,7 @@ $('loginForm').addEventListener('submit', async (e) => {
 async function showDash(){
   $('loginView').classList.add('hidden');
   $('dashView').classList.remove('hidden');
+  $('ktronFab').classList.remove('hidden');
   $('todayStr').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
   refresh();
   if (intervalId) clearInterval(intervalId);

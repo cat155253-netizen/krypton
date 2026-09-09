@@ -156,6 +156,68 @@ async function currentSession(req, res) {
   return token;
 }
 
+/* ---------- AI helpers ---------- */
+
+async function callModel(messages, systemPrompt = SYSTEM_PROMPT) {
+  const payload = {
+    model: MODEL,
+    messages: [{ role: 'system', content: systemPrompt }, ...messages],
+    max_tokens: MAX_TOKENS,
+    stream: false,
+  };
+  try {
+    const upstream = await fetch(`${BASE_URL}/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
+      body: JSON.stringify(payload),
+    });
+    const data = await upstream.json();
+    if (!upstream.ok) return { httpStatus: upstream.status, error: data?.error?.message || data?.error || 'Upstream error' };
+    return data;
+  } catch (e) {
+    return { httpStatus: 502, error: 'Could not reach the model provider.' };
+  }
+}
+
+/* Compact, live digest of everything the admin can see — becomes the co-pilot's brain. */
+async function adminBrain() {
+  const apps = await store.listApplications();
+  const totals = { new: 0, 'in-progress': 0, delivered: 0, paid: 0, cancelled: 0 };
+  let pipelineUSD = 0;
+  for (const a of apps) { totals[a.status] = (totals[a.status] || 0) + 1; pipelineUSD += Number(a.totalUSD) || 0; }
+  const announcementEnabled = (await store.getSetting('announce_enabled')) === 'true';
+  const announcementMessage = announcementEnabled ? (await store.getSetting('announce_message')) : '';
+  return {
+    studio: 'Krypton — one-person premium site studio.',
+    stats: { total: apps.length, byStatus: totals, pipelineUSD, pipelineINR: Math.round(pipelineUSD * 86) },
+    announcement: { enabled: announcementEnabled, message: announcementMessage },
+    programs: apps.map((a) => ({
+      id: a.id,
+      ref: a.appNo,
+      company: a.company || a.applicant,
+      applicant: a.applicant,
+      email: a.founderEmail,
+      theme: a.theme,
+      status: a.status,
+      totalUSD: Number(a.totalUSD) || 0,
+      speed: a.deliverySpeed,
+      pinned: !!a.pinned,
+      notes: a.notes || '',
+      createdAt: a.createdAt,
+    })),
+  };
+}
+
+const updateAdminSystemPrompt = (ctx) =>
+  'You are K-Tron, the AI co-pilot inside the Krypton admin panel. You have complete, current visibility of the ' +
+  'studio: every application, its status, price, client and the live site broadcast. Answer plainly and directly, with ' +
+  'exact numbers from the data you are given — never invent clients, prices, or statuses that are not in the data. ' +
+  'You can draft client emails, summarize the pipeline, flag stuck projects, and suggest next best actions. ' +
+  'Keep replies tight unless asked for more.\n\n' +
+  'LIVE STUDIO CONTEXT:\n' + JSON.stringify(ctx) +
+  '\n\nPRICING RULES (for estimates): site base $300–$340 by theme; speed adds +$0 (1 Month), +$500 (1 Week), +$1,000 (3 Days); ' +
+  'plus optional add-ons and an optional 10% tip. Final price = base + speed + add-ons + tip.';
+
 /* ---------- routes ---------- */
 
 const server = http.createServer(async (req, res) => {
@@ -389,32 +451,55 @@ const server = http.createServer(async (req, res) => {
     const body = await readBody(req);
     const messages = Array.isArray(body.messages) ? body.messages.slice(-20) : [];
     if (!messages.length) { res.writeHead(400).end(JSON.stringify({ error: 'messages required' })); return; }
+    const data = await callModel(messages);
+    if (data.httpStatus) { res.writeHead(data.httpStatus, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: data.error })); return; }
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+    res.end(JSON.stringify(data));
+    return;
+  }
 
-    const payload = {
-      model: MODEL,
-      messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...messages],
-      max_tokens: MAX_TOKENS,
-      stream: false,
-    };
+  /* admin powers — batch operations */
+  if (url.pathname === '/api/admin/commands' && req.method === 'POST') {
+    const token = await currentSession(req, res);
+    if (!token) return;
+    const body = await readBody(req);
+    const cmd = String(body.command || '');
+    let done = 0;
+    if (cmd === 'deliver-in-progress') done = await store.bulkUpdateStatus('in-progress', 'delivered');
+    else if (cmd === 'clear-cancelled') done = await store.deleteApplications('cancelled');
+    else if (cmd === 'clear-all') done = await store.deleteApplications('all');
+    else { res.writeHead(400, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Unknown command.' })); return; }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, command: cmd, done }));
+    return;
+  }
 
-    try {
-      const upstream = await fetch(`${BASE_URL}/chat/completions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
-        body: JSON.stringify(payload),
-      });
-      const data = await upstream.json();
-      if (!upstream.ok) {
-        res.writeHead(upstream.status, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: data?.error?.message || data?.error || 'Upstream error' }));
-        return;
-      }
-      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-      res.end(JSON.stringify(data));
-    } catch (e) {
-      res.writeHead(502, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'Could not reach the model provider.' }));
+  /* admin brain — live studio context for the admin co-pilot */
+  if (url.pathname === '/api/admin/brain' && req.method === 'GET') {
+    const token = await currentSession(req, res);
+    if (!token) return;
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ context: await adminBrain() }));
+    return;
+  }
+
+  /* admin co-pilot chat — K-Tron with full visibility of the studio */
+  if (url.pathname === '/api/admin/chat' && req.method === 'POST') {
+    const token = await currentSession(req, res);
+    if (!token) return;
+    if (!API_KEY) {
+      res.writeHead(503, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Server has no OPENAI_API_KEY set. See .env.example.' }));
+      return;
     }
+    const body = await readBody(req);
+    const messages = Array.isArray(body.messages) ? body.messages.slice(-20) : [];
+    if (!messages.length) { res.writeHead(400).end(JSON.stringify({ error: 'messages required' })); return; }
+    const ctx = await adminBrain();
+    const data = await callModel(messages, updateAdminSystemPrompt(ctx));
+    if (data.httpStatus) { res.writeHead(data.httpStatus, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: data.error })); return; }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(data));
     return;
   }
 

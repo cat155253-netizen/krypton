@@ -184,6 +184,35 @@ async function deleteApplication(id) {
   return true;
 }
 
+async function bulkUpdateStatus(fromStatus, toStatus) {
+  if (pool) {
+    const { rowCount } = await pool.query(
+      'UPDATE applications SET status=$1 WHERE status=$2', [toStatus, fromStatus]);
+    return rowCount;
+  }
+  let n = 0;
+  for (const a of memory.applications) { if (a.status === fromStatus) { a.status = toStatus; n++; } }
+  return n;
+}
+
+async function deleteApplications(status) {
+  if (pool) {
+    if (status === 'all') {
+      const { rowCount } = await pool.query('DELETE FROM applications');
+      return rowCount;
+    }
+    const { rowCount } = await pool.query('DELETE FROM applications WHERE status=$1', [status]);
+    return rowCount;
+  }
+  const before = memory.applications.length;
+  memory.applications = status === 'all'
+    ? []
+    : memory.applications.filter((a) => a.status !== status);
+  return before - memory.applications.length;
+}
+
+module.exports = { init, hasDb, insertApplication, listApplications, getApplication, getApplicationByEmailAndCode, deleteApplication, bulkUpdateStatus, deleteApplications, updateApplicationStatus, updateApplication, reissueApplicationCode, getSetting, setSetting, createSession, getSession, deleteSession, hashToken };
+
 async function updateApplicationStatus(id, status) {
   if (pool) {
     const { rows } = await pool.query(
@@ -283,5 +312,3 @@ async function deleteSession(token) {
   if (pool) await pool.query('DELETE FROM sessions WHERE token_hash=$1', [hash]);
   else memory.sessions.delete(hash);
 }
-
-module.exports = { init, hasDb, insertApplication, listApplications, getApplication, getApplicationByEmailAndCode, deleteApplication, updateApplicationStatus, updateApplication, reissueApplicationCode, getSetting, setSetting, createSession, getSession, deleteSession, hashToken };
