@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KRYPTON — Admin Panel</title>
+<title>KRYPTON — Administrative Panel</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -94,7 +94,7 @@ tailwind.config = {
   <div class="w-full max-w-md">
     <div class="text-center mb-8">
       <div class="text-4xl" style="font-family:'Permanent Marker',cursive;color:#124a5e">Krypton</div>
-      <div class="mono text-[11px] tracking-[.35em] text-soft mt-1">ADMIN PANEL</div>
+      <div class="mono text-[11px] tracking-[.35em] text-soft mt-1">ADMINISTRATIVE PANEL</div>
     </div>
     <div class="glass p-8" style="box-shadow:0 30px 70px rgba(18,74,94,.15)">
       <h2 class="sk-serif text-2xl font-semibold italic text-deep mb-1">Welcome back, Admin</h2>
@@ -145,7 +145,7 @@ tailwind.config = {
     <div class="max-w-7xl mx-auto px-6 py-3.5 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <span class="text-2xl" style="font-family:'Permanent Marker',cursive;color:#124a5e">Krypton</span>
-        <span class="kbadge">ADMIN PANEL</span>
+        <span class="kbadge">ADMINISTRATIVE PANEL</span>
         <span class="hidden md:inline-flex items-center gap-1.5 mini" style="color:#22a06b"><span class="w-2 h-2 rounded-full" style="background:#22a06b;box-shadow:0 0 0 3px rgba(34,160,107,.2)"></span>SYSTEM ONLINE</span>
       </div>
       <div class="flex items-center gap-3">
@@ -162,7 +162,7 @@ tailwind.config = {
     <!-- heading -->
     <div class="dash-head flex items-end justify-between mb-6 flex-wrap gap-3">
       <div>
-        <h1 class="sk-serif text-3xl font-semibold italic text-deep">Operations</h1>
+        <h1 class="sk-serif text-3xl font-semibold italic text-deep">Administrative Panel</h1>
         <p class="text-sm text-soft mt-1" id="summaryLine">Loading…</p>
       </div>
       <div class="flex gap-2">
@@ -320,6 +320,90 @@ tailwind.config = {
       <div id="chatOverview" class="space-y-2 text-sm max-h-80 overflow-y-auto"></div>
     </div>
 
+    <!-- ============ MASTER CONTROL — tune the machine live ============ -->
+    <div id="masterCard" class="glass dash-chrome p-6 mb-6" style="background:linear-gradient(160deg,rgba(63,167,201,.06),rgba(127,208,181,.06))">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="sk-serif text-xl font-semibold italic text-deep">Master control</span>
+            <span class="pill" style="background:rgba(63,167,201,.15);color:#2c5f72;font-size:.58rem;padding:.22rem .6rem">TUNE THE MACHINE</span>
+          </div>
+          <p class="text-sm text-soft" style="max-width:640px">Change the public K-Tron model, directive, greeting copy, or rate card — live, without touching code.</p>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-4 mb-5">
+        <div class="glass p-4">
+          <div class="mini mb-1">PUBLIC K-TRON MODEL</div>
+          <input id="ctlModel" class="field mb-3" placeholder="openrouter/auto" maxlength="120">
+          <div class="mini mb-1">CO-PILOT PERSONA</div>
+          <input id="ctlPersona" class="field mb-3" placeholder="e.g. Always start with a warm greeting" maxlength="240">
+          <div class="mini mb-1">RATE CARD / DIRECTIVE</div>
+          <textarea id="ctlRate" class="field" rows="3" maxlength="800" placeholder="Paste a rate card, legal note, or anything the public K-Tron should quote back verbatim."></textarea>
+        </div>
+        <div class="glass p-4">
+          <div class="mini mb-1">OPERATING DIRECTIVE (injected into public chat prompt)</div>
+          <textarea id="ctlDirective" class="field mb-4" rows="3" maxlength="800" placeholder="e.g. Quote only USD. Mention the 7-day turnaround first."></textarea>
+          <div class="mini mb-1">VISITOR GREETING (welcome copy on the main chat page)</div>
+          <input id="ctlGreeting" class="field mb-3" maxlength="260" placeholder="Scope sites, price packages, plan features — your design-studio copilot.">
+          <div class="mini mb-1">ADMIN CURRENCY RATE (₹ per $)</div>
+          <input id="ctlRateNum" type="number" min="1" max="200" step="0.1" class="field" placeholder="87">
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 mb-6">
+        <button class="btn" onclick="saveMaster()">TRANSMIT MASTER SETTINGS</button>
+        <button class="btnghost" onclick="clearMasterModel()">RESET MODEL TO DEFAULT</button>
+        <span class="mini ml-2" id="masterStatus">—</span>
+      </div>
+
+      <div class="glass p-4 mb-4">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="hand text-lg text-deep">Quick transmit</span>
+          <span class="mini">PRESET BANNERS</span>
+        </div>
+        <div class="flex flex-wrap gap-2" id="quickTransmit"></div>
+      </div>
+
+      <div class="glass p-4">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="hand text-lg text-deep">Quick commands</span>
+          <span class="mini">BOARD BATCH ACTIONS</span>
+        </div>
+        <div id="quickCommands" class="grid grid-cols-2 md:grid-cols-3 gap-2"></div>
+      </div>
+    </div>
+
+    <!-- ============ SECURITY & SESSIONS — see who's inside ============ -->
+    <div id="secCard" class="glass dash-chrome p-6 mb-6">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="sk-serif text-xl font-semibold italic text-deep">Security & sessions</span>
+            <span class="pill" style="background:rgba(226,51,46,.12);color:#a23048;font-size:.58rem;padding:.22rem .6rem">WHO'S INSIDE</span>
+          </div>
+          <p class="text-sm text-soft" style="max-width:560px">Active login sessions, panel key status, and a big red switch.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button class="btnghost" onclick="loadSessions()">REFRESH SESSIONS</button>
+          <button class="btnghost !border-red-300 !text-red-600 hover:!bg-red-50" onclick="signOutAllSessions()">SIGN OUT ALL SESSIONS</button>
+        </div>
+      </div>
+      <div class="grid md:grid-cols-2 gap-4 mb-4">
+        <div class="glass p-4">
+          <div class="mini mb-2">PANEL KEY STATUS</div>
+          <div id="secKeyStatus" class="text-sm text-deep font-semibold mb-2">—</div>
+          <button class="btnghost" onclick="scrollToCard('mainSiteCard')">MANAGE KEY IN LEASH ↓</button>
+        </div>
+        <div class="glass p-4">
+          <div class="mini mb-2">ACTIVE SESSIONS</div>
+          <div id="secSessionsCount" class="text-3xl font-extrabold text-deep mb-1">—</div>
+          <div class="mini" id="secSessionsNote">refreshing…</div>
+        </div>
+      </div>
+      <div id="secSessionsList" class="space-y-2 text-sm max-h-72 overflow-y-auto"></div>
+    </div>
+
     <!-- filters -->
     <div class="glass p-4 mb-6 flex flex-wrap items-center gap-3">
       <input id="search" type="search" placeholder="Search company, email, or app no…" class="field !w-64" oninput="renderTable()">
@@ -420,10 +504,10 @@ const STATUS = {
   paid:         { label: 'PAID',         color: '#1e8a5a' },
   cancelled:    { label: 'CANCELLED',    color: '#b13b52' },
 };
-let ALL = []; let filterStatus = 'all'; let intervalId = null;
+let ALL = []; let filterStatus = 'all'; let intervalId = null; let RATE = 87;
 
 function money(n){ return '$' + Number(n || 0).toLocaleString('en-US'); }
-function inr(n){ return '₹' + Math.round(Number(n || 0) * 87).toLocaleString('en-IN'); }
+function inr(n){ return '₹' + Math.round(Number(n || 0) * RATE).toLocaleString('en-IN'); }
 function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function fmtDate(iso){ return iso ? new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—'; }
 function fmtDateTime(iso){ return iso ? new Date(iso).toLocaleString('en-US',{dateStyle:'medium',timeStyle:'short'}) : '—'; }
@@ -946,6 +1030,118 @@ async function loadOversight(){
   } catch(e){}
 }
 
+/* ============ MASTER CONTROL — tune the live system ============ */
+async function loadMaster(){
+  try {
+    const { status, data } = await json('/api/admin/settings');
+    if (status !== 200) return;
+    const s = data.settings || {};
+    $('ctlModel').value = s.master_model || '';
+    $('ctlPersona').value = s.master_persona || '';
+    $('ctlDirective').value = s.master_directive || '';
+    $('ctlGreeting').value = s.master_greeting || '';
+    $('ctlRate').value = s.master_rate || '';
+    $('ctlRateNum').value = s.master_rate_num || '';
+    const r = Number(s.master_rate_num) || 0;
+    if (r > 0 && r < 500) RATE = r;
+    $('masterStatus').textContent = 'resolved model: ' + (data.resolved?.model || 'auto') + ' · rate ' + RATE + '₹/$';
+    renderQuickTransmit();
+    renderQuickCommands();
+  } catch(e){}
+}
+
+async function saveMaster(){
+  const model = $('ctlModel').value.trim();
+  const persona = $('ctlPersona').value.trim();
+  const directive = $('ctlDirective').value.trim();
+  const greeting = $('ctlGreeting').value.trim();
+  const rate = $('ctlRate').value.trim();
+  const rateNum = $('ctlRateNum').value.trim();
+  const payload = { master_model: model, master_persona: persona, master_directive: directive, master_greeting: greeting, master_rate: rate, master_rate_num: rateNum };
+  const { status } = await json('/api/admin/settings', { method:'PUT', body: JSON.stringify(payload) });
+  if (status === 200){ toast('Master settings transmitted'); loadMaster(); refresh(); } else toast('Save failed');
+}
+
+function clearMasterModel(){ $('ctlModel').value = ''; saveMaster(); }
+
+const QUICK_TRANSMITS = [
+  { label:'OPEN FOR WEEKENDS', msg:'We\'re open for weekend consultations — book a quick call now.' },
+  { label:'LAST 3 SLOTS', msg:'Only 3 project slots left this month — deposit locks your sprint.' },
+  { label:'CLOSED TODAY', msg:'The studio is taking a breather — back tomorrow at 10 AM IST.' },
+  { label:'PROMO: FREE ADD-ON', msg:'This week: any project over $500 gets a free add-on of your choice.' },
+];
+
+function renderQuickTransmit(){
+  $('quickTransmit').innerHTML = QUICK_TRANSMITS.map((p, i) => `<button class="btnghost" data-qtc="${i}">${esc(p.label)}</button>`).join('');
+  QUICK_TRANSMITS.forEach((p, i) => {
+    const b = $('quickTransmit').querySelector('[data-qtc="' + i + '"]');
+    if (b) b.addEventListener('click', () => quickAnn(p.msg));
+  });
+}
+
+async function quickAnn(msg){
+  if (!confirm('Broadcast this to the public site now?')) return;
+  const { status } = await json('/api/settings/announcement', { method:'PUT', body: JSON.stringify({ message: msg, enabled: true }) });
+  if (status === 200){ toast('Transmitted — live on the site now'); refresh(); } else toast('Transmission failed');
+}
+
+const QUICK_CMDS = [
+  { label:'ADVANCE ALL', cmd:'advance-all', hint:'new → in-progress' },
+  { label:'MARK ALL PAID', cmd:'mark-all-paid', hint:'all → paid' },
+  { label:'DELIVER IN PROGRESS', cmd:'deliver-in-progress', hint:'in-progress → delivered' },
+  { label:'RESET BOARD', cmd:'reset-board', hint:'all → new' },
+  { label:'UNPIN ALL', cmd:'unpin-all', hint:'remove every pin' },
+  { label:'PURGE CANCELLED', cmd:'clear-cancelled', hint:'delete forever' },
+  { label:'ZERO THE BOARD', cmd:'clear-all', hint:'destroy everything' },
+  { label:'CLOSE EVERYTHING', cmd:'close-all', hint:'maintenance+pause+chat off' },
+  { label:'REOPEN EVERYTHING', cmd:'open-all', hint:'open the whole site' },
+];
+
+function renderQuickCommands(){
+  $('quickCommands').innerHTML = QUICK_CMDS.map(p => `<button class="btnghost" onclick="runQuickCmd('${p.cmd}','${esc(p.hint)}')">${esc(p.label)}</button>`).join('');
+}
+
+async function runQuickCmd(cmd, hint){
+  if (cmd === 'close-all'){
+    if (!confirm('Close the entire site? Maintenance up, applications paused, chat off.')) return;
+    await json('/api/admin/site', { method:'PUT', body: JSON.stringify({ maintenance:true, applyOpen:false, chatOpen:false }) });
+    toast('Site closed'); loadLeash(); return;
+  }
+  if (cmd === 'open-all'){
+    if (!confirm('Reopen the entire site?')) return;
+    await json('/api/admin/site', { method:'PUT', body: JSON.stringify({ maintenance:false, applyOpen:true, chatOpen:true }) });
+    toast('Site reopened'); loadLeash(); return;
+  }
+  if (!confirm('Run: ' + cmd + ' — ' + hint + '? This cannot be undone.')) return;
+  await runCommand(cmd);
+}
+
+/* ============ SECURITY & SESSIONS ============ */
+async function loadSessions(){
+  try {
+    const { status, data } = await json('/api/admin/sessions');
+    if (status !== 200) return;
+    const sessions = data.sessions || [];
+    const self = data.selfHash || '';
+    const factorIcons = { password:'P', fingerprint:'F', keyfile:'K' };
+    $('secSessionsCount').textContent = sessions.length;
+    $('secSessionsNote').textContent = sessions.length + ' active login(s) on the board';
+    const hasKey = Boolean((await json('/api/admin/site')).data?.hasKeyFile);
+    $('secKeyStatus').innerHTML = hasKey ? '<span style="color:#22a06b">✓ panel key armed — the file can unlock the panel</span>' : '<span style="color:#b46a1f">✕ no panel key — upload or mint one from the System Leash</span>';
+    $('secSessionsList').innerHTML = sessions.slice(0, 20).map(s => {
+      const factors = (s.factors || []).map(f => factorIcons[f] || '?').join(' ');
+      const selfTag = s.hash === self ? '<span class="pill" style="background:rgba(34,160,107,.15);color:#137a55;font-size:.52rem;padding:.15rem .45rem;margin-left:6px">THIS SESSION</span>' : '';
+      return `<div class="flex items-center justify-between py-1.5 px-2 border-b border-[#e9f2f6] last:border-0"><div class="text-deep truncate">${esc(s.hash.slice(0,16))}…${selfTag}</div><div class="flex items-center gap-3"><span class="pill" style="background:rgba(63,167,201,.12);color:#2c5f72;font-size:.55rem;padding:.18rem .5rem">FACTORS ${esc(factors || '—')}</span><span class="mini">${timeAgo(s.expiresAt)} left</span></div></div>`;
+    }).join('') || '<div class="mini opacity-60">No sessions — something is very wrong.</div>';
+  } catch(e){}
+}
+
+async function signOutAllSessions(){
+  if (!confirm('Sign out every active session (including this one)? You will need to re-login.')) return;
+  const { status } = await json('/api/admin/sessions', { method:'DELETE' });
+  if (status === 200){ toast('All sessions signed out — re-login required'); location.reload(); } else toast('Sign-out failed');
+}
+
 /* live clock */
 let clockT = null;
 function startClock(){
@@ -1023,6 +1219,14 @@ const POWERS = [
   { icon:'❦', name:'TRANSMIT WORDS', hint:'Rewrite the main site hero headline', run:()=>{ closePalette(); scrollToCard('mainSiteCard'); } },
   { icon:'◷', name:'COMMAND ARCHIVE', hint:'Every pull of the leash, logged', run:()=>{ closePalette(); scrollToCard('archiveCard'); } },
   { icon:'◉', name:'K-TRON OVERSIGHT', hint:'Read the visitor conversations live', run:()=>{ closePalette(); scrollToCard('oversightCard'); } },
+  { icon:'⚙', name:'MASTER CONTROL', hint:'Tune the machine — model, directive, greeting, rate card', run:()=>{ closePalette(); scrollToCard('masterCard'); } },
+  { icon:'⚿', name:'SECURITY & SESSIONS', hint:'See who\'s inside, sign everyone out', run:()=>{ closePalette(); scrollToCard('secCard'); } },
+  { icon:'➤', name:'ADVANCE ALL', hint:'new → in-progress', run:()=>{ closePalette(); runQuickCmd('advance-all','new → in-progress'); } },
+  { icon:'$', name:'MARK ALL PAID', hint:'All open → paid', run:()=>{ closePalette(); runQuickCmd('mark-all-paid','all → paid'); } },
+  { icon:'⟲', name:'RESET BOARD', hint:'Everything back to new', run:()=>{ closePalette(); runQuickCmd('reset-board','all → new'); } },
+  { icon:'✦', name:'UNPIN ALL', hint:'Remove every pin from the board', run:()=>{ closePalette(); runQuickCmd('unpin-all','remove every pin'); } },
+  { icon:'⚑', name:'CLOSE EVERYTHING', hint:'Maintenance + pause + chat off', run:()=>{ closePalette(); runQuickCmd('close-all',''); } },
+  { icon:'↗', name:'REOPEN EVERYTHING', hint:'Open the whole site again', run:()=>{ closePalette(); runQuickCmd('open-all',''); } },
   { icon:'✕', name:'CLOSE', hint:'Esc — back to the world', run:()=>closePalette() },
 ];
 let palApps = [];
@@ -1226,8 +1430,10 @@ async function showDash(){
   loadHealth();
   loadEvents();
   loadOversight();
+  loadMaster();
+  loadSessions();
   if (intervalId) clearInterval(intervalId);
-  intervalId = setInterval(() => { refresh(); loadLeash(); loadHealth(); loadEvents(); loadOversight(); }, 30000);
+  intervalId = setInterval(() => { refresh(); loadLeash(); loadHealth(); loadEvents(); loadOversight(); loadMaster(); loadSessions(); }, 60000);
 }
 
 (async function boot(){

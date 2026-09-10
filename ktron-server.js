@@ -22,13 +22,38 @@ const crypto = require('crypto');
 const PORT = Number(process.env.PORT || 4173);
 const HOST = process.env.HOST || (process.env.RENDER ? '0.0.0.0' : '127.0.0.1');
 const BASE_URL = (process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1').replace(/\/$/, '');
-const MODEL = process.env.KTRON_MODEL || 'openrouter/auto';
-const MAX_TOKENS = Number(process.env.KTRON_MAX_TOKENS || 1400);
 
 const API_KEY = process.env.OPENAI_API_KEY;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 const SESSION_TTL_MS = Number(process.env.SESSION_TTL_MS || 7 * 24 * 3600 * 1000);
 const SESSION_COOKIE = 'ktron_session';
+
+/* Admin-tuned prod settings — overridable live from the panel. */
+function activeModel() {
+  const m = String((process.env.KTRON_MODEL || 'openrouter/auto') || '');
+  return m.trim() || 'openrouter/auto';
+}
+function activeMaxTokens() {
+  const v = Number(process.env.KTRON_MAX_TOKENS || 1400);
+  return Number.isFinite(v) ? Math.max(1, Math.min(10000, Math.round(v))) : 1400;
+}
+async function master(store) {
+  const model = String((await store.getSetting('master_model')) || '').trim() || activeModel();
+  const maxTokens = Number(Number(await store.getSetting('master_max_tokens')) || activeMaxTokens());
+  const directive = await store.getSetting('master_directive') || '';
+  const greeting = await store.getSetting('master_greeting') || '';
+  const rate = await store.getSetting('master_rate') || '';
+  const rateNum = Number(await store.getSetting('master_rate_num'));
+  const persona = await store.getSetting('master_persona') || '';
+  return { model, maxTokens: Math.max(1, maxTokens), directive, greeting, rate, rateNum: Number.isFinite(rateNum) && rateNum > 0 ? rateNum : 87, persona };
+}
+async function publicSystem() {
+  const m = await master(store);
+  const extra = [];
+  if (m.directive) extra.push('Additional operating directive from the studio: ' + m.directive);
+  if (m.rate) extra.push('Current rate card information:\n' + m.rate);
+  return extra.length ? SYSTEM_PROMPT + '\n\n' + extra.join('\n\n') : SYSTEM_PROMPT;
+}
 
 const ROOT = __dirname;
 const FRONTEND = path.join(ROOT, 'ktron.html');
@@ -50,7 +75,7 @@ const APPLY_DELAY_MS = Number(process.env.APPLY_DELAY_MS || 3000);
 const applyQueue = [];
 const loginAttempts = new Map(); // ip -> { fails, lockedUntil }
 
-const SYSTEM_PROMPT =
+let SYSTEM_PROMPT =
   'You are K-Tron, the courteous AI co-pilot of Krypton, a one-person design studio. Polished, warm and highly ' +
   'respectful; use a refined register (e.g. courteous greetings, measured phrasing) without being sycophantic. ' +
   'You answer conversationally and concisely in plain text, scoping small websites, pricing packages, ' +
@@ -211,11 +236,11 @@ async function currentSession(req, res, minFactors = FULL_FACTORS) {
 
 /* ---------- AI helpers ---------- */
 
-async function callModel(messages, systemPrompt = SYSTEM_PROMPT) {
+async function callModel(messages, systemPrompt = SYSTEM_PROMPT, modelOverride) {
   const payload = {
-    model: MODEL,
+    model: modelOverride || activeModel(),
     messages: [{ role: 'system', content: systemPrompt }, ...messages],
-    max_tokens: MAX_TOKENS,
+    max_tokens: activeMaxTokens(),
     stream: false,
   };
   try {
@@ -249,7 +274,7 @@ async function adminBrain() {
   };
   return {
     studio: 'Krypton — one-person premium site studio.',
-    stats: { total: apps.length, byStatus: totals, pipelineUSD, pipelineINR: Math.round(pipelineUSD * 86) },
+    stats: { total: apps.length, byStatus: totals, pipelineUSD, pipelineINR: Math.round(pipelineUSD * (await master(store)).rateNum) },
     announcement: { enabled: announcementEnabled, message: announcementMessage },
     recentAdminActions: evs.map((e) => `${e.kind}: ${e.detail || ''}`),
     recentVisitorChat: chat.map((c) => `[${c.role}${c.page ? '/' + c.page : ''}] ${(c.content || '').slice(0, 120)}`),
@@ -546,8 +571,10 @@ const server = http.createServer(async (req, res) => {
     let mainHero = null;
     if (heroRaw) { try { mainHero = JSON.parse(heroRaw); } catch { mainHero = null; } }
     const keyArmed = Boolean(await store.getSetting('panel_key_hash'));
+    const greeting = (await store.getSetting('master_greeting')) || '';
+    const directive = (await store.getSetting('master_directive')) || '';
     res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-    res.end(JSON.stringify({ maintenance, applyOpen, chatOpen, mainHero, keyArmed, now: new Date().toISOString() }));
+    res.end(JSON.stringify({ maintenance, applyOpen, chatOpen, mainHero, keyArmed, greeting, directive, now: new Date().toISOString() }));
     return;
   }
 
@@ -613,12 +640,13 @@ const server = http.createServer(async (req, res) => {
   if (url.pathname === '/api/admin/health' && req.method === 'GET') {
     const token = await currentSession(req, res);
     if (!token) return;
+    const m = await master(store);
     const health = {
       mode: store.hasDb ? 'Postgres (live)' : 'Memory',
       node: process.version,
       uptimeSec: Math.round(process.uptime()),
-      model: MODEL,
-      maxTokens: MAX_TOKENS,
+      model: m.model,
+      maxTokens: m.maxTokens,
       email: process.env.SMTP_HOST ? (process.env.SMTP_USER || 'configured') : 'disabled',
       openaiKey: Boolean(process.env.OPENAI_API_KEY),
       maintenance: (await store.getSetting('site_maintenance')) === 'true',
@@ -698,7 +726,8 @@ const server = http.createServer(async (req, res) => {
     const body = await readBody(req);
     const messages = Array.isArray(body.messages) ? body.messages.slice(-20) : [];
     if (!messages.length) { res.writeHead(400).end(JSON.stringify({ error: 'messages required' })); return; }
-    const data = await callModel(messages);
+    const m = await master(store);
+    const data = await callModel(messages, await publicSystem(), m.model);
     if (data.httpStatus) { res.writeHead(data.httpStatus, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: data.error })); return; }
     const lastUser = [...messages].reverse().find((m) => m.role === 'user');
     const reply = data.choices?.[0]?.message?.content?.trim?.();
@@ -721,6 +750,10 @@ const server = http.createServer(async (req, res) => {
     if (cmd === 'deliver-in-progress') { done = await store.bulkUpdateStatus('in-progress', 'delivered'); await store.insertEvent('command', 'delivered ' + done + ' in-progress'); }
     else if (cmd === 'clear-cancelled') { done = await store.deleteApplications('cancelled'); await store.insertEvent('command', 'purged ' + done + ' cancelled'); }
     else if (cmd === 'clear-all') { done = await store.deleteApplications('all'); await store.insertEvent('command', 'zeroed the board (' + done + ')'); }
+    else if (cmd === 'mark-all-paid') { done = await store.bulkSetStatus(['new', 'in-progress', 'delivered'], 'paid'); await store.insertEvent('command', 'marked ' + done + ' as paid'); }
+    else if (cmd === 'advance-all') { done = await store.bulkSetStatus(['new'], 'in-progress'); await store.insertEvent('command', 'advanced ' + done + ' new → in-progress'); }
+    else if (cmd === 'reset-board') { done = await store.bulkSetStatus(['new', 'in-progress', 'delivered', 'paid'], 'new'); await store.insertEvent('command', 'reset ' + done + ' to new'); }
+    else if (cmd === 'unpin-all') { done = await store.unpinAll(); await store.insertEvent('command', 'unpinned ' + done + ' dossiers'); }
     else { res.writeHead(400, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Unknown command.' })); return; }
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: true, command: cmd, done }));
@@ -749,10 +782,75 @@ const server = http.createServer(async (req, res) => {
     const messages = Array.isArray(body.messages) ? body.messages.slice(-20) : [];
     if (!messages.length) { res.writeHead(400).end(JSON.stringify({ error: 'messages required' })); return; }
     const ctx = await adminBrain();
-    const data = await callModel(messages, updateAdminSystemPrompt(ctx));
+    const m = await master(store);
+    const persona = m.persona ? ('Additional persona instruction: ' + m.persona + '\n\n') : '';
+    const data = await callModel(messages, persona + updateAdminSystemPrompt(ctx), m.model);
     if (data.httpStatus) { res.writeHead(data.httpStatus, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: data.error })); return; }
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(data));
+    return;
+  }
+
+  /* master settings — live-overridable model, directive, greeting, rate card, persona */
+  const SETTINGS_KEYS = ['master_model', 'master_directive', 'master_greeting', 'master_rate', 'master_rate_num', 'master_persona'];
+  const SETTINGS_PUBLIC_KEYS = ['master_greeting', 'master_directive', 'master_rate'];
+  const PUBLIC_SETTINGS_MAP = { master_greeting: 'greeting', master_directive: 'directive', master_rate: 'rate' };
+
+  async function loadMasterSettings(vals = {}) {
+    for (const k of SETTINGS_KEYS) { const v = await store.getSetting(k); if (v != null) vals[k] = v; }
+    return vals;
+  }
+
+  async function saveMasterSettings(body) {
+    for (const k of SETTINGS_KEYS) {
+      if (k in body) await store.setSetting(k, String(body[k] ?? ''));
+    }
+  }
+  function masterSettingsSanitized(vals) {
+    const o = {};
+    for (const k of SETTINGS_KEYS) o[k] = vals[k] || '';
+    return o;
+  }
+
+  if (url.pathname === '/api/admin/settings' && req.method === 'GET') {
+    const token = await currentSession(req, res);
+    if (!token) return;
+    const vals = await loadMasterSettings();
+    const m = await master(store);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, settings: masterSettingsSanitized(vals), resolved: { model: m.model, maxTokens: m.maxTokens } }));
+    return;
+  }
+
+  if (url.pathname === '/api/admin/settings' && req.method === 'PUT') {
+    const token = await currentSession(req, res);
+    if (!token) return;
+    const body = await readBody(req);
+    await saveMasterSettings(body);
+    await store.insertEvent('settings', 'master settings updated: ' + Object.keys(body || {}).join(', ') || 'none');
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, settings: masterSettingsSanitized(await loadMasterSettings()) }));
+    return;
+  }
+
+  if (url.pathname === '/api/admin/sessions' && req.method === 'GET') {
+    const token = await currentSession(req, res);
+    if (!token) return;
+    const sessions = await store.listSessions(100);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, sessions, selfHash: cookieHeader(req)[SESSION_COOKIE] || '' }));
+    return;
+  }
+
+  if (url.pathname === '/api/admin/sessions' && req.method === 'DELETE') {
+    const token = await currentSession(req, res);
+    if (!token) return;
+    const myHash = store.hashToken(cookieHeader(req)[SESSION_COOKIE] || '');
+    const cleared = await store.clearSessions();
+    await store.createSession(cookieHeader(req)[SESSION_COOKIE] || token, SESSION_TTL_MS, FULL_FACTORS);
+    await store.insertEvent('security', 'signed out ' + cleared + ' session(s)');
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, cleared, selfHash: myHash }));
     return;
   }
 

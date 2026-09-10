@@ -216,6 +216,28 @@ async function bulkUpdateStatus(fromStatus, toStatus) {
   return n;
 }
 
+async function bulkSetStatus(fromStatuses, toStatus) {
+  const froms = Array.isArray(fromStatuses) ? fromStatuses : [fromStatuses];
+  if (pool) {
+    const { rowCount } = await pool.query(
+      'UPDATE applications SET status=$1 WHERE status = ANY($2)', [toStatus, froms]);
+    return rowCount;
+  }
+  let n = 0;
+  for (const a of memory.applications) { if (froms.includes(a.status)) { a.status = toStatus; n++; } }
+  return n;
+}
+
+async function unpinAll() {
+  if (pool) {
+    const { rowCount } = await pool.query('UPDATE applications SET pinned=FALSE WHERE pinned=TRUE');
+    return rowCount;
+  }
+  let n = 0;
+  for (const a of memory.applications) { if (a.pinned) { a.pinned = false; n++; } }
+  return n;
+}
+
 async function deleteApplications(status) {
   if (pool) {
     if (status === 'all') {
@@ -274,7 +296,7 @@ async function recentChat(limit = 60) {
   return [...memory.chatLog].reverse().slice(0, limit);
 }
 
-module.exports = { init, hasDb, insertApplication, listApplications, getApplication, getApplicationByEmailAndCode, deleteApplication, bulkUpdateStatus, deleteApplications, updateApplicationStatus, updateApplication, reissueApplicationCode, getSetting, setSetting, pingVisit, getVisits, insertEvent, recentEvents, logChat, recentChat, createSession, markFactor, getSession, deleteSession, hashToken };
+module.exports = { init, hasDb, insertApplication, listApplications, getApplication, getApplicationByEmailAndCode, deleteApplication, bulkUpdateStatus, bulkSetStatus, unpinAll, deleteApplications, updateApplicationStatus, updateApplication, reissueApplicationCode, getSetting, setSetting, pingVisit, getVisits, insertEvent, recentEvents, logChat, recentChat, createSession, markFactor, getSession, deleteSession, listSessions, clearSessions, hashToken };
 
 async function updateApplicationStatus(id, status) {
   if (pool) {
@@ -427,4 +449,30 @@ async function deleteSession(token) {
   const hash = hashToken(token);
   if (pool) await pool.query('DELETE FROM sessions WHERE token_hash=$1', [hash]);
   else memory.sessions.delete(hash);
+}
+
+async function listSessions(limit = 80) {
+  if (pool) {
+    const { rows } = await pool.query(
+      'SELECT token_hash, COALESCE(factors, ARRAY[]::TEXT[]) AS factors, created_at, expires_at FROM sessions ORDER BY created_at DESC LIMIT $1',
+      [limit]);
+    return rows.map((r) => ({
+      hash: r.token_hash,
+      factors: r.factors || [],
+      createdAt: r.created_at,
+      expiresAt: r.expires_at,
+    }));
+  }
+  const arr = [];
+  for (const [hash, s] of memory.sessions) {
+    arr.push({ hash, factors: s.factors || [], createdAt: null, expiresAt: s.expires_at });
+  }
+  return arr.sort((a, b) => new Date(b.expiresAt) - new Date(a.expiresAt)).slice(0, limit);
+}
+
+async function clearSessions() {
+  if (pool) { const { rowCount } = await pool.query('DELETE FROM sessions'); return rowCount; }
+  const n = memory.sessions.size;
+  memory.sessions.clear();
+  return n;
 }

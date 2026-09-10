@@ -233,6 +233,8 @@ const form = document.getElementById('composer');
       if (h1) h1.textContent = site.mainHero.title;
       if (p && site.mainHero.sub) p.textContent = site.mainHero.sub;
     }
+    const welcomeP = welcome.querySelector('p');
+    if (welcomeP && site.greeting && !site.mainHero) welcomeP.textContent = site.greeting;
     let vid = sessionStorage.getItem('kree_vid');
     if (!vid) { vid = 'v' + Math.random().toString(36).slice(2, 12); sessionStorage.setItem('kree_vid', vid); }
     navigator.sendBeacon('/api/analytics/ping', new Blob([JSON.stringify({ vid, page: 'k-tron' })], { type: 'application/json' }));
