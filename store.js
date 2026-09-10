@@ -39,7 +39,8 @@ CREATE TABLE IF NOT EXISTS applications (
 CREATE TABLE IF NOT EXISTS sessions (
   token_hash TEXT PRIMARY KEY,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  expires_at TIMESTAMPTZ NOT NULL
+  expires_at TIMESTAMPTZ NOT NULL,
+  factors TEXT[] NOT NULL DEFAULT '{}'
 );
 CREATE TABLE IF NOT EXISTS settings (
   key TEXT PRIMARY KEY,
@@ -272,7 +273,7 @@ async function recentChat(limit = 60) {
   return [...memory.chatLog].reverse().slice(0, limit);
 }
 
-module.exports = { init, hasDb, insertApplication, listApplications, getApplication, getApplicationByEmailAndCode, deleteApplication, bulkUpdateStatus, deleteApplications, updateApplicationStatus, updateApplication, reissueApplicationCode, getSetting, setSetting, pingVisit, getVisits, insertEvent, recentEvents, logChat, recentChat, createSession, getSession, deleteSession, hashToken };
+module.exports = { init, hasDb, insertApplication, listApplications, getApplication, getApplicationByEmailAndCode, deleteApplication, bulkUpdateStatus, deleteApplications, updateApplicationStatus, updateApplication, reissueApplicationCode, getSetting, setSetting, pingVisit, getVisits, insertEvent, recentEvents, logChat, recentChat, createSession, markFactor, getSession, deleteSession, hashToken };
 
 async function updateApplicationStatus(id, status) {
   if (pool) {
@@ -377,16 +378,33 @@ async function getVisits() {
   return { now: nr, today: tr, total: list.length, pages: Object.entries(byPage).map(([page, s]) => ({ page, visitors: s.visitors, last: new Date(s.last) })), recent: [...list].sort((a,b)=>b.seenAt-a.seenAt).slice(0,15) };
 }
 
-async function createSession(token, ttlMs) {
+async function createSession(token, ttlMs, factors = []) {
   const hash = hashToken(token);
+  const expires = new Date(Date.now() + ttlMs).toISOString();
+  const f = factors.filter((x) => typeof x === 'string');
+  if (pool) {
+    await pool.query(
+      'INSERT INTO sessions (token_hash, expires_at, factors) VALUES ($1,$2,$3) ON CONFLICT (token_hash) DO UPDATE SET expires_at=$2, factors=$3',
+      [hash, expires, f]);
+    return;
+  }
+  memory.sessions.set(hash, { expires_at: expires, factors: f });
+}
+
+async function markFactor(token, name, ttlMs, initFactors = []) {
+  const hash = hashToken(token);
+  const s = await getSession(token);
+  const cur = s && (s.factors || []).length ? s.factors : initFactors;
+  if (!cur.includes(name)) cur.push(name);
   const expires = new Date(Date.now() + ttlMs).toISOString();
   if (pool) {
     await pool.query(
-      'INSERT INTO sessions (token_hash, expires_at) VALUES ($1,$2) ON CONFLICT (token_hash) DO UPDATE SET expires_at=$2',
-      [hash, expires]);
-    return;
+      'INSERT INTO sessions (token_hash, expires_at, factors) VALUES ($1,$2,$3) ON CONFLICT (token_hash) DO UPDATE SET expires_at=$2, factors=$3',
+      [hash, expires, cur]);
+    return cur;
   }
-  memory.sessions.set(hash, { expires_at: expires });
+  memory.sessions.set(hash, { expires_at: expires, factors: cur });
+  return cur;
 }
 
 async function getSession(token) {

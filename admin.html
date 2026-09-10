@@ -31,6 +31,24 @@ tailwind.config = {
   body.kt-focus .dash-head,
   body.kt-focus .dash-chrome{display:none !important}
   body.kt-focus main{padding-top:1rem}
+  /* 3-step verification */
+  .steps{display:flex;align-items:center;gap:6px;margin-bottom:1.1rem}
+  .stnode{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;opacity:.42;transition:.3s}
+  .stnode.on{opacity:1}
+  .stnode .ring{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;background:#fff;border:2px solid #cfe0ea;color:#7ba0b2;transition:.3s}
+  .stnode.on .ring{background:linear-gradient(120deg,#3fa7c9,#5fc4b0);border-color:transparent;color:#fff;box-shadow:0 8px 18px rgba(63,167,201,.35)}
+  .stnode.done .ring{background:#fff;border-color:#5fc4b0;color:#2c7a4f}
+  .stnode .lab{font-family:'JetBrains Mono',monospace;font-size:.52rem;letter-spacing:.18em;text-transform:uppercase;color:#5e8ea0}
+  .stlink{height:2px;flex:0 0 14px;background:#dbe9f1;transition:.3s}
+  .stlink.on{background:linear-gradient(90deg,#3fa7c9,#5fc4b0)}
+  .fp{width:120px;height:120px;margin:0 auto;border-radius:50%;position:relative;cursor:pointer;background:radial-gradient(circle at 50% 42%,#f2fbfd 0%,#dbeff6 70%,#bfe0ee 100%);box-shadow:inset 0 2px 10px rgba(18,74,94,.22),0 12px 30px rgba(63,167,201,.28);transition:.2s;user-select:none;-webkit-user-select:none;touch-action:none}
+  .fp::after{content:'';position:absolute;inset:14px;border-radius:50%;border:2px dashed rgba(63,167,201,.5);animation:fpSpin 7s linear infinite}
+  .fp.scanning::before{content:'';position:absolute;left:8px;right:8px;top:0;bottom:0;border-radius:48%;background:linear-gradient(180deg,rgba(95,196,176,.55),rgba(63,167,201,.55));filter:blur(6px);animation:fpSweep 1.6s ease-in-out;pointer-events:none}
+  .fp p{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;font-family:'JetBrains Mono',monospace;font-size:.5rem;letter-spacing:.22em;text-transform:uppercase;color:#38677c}
+  .fp.scanning p{opacity:.5}
+  .fp.scanned{border:2px solid #5fc4b0;box-shadow:0 0 0 6px rgba(95,196,176,.18),0 12px 30px rgba(63,167,201,.28)}
+  @keyframes fpSpin{to{transform:rotate(360deg)}}
+  @keyframes fpSweep{0%{transform:translateY(-60px);opacity:0}15%{opacity:1}85%{opacity:1}100%{transform:translateY(60px);opacity:0}}
   .lswitch{position:relative;width:46px;height:26px;border-radius:999px;background:#cfe0ea;transition:.25s;cursor:pointer;flex-shrink:0;display:inline-block}
   .lswitch i{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.25s;box-shadow:0 2px 6px rgba(0,0,0,.2)}
   .lswitch input:checked + i{transform:translateX(20px)}
@@ -79,25 +97,43 @@ tailwind.config = {
       <div class="mono text-[11px] tracking-[.35em] text-soft mt-1">ADMIN PANEL</div>
     </div>
     <div class="glass p-8" style="box-shadow:0 30px 70px rgba(18,74,94,.15)">
-      <h2 class="sk-serif text-2xl font-semibold italic text-deep mb-1">Welcome back</h2>
-      <p class="text-sm text-soft mb-6">Sign in to manage applications.</p>
-      <form id="loginForm" autocomplete="off">
-        <input id="password" type="password" class="field mb-4" placeholder="Admin password" autocomplete="current-password">
-        <p id="loginErr" class="hidden text-xs text-red-500 mb-3">Incorrect password. Try again.</p>
-        <button type="submit" class="btn w-full py-3 mono text-sm tracking-widest">UNLOCK</button>
-      </form>
+      <h2 class="sk-serif text-2xl font-semibold italic text-deep mb-1">Welcome back, Admin</h2>
+      <p class="text-sm text-soft mb-5">Triple verification — clear all three gates and the panel opens.</p>
 
-      <div class="flex items-center gap-3 my-5">
-        <span class="h-px flex-1" style="background:#e3eef4"></span>
-        <span class="mono text-[10px] tracking-[.25em] text-soft">OR</span>
-        <span class="h-px flex-1" style="background:#e3eef4"></span>
+      <!-- stepper -->
+      <div class="steps" id="steps">
+        <div class="stnode" id="st1"><div class="ring">1</div><div class="lab">Keycode</div></div>
+        <div class="stlink" id="stl1"></div>
+        <div class="stnode" id="st2"><div class="ring">2</div><div class="lab">Fingerprint</div></div>
+        <div class="stlink" id="stl2"></div>
+        <div class="stnode" id="st3"><div class="ring">3</div><div class="lab">Master file</div></div>
       </div>
 
-      <button type="button" class="btnghost w-full py-3 mono text-sm tracking-widest mb-3" onclick="pickKeyFile()">⚿ UNLOCK WITH KEY FILE</button>
-      <input id="keyfile" type="file" accept=".key,.command,.txt,.download" class="hidden">
-      <p id="keyErr" class="hidden text-xs text-red-500 mb-3"></p>
-      <p class="text-xs text-soft leading-relaxed text-center">The Admin-Passkey file IS the passkey. Double-click it to open the panel, or pick it here — same unlock, no fingerprint, no typing.</p>
-      <p class="text-center mt-5"><a href="/krypton.html" class="text-xs mono text-neon hover:underline">← back to the site</a></p>
+      <div class="stepPane" id="step1">
+        <form id="loginForm" autocomplete="off">
+          <input id="password" type="password" class="field mb-4" placeholder="Step 1 · type the admin keycode" autocomplete="current-password">
+          <p id="loginErr" class="hidden text-xs text-red-500 mb-3">Incorrect keycode. Try again.</p>
+          <button type="submit" class="btn w-full py-3 mono text-sm tracking-widest">ENTER KEYCODE</button>
+        </form>
+      </div>
+
+      <div class="stepPane hidden" id="step2">
+        <p class="text-xs text-soft text-center mb-4">Press and hold your finger on the pad until it scans.</p>
+        <div class="fp" id="fpPad" role="button" aria-label="Fingerprint scan"><p>Hold to scan</p></div>
+        <p id="fpMsg" class="hidden text-xs text-center mt-3" style="color:#2c7a4f">Fingerprint verified <span style="color:#2c7a4f">✓</span></p>
+        <p id="fpErr" class="hidden text-xs text-center mt-3 text-red-500"></p>
+      </div>
+
+      <div class="stepPane hidden" id="step3">
+        <p class="text-sm text-soft mb-3">Final gate — upload your <span class="mono text-deep">Admin-Passkey</span> file. It is the master key itself.</p>
+        <button type="button" class="btnghost w-full py-3 mono text-sm tracking-widest mb-3" onclick="pickKeyFile()">⚿ UPLOAD ADMIN-PASSKEY</button>
+        <button type="button" id="fpMint" class="btn w-full py-3 mono text-sm tracking-widest mb-3 hidden" onclick="mintAndEnter()">⚿ MINT ADMIN-PASSKEY (FIRST TIME)</button>
+        <input id="keyfile" type="file" accept=".key,.command,.txt,.download" class="hidden">
+        <p id="keyErr" class="hidden text-xs text-red-500 mb-3"></p>
+      </div>
+
+      <p class="text-xs text-soft leading-relaxed text-center mt-4">Quick lane: double-click your <span class="mono">Admin-Passkey.command</span> on the Desktop and the panel opens on its own.</p>
+      <p class="text-center mt-4"><a href="/krypton.html" class="text-xs mono text-neon hover:underline">← back to the site</a></p>
     </div>
   </div>
 </div>
@@ -1085,16 +1121,99 @@ async function publishAnn(){
   else toast('Transmission failed');
 }
 
+/* ============ 3-STEP VERIFICATION ============ */
+const STEP_LABEL = ['', 'Step 1 · type the admin keycode', 'Step 2 · press and hold the pad', 'Step 3 · upload Admin-Passkey'];
+let fpTimer = null;
+
+function setStep(n){
+  for (let s = 1; s <= 3; s++){
+    const node = $('st' + s);
+    node.classList.toggle('on', s === n);
+    node.classList.toggle('done', s < n);
+    $('step' + s).classList.toggle('hidden', s !== n);
+  }
+  $('stl1').classList.toggle('on', n > 1);
+  $('stl2').classList.toggle('on', n > 2);
+  if (n === 3) armStep3();
+}
+
+async function armStep3(){
+  $('keyErr').classList.add('hidden');
+  try {
+    const { status, data } = await json('/api/settings/site', { silent:true });
+    if (status === 200 && data.keyArmed === false) $('fpMint').classList.remove('hidden');
+  } catch(e){}
+}
+
+async function mintAndEnter(){
+  const btn = $('fpMint');
+  btn.disabled = true; btn.textContent = '…';
+  const { status, data } = await json('/api/admin/keyfile', { method:'POST' });
+  btn.disabled = false; btn.classList.add('hidden');
+  if (status !== 200){ $('keyErr').textContent = 'Could not mint — ' + ((data && data.error) || 'unknown'); $('keyErr').classList.remove('hidden'); return; }
+  const blob = new Blob([data.content], { type:'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = data.filename || 'Admin-Passkey.command'; a.click();
+  URL.revokeObjectURL(url);
+  showDash();
+}
+
 $('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = $('loginForm').querySelector('button[type=submit]');
   btn.disabled = true; btn.textContent = '…';
   const { status, data } = await json('/api/login', { method:'POST', body: JSON.stringify({ password: $('password').value }) });
-  btn.disabled = false; btn.textContent = 'UNLOCK';
-  if (status === 200) { showDash(); return; }
+  btn.disabled = false; btn.textContent = 'ENTER KEYCODE';
+  if (status === 200) { $('loginErr').classList.add('hidden'); setStep(2); $('fpMsg').classList.add('hidden'); $('fpErr').classList.add('hidden'); $('fpPad').classList.remove('scanned'); return; }
   $('loginErr').textContent = (data && data.error) || 'Login failed.';
   $('loginErr').classList.remove('hidden');
 });
+
+/* fingerprint pad — hold ~1.6s to complete the scan */
+const fpPad = $('fpPad');
+let holdStart = 0, holdRaf = null, heldDone = false;
+function fpHold(e){
+  if (holdRaf || heldDone) return;
+  e.preventDefault();
+  holdStart = performance.now();
+  heldDone = false;
+  fpPad.classList.add('scanning');
+  holdRaf = requestAnimationFrame(function tick(now){
+    const el = (now - holdStart) / 1600;
+    if (el >= 1){
+      holdRaf = null;
+      fpPad.classList.remove('scanning');
+      fpPad.classList.add('scanned');
+      completeFingerprint();
+      return;
+    }
+    holdRaf = requestAnimationFrame(tick);
+  });
+}
+function endHold(e){
+  if (!holdRaf) return;
+  cancelAnimationFrame(holdRaf); holdRaf = null;
+  fpPad.classList.remove('scanning');
+  const el = (performance.now() - holdStart) / 1600;
+  if (el < 0.4){ heldDone = false; return; }
+  fpPad.classList.add('scanned');
+  completeFingerprint();
+}
+async function completeFingerprint(){
+  if (heldDone) return;
+  heldDone = true;
+  const { status, data } = await json('/api/auth/fingerprint', { method:'POST', body:'{}' });
+  if (status === 200){ $('fpMsg').classList.remove('hidden'); setTimeout(()=>{ $('fpMsg').classList.add('hidden'); }, 900); setStep(3); return; }
+  heldDone = false;
+  fpPad.classList.remove('scanned');
+  $('fpErr').textContent = (data && data.error) || 'Scan interrupted — release and press again.';
+  $('fpErr').classList.remove('hidden');
+}
+fpPad.addEventListener('pointerdown', fpHold);
+fpPad.addEventListener('pointerup', endHold);
+fpPad.addEventListener('pointerleave', endHold);
+fpPad.addEventListener('pointercancel', endHold);
 
 async function showDash(){
   $('loginView').classList.add('hidden');
@@ -1112,9 +1231,12 @@ async function showDash(){
 }
 
 (async function boot(){
-  const { status } = await json('/api/session');
-  if (status === 200) { showDash(); return; }
+  const { status, data } = await json('/api/session');
+  if (status === 200 && data.ok === true) { showDash(); return; }
   $('loginView').classList.remove('hidden');
+  const missing = (data && data.missing) || [];
+  const next = missing.includes('password') ? 1 : missing.includes('fingerprint') ? 2 : 3;
+  setStep(next);
 })();
 </script>
 </body>

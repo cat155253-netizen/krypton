@@ -188,11 +188,17 @@ function recordFailure(ip) {
 
 function recordSuccess(ip) { loginAttempts.delete(ip); }
 
-async function currentSession(req, res) {
+/* 3-step gate — a session only opens the panel after ALL of these factors are earned */
+const FULL_FACTORS = ['password', 'fingerprint', 'keyfile'];
+
+async function currentSession(req, res, minFactors = FULL_FACTORS) {
   const token = cookieHeader(req)[SESSION_COOKIE];
-  if (!token) { res.writeHead(401, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ ok: false, error: 'Not authenticated' })); return null; }
+  if (!token || token.length > 200) { res.writeHead(401, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ ok: false, error: 'Not authenticated' })); return null; }
   const session = await store.getSession(token);
   if (!session) { clearSessionCookie(res, isSecureRequest(req)); res.writeHead(401, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ ok: false, error: 'Not authenticated' })); return null; }
+  const factors = session.factors || [];
+  const missing = minFactors.filter((f) => !factors.includes(f));
+  if (missing.length) { res.writeHead(403, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ ok: false, error: 'Verification incomplete', missing })); return null; }
   return token;
 }
 
@@ -360,16 +366,29 @@ const server = http.createServer(async (req, res) => {
     }
     recordSuccess(ip);
     const token = crypto.randomBytes(32).toString('base64url');
-    await store.createSession(token, SESSION_TTL_MS);
+    await store.createSession(token, SESSION_TTL_MS, ['password']);
     setSessionCookie(res, token, SESSION_TTL_MS, isSecureRequest(req));
-    await store.insertEvent('login', 'Admin signed in (password) from ' + ip);
+    await store.insertEvent('login', 'STEP 1/3 — Admin typed the password (from ' + ip + ')');
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ ok: true }));
+    res.end(JSON.stringify({ ok: true, step: 1 }));
     return;
   }
 
-  /* unlock with the panel key file — the file works as a master passkey */
+  /* step 2 — fingerprint scan (session must already carry the password factor) */
+  if (url.pathname === '/api/auth/fingerprint' && req.method === 'POST') {
+    const token = await currentSession(req, res, ['password']);
+    if (!token) return;
+    await store.markFactor(token, 'fingerprint', SESSION_TTL_MS);
+    await store.insertEvent('login', 'STEP 2/3 — fingerprint verified');
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, step: 2 }));
+    return;
+  }
+
+  /* step 3 — upload the Admin-Passkey file (must already have password + fingerprint factors) */
   if (url.pathname === '/api/login-key' && req.method === 'POST') {
+    const token = await currentSession(req, res, ['password', 'fingerprint']);
+    if (!token) return;
     const body = await readBody(req);
     const secret = extractKeySecret(body.key);
     const hash = await getPanelKeyHash();
@@ -381,12 +400,10 @@ const server = http.createServer(async (req, res) => {
     const ip = clientIp(req);
     if (secret && await verifyKeySecretStored(secret)) {
       recordSuccess(ip);
-      const token = crypto.randomBytes(32).toString('base64url');
-      await store.createSession(token, SESSION_TTL_MS);
-      setSessionCookie(res, token, SESSION_TTL_MS, isSecureRequest(req));
-      await store.insertEvent('login', 'Admin signed in with panel key file from ' + ip);
+      await store.markFactor(token, 'keyfile', SESSION_TTL_MS);
+      await store.insertEvent('login', 'STEP 3/3 — Admin-Passkey file accepted · all three steps complete');
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ ok: true }));
+      res.end(JSON.stringify({ ok: true, step: 3 }));
       return;
     }
     recordFailure(ip);
@@ -405,8 +422,13 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (url.pathname === '/api/session' && req.method === 'GET') {
-    const token = await currentSession(req, res);
-    if (!token) return;
+    const token = cookieHeader(req)[SESSION_COOKIE];
+    if (!token) { res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ ok: false, missing: FULL_FACTORS })); return; }
+    const session = await store.getSession(token);
+    if (!session) { clearSessionCookie(res, isSecureRequest(req)); res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ ok: false, missing: FULL_FACTORS })); return; }
+    const factors = session.factors || [];
+    const missing = FULL_FACTORS.filter((f) => !factors.includes(f));
+    if (missing.length) { res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ ok: false, missing, have: factors })); return; }
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: true }));
     return;
@@ -516,8 +538,9 @@ const server = http.createServer(async (req, res) => {
     const heroRaw = (await store.getSetting('ktron_hero')) || '';
     let mainHero = null;
     if (heroRaw) { try { mainHero = JSON.parse(heroRaw); } catch { mainHero = null; } }
+    const keyArmed = Boolean(await store.getSetting('panel_key_hash'));
     res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-    res.end(JSON.stringify({ maintenance, applyOpen, chatOpen, mainHero, now: new Date().toISOString() }));
+    res.end(JSON.stringify({ maintenance, applyOpen, chatOpen, mainHero, keyArmed, now: new Date().toISOString() }));
     return;
   }
 
@@ -602,12 +625,13 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  /* admin: mint the panel key file (a file that works as a master passkey) */
+  /* admin: mint the Admin-Passkey file (step 3 itself — password + fingerprint already earned) */
   if (url.pathname === '/api/admin/keyfile' && req.method === 'POST') {
-    const token = await currentSession(req, res);
+    const token = await currentSession(req, res, ['password', 'fingerprint']);
     if (!token) return;
     const kf = generateKeyFile(req.headers.host);
     await store.setSetting('panel_key_hash', kf.hash);
+    await store.markFactor(token, 'keyfile', SESSION_TTL_MS);
     await store.insertEvent('keyfile', 'Admin-Passkey minted at ' + new Date().toISOString());
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: true, filename: 'Admin-Passkey.command', content: kf.content }));
@@ -745,7 +769,7 @@ const server = http.createServer(async (req, res) => {
       const clean = String(keyParam).slice(0, 32).trim();
       if (await verifyKeySecretStored(clean)) {
         const token = crypto.randomBytes(32).toString('base64url');
-        await store.createSession(token, SESSION_TTL_MS);
+        await store.createSession(token, SESSION_TTL_MS, FULL_FACTORS);
         setSessionCookie(res, token, SESSION_TTL_MS, isSecureRequest(req));
         res.writeHead(302, { Location: '/admin' });
         res.end();
