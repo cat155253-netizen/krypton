@@ -38,6 +38,13 @@ const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': '
 
 const { sendConfirmation } = require('./apply-mail');
 const store = require('./store');
+
+process.on('unhandledRejection', (err) => {
+  console.error('[ktron] unhandled rejection:', err && err.message ? err.message : err);
+});
+process.on('uncaughtException', (err) => {
+  console.error('[ktron] uncaught exception:', err && err.message ? err.message : err);
+});
 const APPLY_DELAY_MS = Number(process.env.APPLY_DELAY_MS || 3000);
 
 const applyQueue = [];

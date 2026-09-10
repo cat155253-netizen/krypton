@@ -83,6 +83,7 @@ async function init() {
   });
   await pool.query(SCHEMA);
   // Progressive upgrades so existing production DBs gain new powers.
+  await pool.query(`ALTER TABLE sessions ADD COLUMN IF NOT EXISTS factors TEXT[] NOT NULL DEFAULT '{}'`);
   await pool.query(`ALTER TABLE applications ADD COLUMN IF NOT EXISTS notes TEXT`);
   await pool.query(`ALTER TABLE applications ADD COLUMN IF NOT EXISTS pinned BOOLEAN NOT NULL DEFAULT FALSE`);
   console.log('[store] Postgres connected. Schema ready.');
